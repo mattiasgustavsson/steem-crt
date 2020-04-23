@@ -1,0 +1,216 @@
+"Fullscreen"-Programming on the Atari ST
+                     by Flix of Delta Force
+
+Welcome  to the first part of a series of articles in  which  the 
+Delta  Force will explain how to code  "demos",  featuring  fully 
+working source-codes on the Maggie-disk.  This article will  show 
+you  how  to  display screens with a resolution  of  416  by  276 
+pixels, using 16 colours per line.
+The  reader  of  this  course  should  have  basic  knowledge  of 
+assembler   and  the  ST's  hardware.   The  first  topics   are: 
+Annihilation of the screen borders (by Flix),  Sync-Scrolling (by 
+New Mode) and Music programming using the YM-2149 (by Big  Alec). 
+
+But now let's talk about the borders:
+Allthough nobody expected it to be possible a long time ago,  the 
+ST's  borders  can  be removed  by  pure  software.  Demos,  that 
+displayed  graphics  in the borders using nothing  but  software, 
+were  the  foundation  for  the  development  of  the  well-known 
+"Overscan"-hardware.
+
+At first,  I will write a bit about the history of the  so-called 
+"border-programming".
+The  first human ever to display any graphics in a screen  border 
+was  Sven alias "Alyssa" from Mannheim/Germany.  Back in 1987  he 
+wrote  an intro,  that showed graphics in the  lower  border.  As 
+Sven  vanished  very fast from the  ST-scene,  it  is  completely 
+unsettled,  how Sven had the idea to switch the screen  frequency 
+to  60 Hz for a short period of time within the last line of  the 
+screen.  Without this fundamental idea,  no fullscreens or  sync-
+scrolling  would be possible on the ST.  Unfortunately nobody  in 
+the  ST-scene  knows  what "Alyssa"  is  doing  today.  TEX  (The 
+Exceptions)  firstly  used graphics in the lower  border  in  the 
+famous  "B.I.G.  Demo".  To  open the lower  border,  the  screen 
+frequency  has  to be switched to 60 Hz at the end of  the  199th 
+line.  The  ST  then  reads nearly 50 more lines  of  the  screen 
+memory!  The Exceptions revealed this secret in the  B.I.G.  Demo 
+at the end of the longest scrolltext (42 Kybtes of  text).  After 
+The Exceptions took up Alyssa's trick,  the upper border was  the 
+next  one  to  be  removed.  This is  achieved  by  toggling  the 
+frequency  13  or  29 lines above the "usual"  beginning  of  the 
+screen.  You  may wonder,  why the upper border can be 13  or  29 
+lines long.  Unfortunately there are two different  MMU-versions, 
+that have a difference of 16 lines.  Due to the place to open the 
+upper  border  being  above the screen memory  and  the  Timer  B 
+starting  to  count at the beginning of the  screen  memory,  The 
+Exceptions  used a quite complicated method.  They set a Timer  B 
+Interrupt  in  the last line and waited  until  the  electron-ray 
+reached the right position in the upper border.  Doing this, they 
+had  to waste a lot of processor-time.  In the "Musical Wonder  - 
+1991"  I  used a routine that waited a few  scanlines  after  the 
+VBL-Interrupt occured and then toggled the screen-frequency.  But 
+there's  still a better method.  Timer B is counting just  "real" 
+screen-lines  (200),  but there is another  interrupt,  the  HBL, 
+which  counts all scanlines (313).  At the beginning of  the  VBL 
+the  HBL  starts counting until the right position  to  open  the 
+upper border is reached.  If you now open both, the upper and the 
+lower,  border,  you  have  277  lines of  graphics  in  the  low 
+resolution.
+
+Soon  the next border was declared to vanish:  The right  border. 
+Unfortunately it is not possible to open this border with Timer B 
+or HBL interrupts.  The ST displays graphics in the right border, 
+if  you  switch the frequency to 60 Hz at a certain  position  in 
+every line,  in which the right border is supposed to be  opened. 
+This  "certain" position requires a completely new  technique  of 
+programming. If you switch colours in an ordinary Timer B, VBL or 
+HBL interrupt, you can see, that these interrupts do not occur at 
+exactly the same position. The colours shake from the left to the 
+right.  In  order to make some commands,  like the colour or  our 
+frequency  switchings,  occur at exactly the same  position,  you 
+have  to  become synchronized with  the  raster-electron-ray.  An 
+ingenious method to achieve this effect is the following one:
+
+WAIT:     MOVE.B    $FF8209.W,D0   ; Low-Byte
+          BEQ.S     WAIT           ; mustn't be 0
+          NOT.B     D0             ; negate D0
+          LSL.B     D0,D0          ; Synchronisation
+
+If  you execute this routine every VBL,  all  following  commands 
+will be executed at the same position every VBL,  that means that 
+the colour- or frequency-switches are stable.  But what does this 
+little routine do?  At first,  the low-byte of the screen-address 
+is  loaded  into D0.  This byte exactly determines  the  position 
+within  the line.  It is negated and the LSL-command is  executed 
+(LSR,  ASL  or  ASR  work as well).  As you  can  read  in  every 
+processor-book  the LSL-command takes  8+2*n  clock-cycles.  That 
+means  that  the command needs more clock-cycles the  bigger  the 
+value in D0 is. That is exactly the shifting that we need! I hope 
+that you understood this part,  because all fullscreens and sync-
+scrolling-routines  are based upon this effect.  You should  know 
+that  one  VBL  (50  Hz) consists  of  160000  clock-cycles  (one 
+scanline  consists of 512 clock-cycles).  Now you have to  switch 
+the  frequency  at a certain position and the  border  opens.  Of 
+course  this takes a lot more processor time than the opening  of 
+the  upper  or lower border,  because you've to open  the  border 
+every  line.  Your  ST now displays 204 bytes per  line!  A  line 
+consists  of 25.5 instead of 20 words without the  right  border, 
+but should use only 23 of these 25.5 words,  because the  picture 
+is  distorted on some STs (We made this mistake in  the  "Musical 
+Wonder  - 1991") if you use too much  words.  Anyway,  there  are 
+hardly  any monitors that have such a huge visible right  border. 
+A  demo-screen  without  the  lower  and  the  right  border  was 
+included in the "Amiga-Demo" by TEX.
+For  a  long time it was considered impossible to open  the  left 
+border,  because the trick with the 60-hertz-switch did not  work 
+in the left border (I was sure about that as well). But than came 
+the  "Death  Of The Left Border"-Demo by  the  TNT-Crew.  Finally 
+there  was a screen in the legendary Union-Demo that  firstly  in 
+ST-history  displayed  no borders at  all:  The  first  so-called 
+"Fullscreen"!  The demo-coders made the impossible possible.  But 
+how  does  this  trick  work?  It's  pretty  simple:  Instead  of 
+switching  to  60  Hz you switch to 71 Hz!  If  you  disable  the 
+interrupt  that  resets  at 71 Hz,  you can switch to  71  Hz  in 
+coulour mode.  You should do this only for short periods of  time 
+(a few clock-cycles).  Being in 71 Hz for a long time can  damage 
+your  monitor (allthough I've never seen such damages).  It  goes 
+without  saying  that neither Maggie nor the "Delta  Force"  take 
+responsibility for damages caused by this technique.  If you  now 
+open the right border additionally,  the ST displays 230  instead 
+of  160  bytes  per line!  In order to make the  opening  of  the 
+"side-borders"  run  on  all STs,  you've  to  install  so-called 
+"Stabilisation"-switches  at  the  end  of  each  line  (This  is 
+sometimes  called "Closing of the right border" which it  isn't). 
+You  can  switch  to  71 Hz (like in the  source)  or  to  medium 
+resolution (like ULM (Unlimited Matricks) does it).  I prefer the 
+71  Hz  method,  because  I heard that the  other  method  causes 
+problems  on few STs.  The "Stabilisation" is needed because  the 
+shifter  waits for the last word at the end of the  right  border 
+(115  words are displayed in fullscreen) to fill the last  plane. 
+This  word  never  arrives and to avoid total  confusion  of  the 
+shifter the 71-Hz-switch does something like a shifter-reset.
+If you now open all borders, you've a screen memory that consists 
+of  160+230*276  (=63640) bytes.  The first line  is  needed  for 
+synchronisation, therefore it has 160 bytes. The screen memory is 
+almost twice as big as in the "usual" low resolution!
+Two registers of the shifter are needed to switch the frequency:
+
+     $FFFF820A:     0: 60 Hertz         2: 50 Hertz     
+     $FFFF8260:     0: Low resolution   2: High Res. (71 Hertz)
+
+There  are various methods to cause the  frequency-switches.  ULM 
+uses the "Immediate"-Adressation, that means a 60-Hz-switch would 
+look like this:
+
+          MOVE.B    #0,$FF820A.W   ; 60 Hz (16 clock-cycles)
+          MOVE.B    #2,$FF820A.W   ; 50 Hz (16 clock-cycles)
+
+Besides  that this method takes a lot of processor  time,  it  is 
+said  that it does not run on all STs.  Another method is to  use 
+registers.  This  is faster,  but takes some Data-  and  Address-
+registers.  A  60-Hz-switch  would look like  that  (D0=0,  D1=2, 
+A0=$FF820A.W):
+
+          MOVE.B    D0,(A0)        ; 60 Hz (8 clock-cycles)
+          MOVE.B    D1,(A0)        ; 50 Hz (8 clock-cycles)
+
+In the source-code on the this Maggie-disk only D0, A0 and A1 are 
+used for all frequency switches.  How is this possible? Usually a 
+data-register is needed for synchronisation,  but you can use the 
+fact that D0 should always contain zero:
+
+WAIT:     MOVE.B    $FF8209.W,D0   ; Low-Byte
+          BEQ.S     WAIT           ; mustn't be 0 
+          NOT.B     D0             ; negate D0
+          LSR.B     D0,D0          ; Synchronisation
+
+After  the LSR-command is executed,  D0 contains zero  for  sure. 
+This  zero  can than be used for the  border-routine.  The  other 
+data-register  D1 must contain 2.  This register is  superfluous, 
+because   you   can  get  the  2  from  somewhere   else   (D0=0, 
+A0=$FF820A.W):
+        
+          MOVE.B    D0,(A0)        ; 60 Hz
+          MOVE.W    A0,(A0)        ; 50 Hz
+
+This  step  is not very easy to understand.  The  second  command 
+writes the word $820A to $FF820A.  The second byte of the word is 
+meaningless,  because  the address $FF820B of the shifter is  not 
+used.  The  shifter  only reads the lower two bits of  the  first 
+byte ($82), that means that the byte is handled like $02!
+The  source-code  on the disk includes a  subroutine  that  tests 
+which MMU is present,  that means how many lines the MMU displays 
+with an opened upper border (229 or 213).  The program should run 
+on every ST,  STe,  Mega ST and Mega STe (not on TTs). It took me 
+more  than a month to test the routine on all  possible  ST-chip-
+configurations (Thanx to Alien/ST-CNX).  There are more than  two 
+dozens  ST-versions.  Atari  changed the Glue,  the MMU  and  the 
+Shifter quite often.
+It  is  possible to open two more lines of the  lower  border  by 
+switching  to 60 Hz for a second time at the end of the  "normal" 
+lower border.  Unfortunately this does not work on the new  Atari 
+colour  monitors  (Thanx to Aeon/Aura for telling  me!).  For  my 
+"Punish Your Machine"-screen I had the idea to code a  fullscreen 
+in medium resolution.  It worked fine on my ST very soon,  but on 
+the ICC #2 I discovered that the screen only worked on my ST! New 
+Mode  made  it work on all STs two months  later,  allthough  all 
+"border-experts" on the ICC #2 said that it's impossible to  code 
+a fullscreen in medium resolution.
+The most difficult thing writing a fullscreen is that the  entire 
+code  has  to  fit  synchronous  in  the  waiting  gaps  of   the 
+fullscreen-routine.
+A  few  days  after  the ICC #2 I  developed  a  new  fullscreen-
+routine.  With this routine the main program does not have to  be 
+synchronous  with  the electron-ray.  The  disadvantage  of  this 
+method  is that the border annihilation takes up to 50  per  cent 
+of the processor time.  Therefore you can use  keyboard-requests, 
+multiplications,   divisions  and  interrupts.  The  routine  is, 
+allthough  it's awfully old,  top secret and cannot be  published 
+in Maggie (yet).
+Ok,  I  hope  you  understood  how you make  your  ST  display  a 
+resolution  of  416*276 pixels.  In the next part New  Mode  will 
+explain  how you can scroll the whole screen in 4 planes using  7 
+scanlines of processor-time.
+
+Bye...
+Flix/DF (The Union)

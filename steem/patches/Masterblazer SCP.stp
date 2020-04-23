@@ -1,0 +1,11 @@
+[Text]
+
+Description=Pass protection
+ApplyWhen=Password screen, before typing anything
+Version=STF, TOS 1.02, 1MB
+PatchAuthor=STeven
+
+[Patch]
+
+016A10 = $6000
+

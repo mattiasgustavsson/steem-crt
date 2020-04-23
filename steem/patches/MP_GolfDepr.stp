@@ -1,0 +1,13 @@
+[Text]
+Description=Manual protection bypass.
+ApplyWhen=When shows 3 flags for lang. selection.
+Version=Works on Steem v3.2
+PatchAuthor=P. Putnik
+
+[Patch]
+00593A = $700D4E71
+01272A = $6012
+012736 = $6006
+014022 = $6012
+01402E = $6006
+014D38 = $60

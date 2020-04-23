@@ -1,0 +1,11 @@
+[Text]
+
+Description=Pass protection; note cheat code In the protection routine, first time enter '8859' and second time enter '1506'. Before the third time you should patch. Now you can use HELP to toggle invisibility on/off and restores dead turtles.
+
+ApplyWhen=After loading
+Version=STF, TOS 1.02, 1MB
+PatchAuthor=Seagal
+
+[Patch]
+
+076636 = $6600 $0002

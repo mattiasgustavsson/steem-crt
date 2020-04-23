@@ -1,0 +1,6 @@
+Used for a low-pass filter in YM2149 emulation in Steem SSE.
+There's no 'shelf' filter, so we still need other code for Microwire emulation.
+It is a Linux project, so some minor changes were done to include it in Steem SSE.
+We only use the files we need, for the complete archive see:
+http://www.cardinalpeak.com/blog?p=1841
+

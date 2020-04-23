@@ -1,0 +1,12 @@
+[Text]
+
+Description=Pass protection 
+ApplyWhen=Weapon interrogation screen
+Version=STE, TOS 1.62, 4MB
+PatchAuthor=Seagal
+
+[Patch]
+
+02265E = $6014
+
+

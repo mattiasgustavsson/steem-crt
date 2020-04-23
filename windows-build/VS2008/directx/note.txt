@@ -1,0 +1,2 @@
+This folder has been created so that VS2008 can find libs without
+absolute path

@@ -1,0 +1,12 @@
+[Text]
+
+Description=Pass protection 
+ApplyWhen=Vehicule Identification screen
+Version=STE, TOS 1.62, 4MB
+PatchAuthor=Seagal
+
+[Patch]
+
+02256A = $6074
+
+

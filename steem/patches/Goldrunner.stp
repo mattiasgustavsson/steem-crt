@@ -1,0 +1,13 @@
+[Text]
+
+Description=Reset shields at new level
+ApplyWhen=Title screen
+Version=Automation 008, STF, TOS 1.02, 1MB
+PatchAuthor=Steven
+
+[Patch]
+
+013D26 = $3B7C $0005 $146C
+013D2C = $4CD1 $00FF
+013D30 = $48F9 $00FF $00FF $8240
+013D38 = $4E71 $4E71

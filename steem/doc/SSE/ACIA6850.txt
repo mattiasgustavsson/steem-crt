@@ -1,0 +1,324 @@
+Steem SSE documentation
+
+Motorola ACIA MC6850
+===============================================================================
+
+Sources:
+Official MC6850 documentation by Motorola
+Some general Atari ST documentation
+Development of Steem
+Some tests on real hardware
+Hatari
+
+
+Interesting ST cases
+=====================
+
+Brataccas
+Delirious 4 fake GEM
+Froggies over the Fence (Menu)
+Hades Nebula
+High Fidelity Dreams
+Nightdawn
+Notator (MIDI sequencer)
+Overdrive by Phalanx
+Pandemonium Demos
+Snork/Defulloir
+
+
+Introduction
+=============
+
+ACIA stands for 'Asynchronous Communications Interface Adapter'
+
+Two ACIA MC6850 equip the Atari ST, one for the keyboard controller (called
+IKBD, it's a Hitachi HD6301V1 chip, also documented here) and one for the
+MIDI controller.
+
+Pins (lines)
+=============
+
++---------+
+|VSS      |
+|VCC      |
+|RxData   |
+|RxCLK    |
+|TxData   |
+|TxCLK    |
+|RTS      |
+|IRQ      |
+|CS0-2    |
+|RS       |
+|R/W      |
+|D0-D7    |
+|CTS      |
+|DCD      |
+|E        |
++---------+
+
+
+Serial communication happens bit by bit on a single line per direction.
+The ACIA converts between bit flows and bytes, which is called shifting.
+
+There are two such lines on the 6850:
+RxData = receiving line
+TxData = transmitting line
+
+There are associated clock lines:
+RxCLK  = receiving clock (500khz on the ST)
+TxCLK  = transmitting clock (500khz on the ST)
+The 500khz clock comes from the GLUE.
+
+The ACIA can send and receive in duplex, but there's only one IRQ line, which
+can be used for both directions.
+
+The 6850 has an 8bit bidirectional bus (D0-D7).
+R/W operations on all registers pass through this bus.
+
+The 6850 also has pins to control access, which is done by the electronics
+(no need to emulate at such low level):
+
+CS0-2 = Chip select lines (input)
+RS    = Register select line (input)
+High: Transmit/receive Low: Control/Status
+R/W   = R/W line (input)
+High: Read register  Low: Write register
+
+The RTS, CTS and DCD lines concern Modem activity. They're not used on the ST
+(which has the MFP).
+
+E     = Enable line (input) A derivative of a CPU clock
+It is 1/10th of the CPU clock (+- 800000hz on the ST)
+
+
+Registers
+==========
+
+The Motorola ACIA MC6850 has 4 "visible" (accessible by the programmer) 
+8bit registers:
+
+RDR Receive Data   (read-only)
+TDR Transmit Data  (write-only)
+CR  Control        (write-only)
+SR  Status         (read-only)
+
+Those 4 registers are mapped on only 2 R/W bytes for each ACIA.
+
+On the ST:
+$FFFC00 for CR and SR of the IKBD controller
+$FFFC02 for RDR and TDR of the IKBD controller
+$FFFC04 for CR and SR of the MIDI controller
+$FFFC06 for RDR and TDR of the MIDI controller
+
+Reading or writing on those addresses involves some "jam" time, cycles
+needed by the CPU to access the 8bit peripheral.
+The "jam" is computed as 6 + E-clock MC68000 cycles. This is emulated in Steem.
+
+Data registers are double buffered: R/W can occur during the transmission or
+reception of the next byte.
+
+The double buffer consists of two additional registers where the actual
+shifting happens, we call them:
+
+RDRS shift register for RDR
+TDRS shift register for TDR
+
+We have the following schemas:
+
+other chip -> other serial interface -> bits -> RDRS -> byte -> RDR -> CPU
+
+CPU -> byte -> TDR -> TDRS -> bits -> other serial interface -> other chip
+
+Control Register CR
+--------------------
+
+One writes on the ST's CR by writing on addresses $FFFC00 (IKBD) or $FFFC04 
+(MIDI). This register can't be read by the program. Instead, SR is returned
+from the same addresses.
+
+                                                BIT 7 6 5 4 3 2 1 0|
+       |     |Rx Int enable (1 - enable) -----------' | | | | | | ||
+       |     |Tx Interrupts                           | | | | | | ||
+       |     |00 - RTS low, Tx int disable -----------+-+ | | | | ||
+       |     |01 - RTS low, Tx int enable ------------+-+ | | | | ||
+       |     |10 - RTS high, Tx int disable ----------+-+ | | | | ||
+       |     |11 - RTS low, Tx int disable,           | | | | | | ||
+       |     |     Tx a break onto data out ----------+-' | | | | ||
+       |     |Settings                                    | | | | ||
+       |     |000 - 7 bit, even, 2 stop bit --------------+-+-+ | ||
+       |     |001 - 7 bit, odd, 2 stop bit ---------------+-+-+ | ||
+       |     |010 - 7 bit, even, 1 stop bit --------------+-+-+ | ||
+       |     |011 - 7 bit, odd, 1 stop bit ---------------+-+-+ | ||
+       |     |100 - 8 bit, 2 stop bit --------------------+-+-+ | ||
+       |     |101 - 8 bit, 1 stop bit --------------------+-+-+ | ||
+       |     |110 - 8 bit, even, 1 stop bit --------------+-+-+ | ||
+       |     |111 - 8 bit, odd, 1 stop bit ---------------+-+-' | ||
+       |     |Clock divide                                      | ||
+       |     |00 - Normal --------------------------------------+-+|
+       |     |01 - Div by 16 -----------------------------------+-+|
+       |     |10 - Div by 64 -----------------------------------+-+|
+       |     |11 - Master reset --------------------------------+-'|
+
+If the byte ends with bits 11, it triggers a 'master reset' of the chip.
+
+Notice that there's no 'Reset' pin, so the ACIA isn't concerned by a warm 
+reset (but it somehow detects power-up).
+
+Master reset doesn't affect other CR bits.
+
+Bits 0 and 1 also control the speed of transmission:
+
+SS1 SS0                  Speed (bit/s)
+ 0   0    Normal            500000 = clock
+ 0   1    Div by 16          31250 (ST: MIDI)
+ 1   0    Div by 64         7812.5 (ST: IKBD)
+
+The clock applies to both sending & receiving bits. It's been set at
+500khz for both TxCLK & RxCLK on the ST chips.
+
+Bits 4-3-2 are set as 101 on the ST (8 bit, 1 stop bit). 
+There's also a start bit, so you must count 10bit/byte (a frame).
+The transfer rate unit is in "bauds": bits, including control bits.
+
+After reset ($3), TOS writes the following values in CR:
+$96 for ACIA 0 IKBD 
+$95 for ACIA 1 MIDI
+
+
+
+Status Register SR
+-------------------
+
+The SR is read on the ST on addresses $FFFC00 (IKBD) or $FFFC04 (MIDI). 
+This register can't be written by the program. Bits are set or cleared
+by the hardware (or the emulation).
+
+                                                BIT 7 6 5 4 3 2 1 0|
+       |     |Interrupt request --------------------' | | | | | | ||
+       |     |Parity error ---------------------------' | | | | | ||
+       |     |Rx overrun -------------------------------' | | | | ||
+       |     |Framing error ------------------------------' | | | ||
+       |     |CTS ------------------------------------------' | | ||
+       |     |DCD --------------------------------------------' | ||
+       |     |Tx data register empty ---------------------------' ||
+       |     |Rx data register full ------------------------------'|
+
+On the ST, we shouldn't care too much about bits 6 (parity), 4 (framing),
+3 (CTS) and 2 (DCD).
+
+Receiver (Rx) overrun (OVRN) will be set if the program reads a byte and the 
+previous byte was never read (frequent case). 
+It isn't set when the new byte is copied into RDR, only when it is read.
+
+Notice that there's no overrun for Tx: the ACIA doesn't know if bytes it
+sends are read, only those it receives.
+
+At power on, SR will have value 2 (Tx data register empty), not 0 (or the
+ST would never boot).
+
+At 'master reset', SR is reset to 2 (excepting effect of CTS, DCD, unconnected
+on the ST) and the transmission lines are initialized.
+
+
+Receive Data RDR
+-----------------
+
+Reading a byte doesn't clear it. SR is used by the hardware to know if data
+has been read.
+
+
+Transmit Data TDR
+------------------
+
+Double buffering means that two bytes may be written very fast one after
+the other on TDR. The first byte will be transferred quickly into TDRS. 
+Subsequent bytes will have to wait the full serial transfer time.
+This way, the flow doesn't need to be interrupted at each character, provided
+both the sending and the receiving sides are fast enough.
+
+'Quickly' doesn't mean instant, for some cycles , the TDRE bit in SR will
+be cleared. The delay is documented: "within 1-bit time of the trailing edge
+of the Write command".
+
+TDR will take a byte however, and this new byte will be shifted after the
+short delay instead of the new one.
+This explains why Delirious IV fails to center the mouse on a real ST as well.
+The byte may be replaced all the time before it's transferred, and after.
+
+Cases: 
+Delirious 4 fake GEM
+Pandemonium Demos
+
+
+IRQ
+====
+
+IRQ may be enabled for both receiving and transmitting.
+
+Receiving: bit 7 of CR enables IRQ.
+When a byte has been shifted, it is copied from RDRS into RDR.
+The chip will request an interrupt and will set bit 7 of SR.
+There's an IRQ when Overrun occurs as well, if receiving IRQ is enabled.
+
+Transmitting: in CR, if bit 6=0 and bit 5=1, IRQ is enabled for transmission.
+When TDR is empty, IRQ will trigger. It is cleared when writing a new byte.
+If TDR is empty when writing on the ACIA CR, IRQ will trigger at once, which is
+kind of silly, but IRQ is an instant logical test.
+Additionally, double buffering means that the IRQ could trigger very soon after
+a first byte has been written into TDR.
+Few programs do use this IRQ.
+Cases: 
+Hades Nebula (can get stuck on real HW).
+Nightdawn
+
+
+Overrun (OVR)
+==============
+
+When a byte has been shifted but the previous byte hasn't been read by the CPU
+yet, the new byte isn't copied into RDR, it stays in RDRS, and the ACIA knows
+that the chip is in a overrun situation (internal flag).
+The new byte is lost, it will never be transferred into RDR.
+Other bytes will be shifted, and lost on arrival.
+The OVRN status bit will be set only when reading RDR.
+Doc says one should read SR then RDR to clear overrun condition (and allow
+transfer of bytes to RDR), but reading RDR once is enough (ACIA02.TOS).
+
+
+Timings
+========
+
+* ACIA <--> IKBD timings
+
+Data is transmitted at 7812.5 bauds between the ACIA and the HD6301,
+both directions.
+
+One character (10 bits) = 64 * 10 ACIA clock ticks
+ST ~ 8mhz = ACIA clock * 16
+
+Case: Defulloir
+The program sends IKBD commands and directly reads the results in a fullscreen,
+every 20 scanlines, which translates to precisely the theoretical transmission
+time:
+
+20 * 512 (50hz) = 10240 cycles
+10 * 64 * 16 = 10240 cycles (max 1024 before first TDR->TDRS)
+
+If transmission time is off, the mouse will hop around. Had the problem in Steem
+SSE.
+Of course, the 6301 needs processing time, but every byte is ready when 
+transmission of the previous byte finishes, so no time is lost, except for
+the first byte.
+
+Case: Froggies
+Timings are critical for this demo too. It depends on the delay before TDR is
+moved to TDRS, in both the ACIA and the HD6301 (IKBD).
+It's not on purpose, things don't happen as the programmers expected.
+
+
+* ACIA <--> MIDI timings
+
+10* 16 * 16 = 2560 cycles (max 256 before first TDR->TDRS, one bit delay is 
+shorter than for the IKBD)
+
+

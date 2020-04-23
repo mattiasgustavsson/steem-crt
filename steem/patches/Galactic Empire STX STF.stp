@@ -1,0 +1,11 @@
+[Text]
+
+Description=Pass protection
+ApplyWhen=Password screen
+Version=DE/FR STF, TOS 1.02, 1MB
+PatchAuthor=Steven
+
+[Patch]
+
+145EA = $10BC $00FB
+145FA = $10BC $0007

@@ -1,0 +1,66 @@
+ST Ghost v1.0
+===============================================================================
+
+STG is the extension of "ghost disks" for Steem.
+
+Ghost disks are used to save sector changes in read-only disk image
+formats such as STX (pasti) and IPF, CTR (caps).
+
+If SSE option 'Ghost disk' is checked, a STG file is automatically
+ created at first sector write, with the same name as the disk image.
+Steem will check the existence of a STG file at reads.
+
+Only those sectors that are changed are saved, and retrieved when
+the same sectors are read.
+
+This is useful to save highscores or game progress.
+
+Sectors are identified by an "ID field" as described in the WD1772 doc.
+The CRC info isn't used.
+
+To save space, records are sequentially added.
+Normally, there will not be a lot of records, so performance
+shouldn't be an issue.
+
+In the current specification, only sectors are recorded, not full
+tracks.
+
+Tested on: 
+- Sundog IPF loads to menu
+- Great Courts
+- Super Cycles
+- Platoon
+
+To test:
+- Lethal Xcess
+- Super Sprint
+
+
+Header 
+------
+
+4 bytes: "STG" null-terminated C string
+1 word (little-endian): version in hex ($0100 to begin with)
+1 word (little-endian): number of records
+
+
+Record
+------
+
+5 bytes: header "SEC" (for sector) and the record number (big-endian)
+to help debugging.
+
+6bytes: ID field, being:
+  BYTE track (0-83) (disk track, not TR register that could be different)
+  BYTE side (0 or 1) (real, as selected in the PSG)
+  BYTE num (sector number) (SR register)
+  BYTE len 0-3 for 128,256,512 or 1024 bytes
+  BYTE CRC (unused)
+  BYTE CRC (unused)
+
+X bytes acording to len: data
+
+If the program saves the same sector with different sizes, this will corrupt
+the file. Normally there are no such cases.
+
+

@@ -1,0 +1,91 @@
+SDL_config_win32.h has been changed to be compatible with Borland C++,
+as directed below - SS
+**********************************************************************
+
+
+http://sdl.5483.n7.nabble.com/How-to-compile-and-link-with-Borland-s-C-command-line-tools-td16519.html
+How to compile and link with Borland's C++ command line tools
+BenoitRen
+
+May 02, 2008; 12:00am 
+ How to compile and link with Borland's C++ command line tools  
+28 posts	 I've figured it all out. First, you need an SDL.lib file. To create it, 
+first place SDL.dll in your working directory. Next, use the following 
+commands: 
+
+impdef -a sdl.def sdl.dll 
+implib sdl.lib sdl.def 
+
+With impdef you create a definition file that lists SDL.dll's functions. 
+The -a option creates aliases for the function in Microsoft style with 
+an underscore prepended. 
+
+implib creates the actual library file from the definition file. Place 
+the resulting file in your lib directory. 
+
+Unfortunately, there's no DLL to create SDLmain.lib from. Take the win32 
+version of sdl_main.c and put it in your project's directory. 
+
+Next, you have to make some small changes to SDL header files to 
+accomodate for Borland's way of doing things. 
+
+In the file SDL_config_win32.h, at line 63, change this: 
+
+typedef signed long long int64_t; 
+typedef unsigned long long uint64_t; 
+
+to this: 
+
+typedef __int64 int64_t; 
+typedef unsigned __int64 uint64_t; 
+
+Borland C++ doesn't support "long long", since it's non-standard. What 
+I've done here is to replace it with the Borland extension that 
+implements the same type. 
+
+Further in the same file, we have this: 
+
+#ifndef _SIZE_T_DEFINED_ 
+#define _SIZE_T_DEFINED_ 
+typedef unsigned int size_t; 
+#endif 
+
+Comment these lines out. The _stddef.h include file of Borland will 
+define size_t by itself later on. 
+
+Now you're ready to compile your project's files, along with sdl_main.c, 
+without linking: 
+
+bcc32 -b -c -tW -DWIN32 [your project files] sdl_main.c 
+
+-b (Make enums the size of an int) 
+-c (Don't link) 
+-tW (make Windows application) 
+-DWIN32 (define WIN32) 
+
+Finally you can link the obj files: 
+
+ilink32 -aa -Tpe -c [your project obj files] sdl_main c0w32,,[your map 
+file], sdl import32 cw32 
+
+-aa (make Windows application) 
+-Tpe (windows exe target) 
+-c (case sensitive linking) 
+
+c0w32.obj is the Windows application start-up code. You should have a 
+map file with the name of your first source file. You don't need to type 
+in the extensions, as Borland will know it from the order defined by the 
+commas. 
+
+Finally, you may have to define the library path and the object path 
+while doing this if you're on Win9x, as there's a bug that sometimes 
+prevents the linker from reading its own configuration file. 
+
+I hope this helps other users of Borland's free C++ compiler, and that 
+the SDL developers will update the FAQ with this information. 
+
+Finally I can start out on development with SDL! 
+
+
+Best regards 
+BenoitRen

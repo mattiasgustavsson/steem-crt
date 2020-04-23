@@ -1,0 +1,16 @@
+[Text]
+
+Description=To remove flicker in high score table
+ApplyWhen=When the game is loaded ; use TOS106UK!
+Version=Works on Steem v3.2
+
+PatchAuthor=Steven Seagal
+
+
+
+[Patch]
+
+
+028990 = $4e71
+ 
+028992 = $4e71

@@ -1,0 +1,271 @@
+[SCROLLERS]
+§v, built §b
+running §d
+Press F12 to start/stop emulation, F11 to free or grab the mouse
+Steem, the STE emulating engine, written by Anthony and Russell Hayward
+Steem SSE stands for ST Enhanced Emulator Sensei Software Edition
+Right-click on the fast forward button to use the flashlight - see if there is really something there on a black screen
+steem was created using Borland's Free C++ compiler, it is maintained with Free Visual C++ too
+Thanks to all the people who have helped, knowingly or not, make Steem better
+If a program won't run from hard drives, copy it to a disk image using the ST desktop, and it might work better
+Some programs won't work if their disk is read only, always try making it read-write (or extracting the disk if it is in an archive) if you have problems
+Some programs won't work with memory size set to 4Mb or 512Kb
+More programs than you think require Accurate Disk Access Times (slow) option in the Disk manager, check the Hints
+http://sourceforge.net/projects/steemsse
+GREETINGS TO JEAN CLAUDE VAN DAMME, LANCE HENRIKSEN, NICOLAS CAGE, KURT RUSSELL, NICK NOLTE, JOHN TRAVOLTA, CHUCK NORRIS, TOM SELLECK, MICHAEL IRONSIDE, STEPHEN LANG, KAYDEN NGUYEN, WILLIAM FORSYTHE, MICHAEL CAINE, JEFF SPEAKMAN, MICHAEL PARE, SYLVESTER STALLONE, DANNY TREJO, RICHARD DEAN ANDERSON, MICHAEL BIEHN, KEVIN COSTNER, BOLO YEUNG, DONALD SUTHERLAND, BRIAN BOSWORTH, MARIO VAN PEEBLES, BRUCE WILLIS, CLINT EASTWOOD, VERNON WELLS, TOM BERENGER, JOHN SAXON, HARRISON PAGE, BRIAN THOMPSON, LIAM NEESON, SEAN BEAN, RICHARD LYNCH, DOLPH LUNDGREN, DONALD GIBB, MICKEY ROURKE, GARY BUSEY, JESSE VENTURA, SEAN CONNERY, CARL WEATHERS, MEL GIBSON, BILL DUKE, BILL PAXTON, HARRISON FORD, VIGGO MORTENSEN, SVEN-OLE THORSEN, ARNOLD SCHWARZENEGGER, VINCENT KLYN, VIN DIESEL, WILLEM DAFOE, LEE MAJORS, CHRISTOPHER WALKEN, DAVID SOUL, PAUL MICHAEL GLASER AND JAMES WOODS... R.I.P. LEE VAN CLEEF, PAUL WALKER, HARRY DEAN STANTON, BILLY DRAGO, DAVID CARRADINE, SOON-TEK HO AND RUTGER HAUER...
+Steem is the best, so why bother with the rest?
+When Chuck Norris can't do it, call Steven Seagal
+Demos don't work? check the 'ST Video/Software Overscan' option
+You may use the ghost disk feature to save your high scores on protected games 
+Sick of those silly scrollers? You can switch them off in the options!
+Some strange dots on hicolour pics? ST Video option Shifter wakeup may help
+For fast but accurate disk emulation, check both Slow and automatic fast forward in the disk manager
+Please take the time to read the manual once, it's worth it.
+With Steem SSE, the legend continues!
+Who needs drugs? Winners use Steem
+
+[WINSCROLLERS]
+Know your mc68k from your mk68901?  Download the debug build of steem and help us get those little games working
+Know the blitter from the shifter? Download the debug build of steem and help us get those little demos working
+Know a spurious interrupt from an ACIA overrun? Download the debug build of steem and help us get those little applications working
+Know the GLUE from the MMU? Download the debug build of steem and help us get those little menu disks working
+Using the debugger you can prepare patches to pass some protections - check if the one you want is already included 
+drag a file to the Home button with right mouse button - easy shortcuts to your disks
+ST, MSA, DIM, STT, STX, IPF, CTR, SCP, HFE, STW, PRG, TOS: Steem runs everything!
+You need pasti.dll to run STX images, capslib.dll for IPF and CTR images
+Keyboard freaks: Press alt for an alternative menu (when the emulator's stopped)
+You can use Steem on a second monitor, even in fullscreen under conditions
+Steem SSE Debugger: Power without the price!
+For STX, IPF, CTR and SCP disk images, disk emulation must be accurate but automatic fast forward works
+
+
+[LINKS]
+...Forums
+Atari Forum
+http://www.atari-forum.com/
+Exxos forum
+https://www.exxoshost.co.uk/forum/
+AtariAge
+http://www.atariage.com/
+
+
+...ST programs downloads
+Atarimania
+http://www.atarimania.com/
+Automation Game List
+http://steem.atari.st/automation.htm
+Stonish.net
+http://www.stonish.net/
+Automation Game List 2
+http://www.exxoshost.co.uk/atari/games/automation/AUTOMATION2015A.htm
+The Fuzion Shrine
+http://omiquel.lautre.net/
+Medway Boys Menus - The Pictures
+http://www.spiny.org/medway/
+Planet Emu (French)
+http://www.planetemu.net/
+D-Bug
+http://dbug.atari.org/
+Mr. Sam's Atari ST Site
+http://www.h2nob.de/games/atari/st/
+Petari (utilities, fixed games...)
+http://atari.8bitchip.info/
+Klapauzius
+http://www.klapauzius.net/
+Resampled
+http://rom.resampled.ru/%D0%94%D0%B8%D1%81%D0%BA%D0%B8%20%D0%B4%D0%BB%D1%8F%20Atari%20ST/
+Atari Legend
+http://www.atarilegend.com/
+
+
+...Dedicated
+Bird Sanctuary - Rainbird, Firebird and Silverbird
+http://www.birdsanctuary.co.uk/
+Brataccas
+http://brataccas.com/
+Captain Blood
+http://argnet.fatal-design.com/bluddian.php
+Captive
+http://captive.atari.org/
+Dungeon Master fans
+http://www.dungeon-master.com/index.htm
+Dungeon Master Encyclopaedia
+http://dmweb.free.fr
+Gryzor
+http://www.gryzor.info/index2.html
+Infocom
+http://infocom-if.org/index2.html 
+Lethal Xcess
+http://edv-rudolf.de/lethal-xcess/main.htm
+Level 9
+http://l9memorial.if-legends.org/html/home.html
+Lords of Chaos
+http://l-o-c.sourceforge.net/
+Magnetic Scrolls
+http://magneticscrolls.info/memorial.php
+Thalion
+http://thalion.atari.org/
+
+
+...ST Utilities
+Pasti
+http://pasti.fxatari.com/
+EmuTOS
+http://sourceforge.net/projects/emutos
+TeraDesk
+http://solair.eunet.rs/~vdjole/teradesk.htm
+Windows Floppy Disk Copy
+http://sourceforge.net/projects/wfdcopy/
+Gemulator Explorer
+http://www.emulators.com/explorer.htm
+STDisk
+http://www.8hz.com/stdisk/
+Disk2FDI
+http://www.oldskool.org/disk2fdi
+Avtandil
+http://www.avtandil.narod.ru/indexe.html
+
+...Hardware
+HxC Floppy Emulator
+http://hxc2001.com/
+Kryoflux
+http://kryoflux.com/
+Supercard
+http://www.cbmstuff.com/index.htm
+Exxos
+http://www.exxoshost.co.uk/atari/
+Lotharek
+https://lotharek.pl/
+
+...Demos (Steem runs them all!)
+Pouet
+http://www.pouet.net/ 
+Demozoo
+http://demozoo.org/
+Dead Hackers Society
+http://www.dhs.nu/
+PaCiDemo
+http://pacidemo.planet-d.net/
+Delta Force
+http://wwwbrauer.informatik.tu-muenchen.de/~brandtf/df.html
+No Fragments Atari.Org Mirror
+http://no-fragments.atari.org/
+PHF - Atari, C64 & Amiga coders
+http://www.tphf.karoo.net/
+Cybernetics
+http://cyber.savina.net/
+Equinox
+http://equinox.planet-d.net/
+Cyclone's X-Troll Website
+http://www.edv-rudolf.de/xtroll/
+Official HMD Whq
+http://hemoroids.eu/
+
+
+...E-mags
+atarimagazines
+http://www.atarimagazines.com/ 
+ST Format
+http://stformat.com/
+Computer Magazin Archiv (German and English)
+http://www.stcarchiv.de/
+MyAtari.net
+http://www.myatari.net/
+
+
+...Documentation
+atari4ever
+http://atari4ever.free.fr/
+Atari STE Fanpage
+http://atari-ste.anvil-soft.com/
+bus-error
+http://bus-error.nokturnal.pl
+Atari ST Hardware Information
+http://info-coach.fr/atari/hardware/index.php
+
+
+...Other ST Emulators (not as good as Steem)
+PaCifiST (DOS)
+http://www.atari.st/pacifist/
+WinSTon SourceForge (Windows)
+http://sourceforge.net/projects/winston/
+SainT (Windows)
+http://leonard.oxg.free.fr/SainT/saint.html
+Hatari (Unix, Mac, Windows)
+http://hatari.tuxfamily.org/
+ARAnyM
+https://aranym.github.io/
+Castaway
+http://sourceforge.net/projects/castaway/
+Gemulator (Windows)
+http://www.emulators.com/
+STonX
+http://sourceforge.net/projects/stonx/
+NoSTalgia and PowerST (Mac)
+http://users.skynet.be/sky39147/
+FAST (DOS)
+http://fast.emuunlim.com/
+
+
+...Other Sites
+Atari.org
+http://www.atari.org/
+
+
+...Legacy and various
+Lee's Atari ST Shrine
+http://www.atari-shrine.co.uk/
+Atari Force
+http://atariforce.free.fr/
+Lip6 FTP
+ftp://ftp.lip6.fr/pub/atari
+Funet
+http://www.funet.fi/pub/atari/
+Reservoir Gods
+http://www.reservoir-gods.com/
+Zogging Hell!!!
+http://www.zhell.co.uk/
+TiK's Atari ST Image Riot (French)
+http://tik.atari.org/
+Sector One Homepage
+http://deunstg.free.fr/sct1/index.html
+sc68 - Atari ST and Amiga musics
+http://sc68.atari.org/
+GokMasE's Atari Page
+https://web.archive.org/web/20160503205108/http://aicq.atari-users.net/
+Defence-Force Atari page
+http://www.defence-force.org/computing/atari/index.htm
+Mike's Web Archive
+http://members.optusnet.com.au/~atari1/
+Tim's Atari MIDI World
+https://web.archive.org/web/20100504085054/http://tamw.atari-users.net/index.htm
+ARGanoid's ST Scene page
+http://argnet.fatal-design.com/stscene.php
+Atari History Museum
+http://www.atarimuseum.com/
+ATARItoday
+https://web.archive.org/web/20070828042919/http://www.ataritoday.com/index.html
+x-com.atari.org (German)
+http://x-com.atari.org/
+Freddo (French)
+http://www.chez.com/freddo/
+Epsilon's Archives (French and English)
+http://tms.foxysofts.com/
+public ATARI (German)
+http://www.haretuerk.de/atari/index.html
+aLiVe! HQ
+http://alive.atari.org/
+Atari Hardware Guide
+http://hardware.atari.org/
+The MALEB Atari Page
+http://atari.scum.org/
+MagiCPC (Windows)
+http://www.application-systems.de/magicpc/
+MagiCMac (Mac)
+http://www.application-systems.de/magicmac/index.html
+dev-doc
+https://web.archive.org/web/20171016150036/http://dev-docs.atariforge.org/
+
+[LINKSEND]
+[END]
+

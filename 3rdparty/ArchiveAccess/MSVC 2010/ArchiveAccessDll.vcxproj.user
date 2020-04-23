@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LocalDebuggerCommandArguments>t:\BG-Units-2007-01-18.tar.gz</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommand>D:\devel\ArchiveAccess-9.20-2013-07-16-debug\MSVC 2010\Debug\_WinHex.exe</LocalDebuggerCommand>
+    <LocalDebuggerWorkingDirectory>D:\devel\ArchiveAccess-9.20-2012-03-21\MSVC 2010\Debug</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LocalDebuggerCommandArguments>
+    </LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommand>D:\devel\ArchiveAccess-9.20-2012-03-21\MSVC 2010\Debug64\WinHex64.exe</LocalDebuggerCommand>
+    <LocalDebuggerWorkingDirectory>D:\devel\ArchiveAccess-9.20-2012-03-21\MSVC 2010\Debug64</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
+</Project>

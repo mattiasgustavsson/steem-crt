@@ -1,0 +1,9 @@
+[Text]
+Description=The most common version of the B.I.G. Demo has wrong data that make it crash when playing 'Action-Biker #1'
+ApplyWhen=Before playing 'Action-Biker #1'
+Version=Works on Steem v3.2
+PatchAuthor=X
+
+[Patch]
+034940 = $87e7
+034980 = $8e43

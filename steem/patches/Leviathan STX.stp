@@ -1,0 +1,10 @@
+[Text]
+Description=Protection at track 79 randomly fails on a bad image disk
+ApplyWhen=Before pressing F2
+
+Version=STF T102
+PatchAuthor=Seagal
+
+
+[Patch]
+114F4=$103C $0000

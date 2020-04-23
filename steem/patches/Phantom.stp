@@ -1,0 +1,8 @@
+[Text]
+Description=Fix glitches in Phantom scroller
+ApplyWhen=on that screen
+Version=All, STE 4MB
+PatchAuthor=Seagal
+
+[Patch]
+040400 = $13fc

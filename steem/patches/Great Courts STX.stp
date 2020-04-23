@@ -1,0 +1,11 @@
+[Text]
+Description=Bypass protection
+ApplyWhen=When game displays an open and a date, apply patch, type something + return
+Version=Tested on 3.6.2, STF, TOS1.02, colour
+
+PatchAuthor=Steven Seagal/Petari
+
+[Patch]
+002896 = $6000 F554
+00562E = $600C
+

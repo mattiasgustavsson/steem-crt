@@ -1,0 +1,216 @@
+
+# to build XSteem SSE, enter this in the terminal:
+# make -B -fMakefile_dbg.txt 3rdparty
+# make -B -fMakefile_dbg.txt
+
+
+#####################################
+#      Makefile for Steem           #
+#####################################
+
+# requires tools: make, gcc, g++, nasm
+# requires libs: rtaudio, /*portaudio*/, zlib, minizip, /*urarlib*/, X
+
+# symbolic links - code, inc, 3rdparty
+
+ROOT=..
+
+# Compiler
+CC=g++
+
+# Parameters given to the compiler
+STEEMFLAGS=-DUNIX -DLINUX -DSTEVEN_SEAGAL -DNO_PORT_AUDIO -DSSE_DEBUG
+CFLAGS=-I$(ROOT)/include -I$(ROOT)/steem/code \
+-I$(ROOT)/3rdparty \
+-I$(ROOT)/3rdparty/dsp \
+-I$(ROOT)/3rdparty/6301 \
+-I$(ROOT)/3rdparty/zlib/contrib/minizip \
+-I$(ROOT)/3rdparty/zlib \
+-I$(ROOT)/3rdparty/rtaudio \
+-lasound -w -Wfatal-errors
+
+RELEASE_CFLAGS=-O
+
+# Output filename
+OUTPUT="./output/steem_dbg"
+
+    LIBS=-lX11 -lXext -lpthread -lXxf86vm \
+      $(ROOT)/3rdparty/zlib/crc32.o  \
+      $(ROOT)/3rdparty/zlib/inflate.o \
+      $(ROOT)/3rdparty/zlib/adler32.o \
+      $(ROOT)/3rdparty/zlib/trees.o \
+      $(ROOT)/3rdparty/zlib/inffast.o \
+      $(ROOT)/3rdparty/zlib/inftrees.o \
+      $(ROOT)/3rdparty/zlib/deflate.o \
+      $(ROOT)/3rdparty/zlib/zutil.o \
+      $(ROOT)/3rdparty/zlib/compress.o \
+      $(ROOT)/3rdparty/zlib/contrib/minizip/unzip.o \
+      $(ROOT)/3rdparty/zlib/contrib/minizip/ioapi.o \
+      $(ROOT)/3rdparty/rtaudio/tests/Release/RtAudio.o \
+      $(ROOT)/X-build/obj/6301.o \
+      $(ROOT)/X-build/obj/dsp.o \
+      $(ROOT)/X-build/obj/div68kCycleAccurate.o 
+
+LIBTOOL=libtool
+
+# Objects
+OBJS=./obj/asm_draw.o ./obj/emu.o ./obj/asm_osd.o ./obj/main.o ./obj/helper.o \
+ ./obj/resource.o ./obj/SSE.o ./obj/SSEOption.o ./obj/SSEMMU.o ./obj/SSE6301.o\
+ ./obj/SSECpu.o ./obj/SSEDebug.o ./obj/SSEFrameReport.o ./obj/SSEShifter.o    \
+ ./obj/SSESTF.o ./obj/SSEVideo.o ./obj/SSEFloppy.o ./obj/SSEWD1772.o          \
+ ./obj/SSEDrive.o ./obj/SSEDisk.o ./obj/SSEYM2149.o ./obj/SSEDma.o ./obj/SSEPsg.o
+
+
+# Targets
+
+all:	asm
+	mkdir -p obj output
+	$(MAKE) -fMakefile_dbg.txt res
+	$(MAKE) -fMakefile_dbg.txt helper
+	$(MAKE) -fMakefile_dbg.txt main
+	$(MAKE) -fMakefile_dbg.txt emu
+	$(MAKE) -fMakefile_dbg.txt SSE
+	$(MAKE) -fMakefile_dbg.txt SSEMMU
+	$(MAKE) -fMakefile_dbg.txt SSEOption
+	$(MAKE) -fMakefile_dbg.txt SSE6301
+	$(MAKE) -fMakefile_dbg.txt SSECpu
+	$(MAKE) -fMakefile_dbg.txt SSEDebug
+	$(MAKE) -fMakefile_dbg.txt SSEFloppy
+	$(MAKE) -fMakefile_dbg.txt SSEShifter
+	$(MAKE) -fMakefile_dbg.txt SSEFrameReport
+	$(MAKE) -fMakefile_dbg.txt SSESTF
+	$(MAKE) -fMakefile_dbg.txt SSEVideo
+	$(MAKE) -fMakefile_dbg.txt SSEWD1772
+	$(MAKE) -fMakefile_dbg.txt SSEDrive
+	$(MAKE) -fMakefile_dbg.txt SSEDisk
+	$(MAKE) -fMakefile_dbg.txt SSEYM2149
+	$(MAKE) -fMakefile_dbg.txt SSEDma
+	$(MAKE) -fMakefile_dbg.txt SSEPsg
+	$(MAKE) -fMakefile_dbg.txt link
+
+clean:
+	rm -rf obj output
+
+fresh:
+	$(MAKE) -fMakefile_dbg.txt clean
+#	$(MAKE) urarlib
+	$(MAKE) -fMakefile_dbg.txt asm
+	$(MAKE) -fMakefile_dbg.txt all
+
+test:
+	$(MAKE) -fMakefile_dbg.txt all
+	$(OUTPUT)
+
+release:
+	$(MAKE) -fMakefile_dbg.txt clean
+	$(MAKE) -fMakefile_dbg.txt res
+#	$(MAKE) urarlib
+	$(MAKE) -fMakefile_dbg.txt asm
+	$(MAKE) -fMakefile_dbg.txt release_compile
+	$(MAKE) -fMakefile_dbg.txt link_static
+	strip -s $(OUTPUT)
+
+helper:
+	$(CC) -o ./obj/helper.o -c $(ROOT)/steem/helper.cpp $(CFLAGS) $(STEEMFLAGS)
+
+main:
+	$(CC) -o ./obj/main.o -c $(ROOT)/steem/code/main.cpp $(CFLAGS) $(STEEMFLAGS)
+
+emu:
+	$(CC) -o ./obj/emu.o -c $(ROOT)/steem/emu.cpp $(CFLAGS) $(STEEMFLAGS)
+
+
+asm:
+	mkdir -p ./obj
+	nasm -felf -o./obj/asm_draw.o -i$(ROOT)/steem/asm/ $(ROOT)/steem/asm/asm_draw.asm
+	nasm -felf -o./obj/asm_osd.o -i$(ROOT)/steem/asm/ $(ROOT)/steem/asm/asm_osd_draw.asm
+
+res:
+	nasm -felf -o./obj/resource.o -i$(ROOT)/steem/ $(ROOT)/steem/rc/resource.asm
+
+link: 
+	$(LIBTOOL) --tag=CC --mode=link $(CC) -o $(OUTPUT) $(CFLAGS) $(OBJS) $(LIBS)
+#	$(LIBTOOL) --tag=CC  $(CC) -o $(OUTPUT) $(CFLAGS) $(OBJS) $(LIBS)
+
+link_static:
+	$(CC) -o $(OUTPUT) $(CFLAGS) $(OBJS) $(LIBS) -static
+
+SSEMMU:
+	$(CC) -o ./obj/SSEMMU.o -c $(ROOT)/steem/code/SSE/SSEMMU.cpp $(CFLAGS) $(STEEMFLAGS)
+
+SSE6301:
+	$(CC) -o ./obj/SSE6301.o -c $(ROOT)/steem/code/SSE/SSE6301.cpp $(CFLAGS) $(STEEMFLAGS)
+
+SSECpu:
+	$(CC) -o ./obj/SSECpu.o -c $(ROOT)/steem/code/SSE/SSECpu.cpp $(CFLAGS) $(STEEMFLAGS)
+
+SSEDebug:
+	$(CC) -o ./obj/SSEDebug.o -c $(ROOT)/steem/code/SSE/SSEDebug.cpp $(CFLAGS) $(STEEMFLAGS)
+
+SSESTF:
+	$(CC) -o ./obj/SSESTF.o -c $(ROOT)/steem/code/SSE/SSESTF.cpp $(CFLAGS) $(STEEMFLAGS)
+
+SSEVideo:
+	$(CC) -o ./obj/SSEVideo.o -c $(ROOT)/steem/code/SSE/SSEVideo.cpp $(CFLAGS) $(STEEMFLAGS)
+
+SSEShifter:
+	$(CC) -o ./obj/SSEShifter.o -c $(ROOT)/steem/code/SSE/SSEShifter.cpp $(CFLAGS) $(STEEMFLAGS)
+
+SSEFrameReport:
+	$(CC) -o ./obj/SSEFrameReport.o -c $(ROOT)/steem/code/SSE/SSEFrameReport.cpp $(CFLAGS) $(STEEMFLAGS)
+
+SSE:
+	$(CC) -o ./obj/SSE.o -c $(ROOT)/steem/code/SSE/SSE.cpp $(CFLAGS) $(STEEMFLAGS)
+
+SSEOption:
+	$(CC) -o ./obj/SSEOption.o -c $(ROOT)/steem/code/SSE/SSEOption.cpp $(CFLAGS) $(STEEMFLAGS)
+
+SSEFloppy:
+	$(CC) -o ./obj/SSEFloppy.o -c $(ROOT)/steem/code/SSE/SSEFloppy.cpp $(CFLAGS) $(STEEMFLAGS)
+
+SSEWD1772:
+	$(CC) -o ./obj/SSEWD1772.o -c $(ROOT)/steem/code/SSE/SSEWD1772.cpp $(CFLAGS) $(STEEMFLAGS)
+
+SSEDrive:
+	$(CC) -o ./obj/SSEDrive.o -c $(ROOT)/steem/code/SSE/SSEDrive.cpp $(CFLAGS) $(STEEMFLAGS)
+
+SSEDisk:
+	$(CC) -o ./obj/SSEDisk.o -c $(ROOT)/steem/code/SSE/SSEDisk.cpp $(CFLAGS) $(STEEMFLAGS)
+
+SSEYM2149:
+	$(CC) -o ./obj/SSEYM2149.o -c $(ROOT)/steem/code/SSE/SSEYM2149.cpp $(CFLAGS) $(STEEMFLAGS)
+
+SSEDma:
+	$(CC) -o ./obj/SSEDma.o -c $(ROOT)/steem/code/SSE/SSEDma.cpp $(CFLAGS) $(STEEMFLAGS)
+
+SSEPsg:
+	$(CC) -o ./obj/SSEPsg.o -c $(ROOT)/steem/code/SSE/SSEPsg.cpp $(CFLAGS) $(STEEMFLAGS)
+
+
+#3rdparty:	zlib unrarlib portaudio rtaudio div68kCycleAccurate 6301
+3rdparty:	div68kCycleAccurate 6301 dsp zlib rtaudio 
+
+div68kCycleAccurate:
+	gcc -c $(ROOT)/3rdparty/pasti/div68kCycleAccurate.c $(CFLAGS) -o./obj/div68kCycleAccurate.o
+
+6301:
+	gcc -c $(ROOT)/3rdparty/6301/6301.c $(CFLAGS) -DSTEVEN_SEAGAL -DSS_DEBUG -o./obj/6301.o
+
+dsp:
+	$(CC) -o ./obj/dsp.o -c $(ROOT)/3rdparty/dsp/dsp.cpp $(CFLAGS) $(STEEMFLAGS)
+
+#unrarlib:
+#	gcc -c $(ROOT)/3rdparty/unrarlib/unrarlib/unrarlib.c $(CFLAGS) -o$(ROOT)/3rdparty/unrarlib/unrarlib/unrarlib.o
+
+zlib:
+	cd $(ROOT)/3rdparty/zlib; sh configure; make test
+	cd $(ROOT)/3rdparty/zlib/contrib/minizip; make all
+
+#portaudio:
+#	cd $(ROOT)/3rdparty/portaudio; \
+#	sh configure; \
+#	make
+
+rtaudio:
+	cd $(ROOT)/3rdparty/rtaudio; sh configure --with-alsa; cd tests; make
+

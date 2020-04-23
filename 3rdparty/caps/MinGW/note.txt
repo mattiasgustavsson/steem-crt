@@ -1,0 +1,2 @@
+Those files were derived from the DLL, using
+lib2a (as,dlltool,reimp)

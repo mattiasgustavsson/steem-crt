@@ -1,0 +1,8 @@
+[Text]
+Description=There's a bugged version that will only work on French TOS. With the patch, UK/US TOS OK.
+ApplyWhen=At frequency menu
+Version=STF, TOS 1.02, 1MB
+PatchAuthor=Seagal
+
+[Patch]
+013096 = $6600 $0028

@@ -1,0 +1,76 @@
+Using svn command-line
+=======================
+
+It's not a manual, just some help on commands likely to be used.
+'FreeCommander' makes using the command-line easier.
+
+
+URL: https://svn.code.sf.net/p/steemsse/code/trunk/steemsse
+Repository Root: https://svn.code.sf.net/p/steemsse/code
+Repository UUID: dd3fbd3b-ef5d-4b78-98e8-da144fa02e5b
+
+Commands
+=========
+
+svn import https://steven-seagal@svn.code.sf.net/p/steemsse/code/trunk/ -m "Initial commit"
+To import for the first time.
+It asks for password, then user name then password again.
+
+svn checkout http://svn.code.sf.net/p/steemsse/code/trunk steemsse-code
+To download current source
+
+svn checkout https://svn.code.sf.net/p/steemsse/code/trunk steemsse-code
+To download current source and be able to commit
+
+svn checkout -r 2 https://svn.code.sf.net/p/steemsse/code/trunk steemsse-code
+To specify which version we want
+
+svn switch --relocate http://svn.code.sf.net/p/steemsse/code/trunk https://svn.code.sf.net/p/steemsse/code/trunk
+If you downloaded with http and want to commit
+
+svn update
+To refresh local based on repository
+Always start with this command or "svn info" will be outdated
+
+svn info
+To get address and current revision
+
+svn add
+To add a file
+
+svn delete
+To delete a file (use this, not OS)
+
+svn status
+To list files that were changed
+
+svn diff >diff.txt
+To create a file showing all changes
+
+svn diff -r 16:27 >diff.txt
+To show changes between revisions 16 and 27 (powerful!)
+
+svn revert
+To restore a file as it is in the repository
+
+svn commit -m "the message"
+svn commit -F file.txt
+To upload changes
+
+svn copy https://svn.code.sf.net/p/steemsse/code/trunk https://svn.code.sf.net/p/steemsse/code/tags/V3.4.0 -m "tag release 3.4.0"
+To create a tag (release point)
+
+$ svn copy https://svn.code.sf.net/p/steemsse/code/trunk https://svn.code.sf.net/p/steemsse/code/branches/STWdev -m "create branch for STW development"
+To create a branch (development copy)
+
+svn checkout https://svn.code.sf.net/p/steemsse/code/branches/STWdev
+To check out the branch if you will
+
+svn switch --relocate https://svn.code.sf.net/p/steemsse/code/trunk https://svn.code.sf.net/p/steemsse/code/branches/STWdev
+svn switch --relocate https://svn.code.sf.net/p/steemsse/code/branches/STWdev http://svn.code.sf.net/p/steemsse/code/trunk
+to select where you will upload (1st line: in dev branch, 2nd line: in main trunk)
+
+svn switch https://svn.code.sf.net/p/steemsse/code/branches/STWdev
+svn switch https://svn.code.sf.net/p/steemsse/code/trunk
+even simpler way, apparently recommended, lot of "delete/add" though
+

@@ -1,0 +1,11 @@
+Script files to compile Steem SSE with MinGW (yes sir!)
+
+The SET variables need to be edited according to your system
+(build_mingw_set.bat).
+
+build_mingw_asm.bat must be called first if asm files haven't been assembled 
+yet.
+
+build_mingw_debug.bat will build the boiler.
+
+build_mingw_user.bat will build regular Steem SSE.

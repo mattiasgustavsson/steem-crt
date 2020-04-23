@@ -1,0 +1,11 @@
+[Text]
+
+Description=Pass protection
+ApplyWhen=Password screen
+Version=STF, TOS 1.02, 1MB
+PatchAuthor=Steven
+
+[Patch]
+
+13F00 = $4e71 $4e71
+

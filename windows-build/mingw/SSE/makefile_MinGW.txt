@@ -1,0 +1,678 @@
+###########################################
+#      Mingw Makefile for Steem SSE       #
+###########################################
+
+# path to MinGW\bin\ must be in PATH
+#
+#
+#
+
+STEEMROOT = $(ROOT)/steem
+INCDIR = $(ROOT)/include
+3RDPARTYROOT = $(ROOT)/3rdparty
+OBJECT=$(OUT)
+RCDIR=$(STEEMROOT)/rc
+
+# Compiler
+CCP:=mingw32-g++
+CC:=mingw32-gcc
+WINDRES:=windres
+
+# Parameters given to the compiler
+STEEMFLAGS=-DMINGW_BUILD -DWIN32 -DSTEVEN_SEAGAL -DSSE_DD
+
+CFLAGS=-Wall 
+#CFLAGS+=-B$(MINGWDIR)/BIN/ -I/usr/i686-w64-mingw32/include -L/usr/i686-w64-mingw32/lib 
+
+#LIBS= -L$(ROOT)/3rdparty/UnRARDLL/MinGW/unrar -lunrar
+#-L$(ROOT)/3rdparty/UnRARDLL/MinGW/unrar
+#LIBS+=-L$(MINGWROOT)/lib -L$(MINGWROOT)/DX_SDK/lib
+
+LIBS= -L$(ROOT)/3rdparty/UnRARDLL/MinGW/
+LIBS+= -L$(ROOT)/3rdparty/caps/MinGW/
+LIBS+= -L$(ROOT)/3rdparty/FreeImage/MinGW/
+
+#CFLAGS+= -L$(MINGWROOT)/lib -L(MINGWROOT)/DX_SDK/lib
+#CFLAGS+=$(LIBS)
+
+CFLAGS+=-I$(INCDIR) -I$(3RDPARTYROOT) -I$(STEEMROOT) -I$(STEEMROOT)/headers
+CFLAGS+=-I$(ROOT)/3rdparty/d3d
+CFLAGS+=-I$(MINGWROOT)/DX_SDK/include
+
+#GCCFLAGS=-std=c99 -fdiagnostics-show-option 
+GCCFLAGS=-fdiagnostics-show-option 
+
+CPPFLAGS=$(CFLAGS)
+CPPFLAGS+= -fdiagnostics-show-option -Wno-write-strings -fpermissive
+
+# RELEASE_CFLAGS=-O 
+# RELEASE_CFLAGS=-Wall $(RELEASE_CFLAGS)
+
+ifeq ($(DEBUG),1)
+	STEEMFLAGS+=-DDEBUG_BUILD
+	STEEMFLAGS+=-DSSE_DEBUG
+endif
+
+ifeq ($(USER),1)
+	STEEMFLAGS+=-DNO_DEBUG_BUILD
+endif
+
+ifeq ($(RELEASE),1)
+	STEEMFLAGS+=$(RELEASE_CFLAGS)
+endif
+
+ifeq ($(GDB),1)
+	STEEMFLAGS+= -ggdb
+endif
+
+# Output filename
+# This will be changed by BAT scripts
+OUTPUT=$(OBJECT)/Steem.exe
+
+# Libraries
+#OBJS=-lwinmm -luuid -lcomctl32 -lole32 -lgdi32
+
+#OBJS+=lunrar lCAPSImg
+#OBJS+=$(LIBS)
+
+#OBJS+=$(OBJECT)/Steem.o $(OBJECT)/emu.o $(OBJECT)/helper.o $(OBJECT)/resource.o 
+OBJS+=$(OBJECT)/resource.o 
+
+#ASM
+OBJS+=$(OBJECT)/asm_draw.o $(OBJECT)/asm_osd_draw.o $(OBJECT)/asm_int.o $(OBJECT)/asm_portio.o
+
+#SSE-3rd party
+OBJS+=$(OBJECT)/div68kCycleAccurate.o
+OBJS+=$(OBJECT)/6301.o
+OBJS+=$(OBJECT)/dsp.o
+OBJS+=$(OBJECT)/ArchiveAccessSSE.o
+OBJS+=$(OBJECT)/CapsPlug.o
+OBJS+=$(OBJECT)/filt.o
+#OBJS+=$(OBJECT)/CpuUsage.o
+#OBJS+=$(OBJECT)/AviFile.o
+
+#should be libray, linker
+#OBJS+=$(ROOT)/3rdparty/UnRARDLL/MinGW/unrar.a
+
+#OBJS+=$(ROOT)/3rdparty/caps/MinGW/CAPSImg.a
+
+
+#Steem SSE
+OBJS+=$(OBJECT)/main.o
+OBJS+=$(OBJECT)/options.o 
+OBJS+=$(OBJECT)/mmu.o 
+OBJS+=$(OBJECT)/ikbd.o 
+OBJS+=$(OBJECT)/cpu.o 
+OBJS+=$(OBJECT)/debug.o 
+OBJS+=$(OBJECT)/shifter.o 
+OBJS+=$(OBJECT)/display.o 
+OBJS+=$(OBJECT)/glue.o
+OBJS+=$(OBJECT)/computer.o 
+OBJS+=$(OBJECT)/disk_stw.o 
+OBJS+=$(OBJECT)/disk_ghost.o 
+OBJS+=$(OBJECT)/fdc.o 
+OBJS+=$(OBJECT)/floppy_drive.o 
+OBJS+=$(OBJECT)/floppy_disk.o 
+OBJS+=$(OBJECT)/disk_dma.o 
+OBJS+=$(OBJECT)/psg.o 
+OBJS+=$(OBJECT)/hd_acsi.o
+OBJS+=$(OBJECT)/interface_caps.o 
+OBJS+=$(OBJECT)/disk_scp.o 
+OBJS+=$(OBJECT)/disk_hfe.o 
+OBJS+=$(OBJECT)/interface_stvl.o 
+OBJS+=$(OBJECT)/acia.o 
+OBJS+=$(OBJECT)/blitter.o 
+OBJS+=$(OBJECT)/mfp.o
+OBJS+=$(OBJECT)/rs232.o 
+OBJS+=$(OBJECT)/hd_gemdos.o 
+OBJS+=$(OBJECT)/emulator.o
+OBJS+=$(OBJECT)/reset.o 
+OBJS+=$(OBJECT)/run.o 
+OBJS+=$(OBJECT)/ior.o 
+OBJS+=$(OBJECT)/iow.o
+OBJS+=$(OBJECT)/sound.o 
+OBJS+=$(OBJECT)/loadsave.o 
+OBJS+=$(OBJECT)/draw.o
+OBJS+=$(OBJECT)/stports.o 
+OBJS+=$(OBJECT)/midi.o
+OBJS+=$(OBJECT)/loadsave_emu.o 
+OBJS+=$(OBJECT)/acc.o 
+OBJS+=$(OBJECT)/archive.o
+OBJS+=$(OBJECT)/dataloadsave.o 
+OBJS+=$(OBJECT)/gui_controls.o 
+OBJS+=$(OBJECT)/cpu_ea.o
+OBJS+=$(OBJECT)/tos.o
+OBJS+=$(OBJECT)/cpu_op.o 
+OBJS+=$(OBJECT)/cpuinit.o
+OBJS+=$(OBJECT)/wordwrapper.o
+OBJS+=$(OBJECT)/associate.o 
+OBJS+=$(OBJECT)/dir_id.o
+OBJS+=$(OBJECT)/diskman.o 
+OBJS+=$(OBJECT)/diskman_diags.o 
+OBJS+=$(OBJECT)/diskman_drag.o
+OBJS+=$(OBJECT)/gui.o 
+OBJS+=$(OBJECT)/stemwin.o
+OBJS+=$(OBJECT)/harddiskman.o
+OBJS+=$(OBJECT)/key_table.o
+OBJS+=$(OBJECT)/shortcutbox.o 
+OBJS+=$(OBJECT)/patchesbox.o 
+OBJS+=$(OBJECT)/infobox.o
+OBJS+=$(OBJECT)/osd.o 
+OBJS+=$(OBJECT)/stjoy.o 
+OBJS+=$(OBJECT)/macros.o 
+OBJS+=$(OBJECT)/notifyinit.o 
+OBJS+=$(OBJECT)/options_create.o 
+OBJS+=$(OBJECT)/palette.o  
+OBJS+=$(OBJECT)/screen_saver.o  
+OBJS+=$(OBJECT)/steemintro.o 
+OBJS+=$(OBJECT)/stemdialogs.o  
+OBJS+=$(OBJECT)/stjoy_directinput.o 
+OBJS+=$(OBJECT)/translate.o
+# debugger
+OBJS+=$(OBJECT)/debugger.o 
+OBJS+=$(OBJECT)/debug_emu.o 
+OBJS+=$(OBJECT)/d2.o
+OBJS+=$(OBJECT)/historylist.o
+OBJS+=$(OBJECT)/mem_browser.o
+OBJS+=$(OBJECT)/mr_static.o
+OBJS+=$(OBJECT)/debugger_trace.o
+OBJS+=$(OBJECT)/iolist.o 
+OBJS+=$(OBJECT)/debug_framereport.o 
+OBJS+=$(OBJECT)/dwin_edit.o
+# include
+OBJS+=$(OBJECT)/choosefolder.o 
+OBJS+=$(OBJECT)/scrollingcontrolswin.o
+OBJS+=$(OBJECT)/circularbuffer.o 
+OBJS+=$(OBJECT)/configstorefile.o
+OBJS+=$(OBJECT)/di_get_contents.o 
+OBJS+=$(OBJECT)/directory_tree.o 
+OBJS+=$(OBJECT)/dirsearch.o
+OBJS+=$(OBJECT)/easycompress.o 
+OBJS+=$(OBJECT)/easystr.o 
+OBJS+=$(OBJECT)/easystringlist.o
+OBJS+=$(OBJECT)/input_prompt.o 
+OBJS+=$(OBJECT)/mymisc.o 
+OBJS+=$(OBJECT)/portio.o
+
+
+#library objects specified at the end
+
+#is it in fact static???
+OBJS+=$(ROOT)/3rdparty/caps/MinGW/CAPSImg.a
+OBJS+=$(ROOT)/3rdparty/UnRARDLL/MinGW/unrar.a
+OBJS+=$(ROOT)/3rdparty/FreeImage/MinGW/FreeImage.a
+
+
+OBJS+=-luuid -lwinmm  -lcomctl32 -lole32 -lgdi32 -lddraw  -lComdlg32 -ldxguid -ld3d9
+#-luser32
+#-ld3d8
+#-ldxguid
+#-lddraw
+#-luuid
+
+
+# Targets
+
+all: 
+#	$(MAKE) -f $(MAKEFILE_PATH) clean
+#	$(MAKE) -f $(MAKEFILE_PATH) 3rdparty
+	$(MAKE) -f $(MAKEFILE_PATH) rc
+#	$(MAKE) -f $(MAKEFILE_PATH) helper
+#	$(MAKE) -f $(MAKEFILE_PATH) emu
+	$(MAKE) -f $(MAKEFILE_PATH) main 
+# $(MAKE) -f $(MAKEFILE_PATH) SSE
+#	$(MAKE) -f $(MAKEFILE_PATH) link
+########  Steem SSE ########
+	$(MAKE) -f $(MAKEFILE_PATH) main
+	$(MAKE) -f $(MAKEFILE_PATH) options 
+	$(MAKE) -f $(MAKEFILE_PATH) mmu 
+	$(MAKE) -f $(MAKEFILE_PATH) ikbd 
+	$(MAKE) -f $(MAKEFILE_PATH) cpu 
+	$(MAKE) -f $(MAKEFILE_PATH) tos
+	$(MAKE) -f $(MAKEFILE_PATH) debug 
+	$(MAKE) -f $(MAKEFILE_PATH) shifter 
+	$(MAKE) -f $(MAKEFILE_PATH) display 
+	$(MAKE) -f $(MAKEFILE_PATH) glue
+	$(MAKE) -f $(MAKEFILE_PATH) computer 
+	$(MAKE) -f $(MAKEFILE_PATH) disk_stw 
+	$(MAKE) -f $(MAKEFILE_PATH) disk_ghost 
+	$(MAKE) -f $(MAKEFILE_PATH) fdc 
+	$(MAKE) -f $(MAKEFILE_PATH) floppy_drive 
+	$(MAKE) -f $(MAKEFILE_PATH) floppy_disk 
+	$(MAKE) -f $(MAKEFILE_PATH) disk_dma 
+	$(MAKE) -f $(MAKEFILE_PATH) psg 
+	$(MAKE) -f $(MAKEFILE_PATH) hd_acsi
+	$(MAKE) -f $(MAKEFILE_PATH) interface_caps 
+	$(MAKE) -f $(MAKEFILE_PATH) disk_scp 
+	$(MAKE) -f $(MAKEFILE_PATH) disk_hfe 
+	$(MAKE) -f $(MAKEFILE_PATH) interface_stvl 
+	$(MAKE) -f $(MAKEFILE_PATH) acia 
+	$(MAKE) -f $(MAKEFILE_PATH) blitter 
+	$(MAKE) -f $(MAKEFILE_PATH) mfp
+	$(MAKE) -f $(MAKEFILE_PATH) rs232 
+	$(MAKE) -f $(MAKEFILE_PATH) hd_gemdos 
+	$(MAKE) -f $(MAKEFILE_PATH) emulator
+	$(MAKE) -f $(MAKEFILE_PATH) reset 
+	$(MAKE) -f $(MAKEFILE_PATH) run 
+	$(MAKE) -f $(MAKEFILE_PATH) ior 
+	$(MAKE) -f $(MAKEFILE_PATH) iow
+	$(MAKE) -f $(MAKEFILE_PATH) sound 
+	$(MAKE) -f $(MAKEFILE_PATH) loadsave 
+	$(MAKE) -f $(MAKEFILE_PATH) draw
+	$(MAKE) -f $(MAKEFILE_PATH) stports 
+	$(MAKE) -f $(MAKEFILE_PATH) midi
+	$(MAKE) -f $(MAKEFILE_PATH) loadsave_emu 
+	$(MAKE) -f $(MAKEFILE_PATH) acc 
+	$(MAKE) -f $(MAKEFILE_PATH) archive
+	$(MAKE) -f $(MAKEFILE_PATH) debugger 
+	$(MAKE) -f $(MAKEFILE_PATH) debug_emu 
+	$(MAKE) -f $(MAKEFILE_PATH) d2
+	$(MAKE) -f $(MAKEFILE_PATH) dataloadsave 
+	$(MAKE) -f $(MAKEFILE_PATH) gui_controls 
+	$(MAKE) -f $(MAKEFILE_PATH) cpu_ea
+	$(MAKE) -f $(MAKEFILE_PATH) cpu_op 
+	$(MAKE) -f $(MAKEFILE_PATH) cpuinit 
+	$(MAKE) -f $(MAKEFILE_PATH) wordwrapper
+	$(MAKE) -f $(MAKEFILE_PATH) associate 
+	$(MAKE) -f $(MAKEFILE_PATH) dir_id
+	$(MAKE) -f $(MAKEFILE_PATH) diskman 
+	$(MAKE) -f $(MAKEFILE_PATH) diskman_diags 
+	$(MAKE) -f $(MAKEFILE_PATH) diskman_drag
+	$(MAKE) -f $(MAKEFILE_PATH) dwin_edit 
+	$(MAKE) -f $(MAKEFILE_PATH) gui 
+	$(MAKE) -f $(MAKEFILE_PATH) stemwin
+	$(MAKE) -f $(MAKEFILE_PATH) harddiskman
+	$(MAKE) -f $(MAKEFILE_PATH) key_table 
+	$(MAKE) -f $(MAKEFILE_PATH) shortcutbox 
+	$(MAKE) -f $(MAKEFILE_PATH) patchesbox 
+	$(MAKE) -f $(MAKEFILE_PATH) infobox
+	$(MAKE) -f $(MAKEFILE_PATH) osd 
+	$(MAKE) -f $(MAKEFILE_PATH) stjoy 
+	$(MAKE) -f $(MAKEFILE_PATH) macros 
+	$(MAKE) -f $(MAKEFILE_PATH) notifyinit 
+	$(MAKE) -f $(MAKEFILE_PATH) options_create 
+	$(MAKE) -f $(MAKEFILE_PATH) palette  
+	$(MAKE) -f $(MAKEFILE_PATH) screen_saver  
+	$(MAKE) -f $(MAKEFILE_PATH) steemintro 
+	$(MAKE) -f $(MAKEFILE_PATH) stemdialogs  
+	$(MAKE) -f $(MAKEFILE_PATH) stjoy_directinput 
+	$(MAKE) -f $(MAKEFILE_PATH) translate
+# debugger
+	$(MAKE) -f $(MAKEFILE_PATH) historylist 
+	$(MAKE) -f $(MAKEFILE_PATH) mem_browser 
+	$(MAKE) -f $(MAKEFILE_PATH) mr_static 
+	$(MAKE) -f $(MAKEFILE_PATH) debugger_trace
+	$(MAKE) -f $(MAKEFILE_PATH) iolist 
+	$(MAKE) -f $(MAKEFILE_PATH) debug_framereport 
+# include
+	$(MAKE) -f $(MAKEFILE_PATH) choosefolder 
+	$(MAKE) -f $(MAKEFILE_PATH) scrollingcontrolswin
+	$(MAKE) -f $(MAKEFILE_PATH) circularbuffer 
+	$(MAKE) -f $(MAKEFILE_PATH) configstorefile
+	$(MAKE) -f $(MAKEFILE_PATH) di_get_contents 
+	$(MAKE) -f $(MAKEFILE_PATH) directory_tree 
+	$(MAKE) -f $(MAKEFILE_PATH) dirsearch
+	$(MAKE) -f $(MAKEFILE_PATH) easycompress 
+	$(MAKE) -f $(MAKEFILE_PATH) easystr 
+	$(MAKE) -f $(MAKEFILE_PATH) easystringlist
+	$(MAKE) -f $(MAKEFILE_PATH) input_prompt 
+	$(MAKE) -f $(MAKEFILE_PATH) mymisc 
+	$(MAKE) -f $(MAKEFILE_PATH) portio
+
+
+
+
+release:
+#	$(MAKE) -f $(MAKEFILE_PATH) clean
+#	$(MAKE) -f $(MAKEFILE_PATH) 3rdparty
+	$(MAKE) -f $(MAKEFILE_PATH) rc
+#	$(MAKE) -f $(MAKEFILE_PATH) helper
+	$(MAKE) -f $(MAKEFILE_PATH) main
+#	$(MAKE) -f $(MAKEFILE_PATH) emu
+#	$(MAKE) -f $(MAKEFILE_PATH) SSE
+#	$(MAKE) -f $(MAKEFILE_PATH) link
+	strip -s $(OUTPUT)
+
+user: 
+	$(MAKE) -f $(MAKEFILE_PATH) all
+
+debug: 
+	$(MAKE) -f $(MAKEFILE_PATH) all
+
+all_gdb:
+	$(MAKE) -f $(MAKEFILE_PATH) all
+
+user_release:
+	$(MAKE) -f $(MAKEFILE_PATH) release
+
+debug_release: 
+	$(MAKE) -f $(MAKEFILE_PATH) release
+
+
+helper:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/helper.o $(STEEMROOT)/helper.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+main:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/main.o $(STEEMROOT)/main.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+emu:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/emu.o $(STEEMROOT)/emu.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+link: 
+#	$(CCP) -o $(OUTPUT) $(OBJS)
+	$(CCP) -o$(OUTPUT) $(OBJS) $(LIBS)
+#	$(CCP) -o $(OUTPUT) $(OBJS) $(CPPFLAGS)
+#	LD $(LIBS) -o $(OUTPUT) $(OBJS)
+
+
+rc:
+	$(WINDRES) --include-dir=$(MINGWDIR)/INCLUDE/ --include-dir=$(STEEMROOT) -DMINGW_BUILD --use-temp-file -O coff -i "$(RCDIR)/resource.rc" -o $(OBJECT)/resource.o
+
+#urarlib:
+#	$(CC) -c "$(3RDDIR)/urarlib/urarlib.c" $(CFLAGS) -ourarlib.o $(RELEASE_CFLAGS)
+
+#draw_c:
+#	$(CCP) -o $(OBJECT)/draw_c.o -c "$(STEEMDIR)/code/draw_c/draw_c.cpp" $(CFLAGS) $(STEEMFLAGS) $(RELEASE_CFLAGS)
+
+clean:
+	-rm $(OBJECT)/Steem.o
+	-rm $(OBJECT)/emu.o
+	-rm $(OBJECT)/helper.o
+	-rm $(OBJECT)/resource.o
+
+######## 3RD PARTY ########
+3rdparty:	div68kCycleAccurate dsp 6301 ArchiveAccessSSE CapsPlug filt 
+#CpuUsage AviFile
+
+
+div68kCycleAccurate:
+	$(CC) -Wfatal-errors -o $(OBJECT)/div68kCycleAccurate.o -c $(3RDPARTYROOT)\pasti\div68kCycleAccurate.c $(CFLAGS) $(STEEMFLAGS)
+dsp:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/dsp.o -c $(3RDPARTYROOT)\dsp\dsp.cpp $(CFLAGS) $(STEEMFLAGS)
+6301:
+	$(CC) -Wfatal-errors -o $(OBJECT)/6301.o -c $(3RDPARTYROOT)\6301\6301.c $(CFLAGS) $(GCCFLAGS) $(STEEMFLAGS)
+AviFile:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/AviFile.o -c $(3RDPARTYROOT)\avi\AviFile.cpp $(CFLAGS) $(STEEMFLAGS)
+
+ArchiveAccessSSE:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/ArchiveAccessSSE.o -c $(3RDPARTYROOT)/ArchiveAccess/ArchiveAccess/ArchiveAccessSSE.cpp $(CFLAGS) $(STEEMFLAGS)
+CapsPlug:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/CapsPlug.o -c $(3RDPARTYROOT)/caps/CapsPlug.cpp $(CFLAGS) $(STEEMFLAGS)
+filt:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/filt.o -c $(3RDPARTYROOT)/dsp/FIR-filter-class/filt.cpp $(CFLAGS) $(STEEMFLAGS)
+CpuUsage:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/CpuUsage.o -c $(3RDPARTYROOT)/CpuUsage/CpuUsage.cpp $(CFLAGS) $(STEEMFLAGS)
+
+######## SSE ########
+SSE:
+	$(CCP) $(CPPFLAGS) $(STEEMFLAGS) -c -Wfatal-errors -o $(OBJECT)/SSE.o $(STEEMROOT)\code\SSE\SSE.cpp
+	$(MAKE) -f $(MAKEFILE_PATH) SSEOption
+	$(MAKE) -f $(MAKEFILE_PATH) SSEMMU
+	$(MAKE) -f $(MAKEFILE_PATH) SSE6301
+	$(MAKE) -f $(MAKEFILE_PATH) SSECpu
+	$(MAKE) -f $(MAKEFILE_PATH) SSEDebug
+	$(MAKE) -f $(MAKEFILE_PATH) SSEFloppy
+	$(MAKE) -f $(MAKEFILE_PATH) SSESTF
+	$(MAKE) -f $(MAKEFILE_PATH) SSEVideo
+	$(MAKE) -f $(MAKEFILE_PATH) SSEFrameReport
+	$(MAKE) -f $(MAKEFILE_PATH) SSEShifter
+	$(MAKE) -f $(MAKEFILE_PATH) SSEGhostDisk
+	$(MAKE) -f $(MAKEFILE_PATH) SSESTW
+	$(MAKE) -f $(MAKEFILE_PATH) SSEWD1772
+	$(MAKE) -f $(MAKEFILE_PATH) SSEDma
+	$(MAKE) -f $(MAKEFILE_PATH) SSEDrive
+	$(MAKE) -f $(MAKEFILE_PATH) SSEDisk
+	$(MAKE) -f $(MAKEFILE_PATH) SSEYM2149
+	$(MAKE) -f $(MAKEFILE_PATH) SSECapsImg
+	$(MAKE) -f $(MAKEFILE_PATH) SSESCP
+
+SSEOption:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSEOption.o $(STEEMROOT)\code\SSE\SSEOption.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+SSEMMU:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSEMMU.o $(STEEMROOT)\code\SSE\SSEMMU.cpp $(CPPFLAGS) $(STEEMFLAGS) 
+
+SSE6301:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSE6301.o $(STEEMROOT)\code\SSE\SSE6301.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+SSECpu:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSECpu.o $(STEEMROOT)\code\SSE\SSECpu.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+SSEDebug:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSEDebug.o $(STEEMROOT)\code\SSE\SSEDebug.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+SSEFloppy:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSEFloppy.o $(STEEMROOT)\code\SSE\SSEFloppy.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+SSESTF:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSESTF.o $(STEEMROOT)\code\SSE\SSESTF.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+SSEVideo:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSEVideo.o $(STEEMROOT)\code\SSE\SSEVideo.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+SSEFrameReport:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSEFrameReport.o $(STEEMROOT)\code\SSE\SSEFrameReport.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+SSEShifter:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSEShifter.o $(STEEMROOT)\code\SSE\SSEShifter.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+SSEGhostDisk:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSEGhostDisk.o $(STEEMROOT)\code\SSE\SSEGhostDisk.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+SSESTW:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSESTW.o $(STEEMROOT)\code\SSE\SSESTW.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+SSEWD1772:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSEWD1772.o $(STEEMROOT)\code\SSE\SSEWD1772.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+SSEDma:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSEDma.o $(STEEMROOT)\code\SSE\SSEDma.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+SSEDrive:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSEDrive.o $(STEEMROOT)\code\SSE\SSEDrive.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+SSEDisk:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSEDisk.o $(STEEMROOT)\code\SSE\SSEDisk.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+SSEYM2149:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSEYM2149.o $(STEEMROOT)\code\SSE\SSEYM2149.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+SSECapsImg:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSECapsImg.o $(STEEMROOT)\code\SSE\SSECapsImg.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+SSESCP:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/SSESCP.o $(STEEMROOT)\code\SSE\SSESCP.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+
+#### Steem SSE ####
+
+options:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/options.o $(STEEMROOT)/options.cpp $(CPPFLAGS) $(STEEMFLAGS)
+mmu:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/mmu.o $(STEEMROOT)/mmu.cpp $(CPPFLAGS) $(STEEMFLAGS)
+ikbd:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/ikbd.o $(STEEMROOT)/ikbd.cpp $(CPPFLAGS) $(STEEMFLAGS)
+cpu:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/cpu.o $(STEEMROOT)/cpu.cpp $(CPPFLAGS) $(STEEMFLAGS)
+debug:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/debug.o $(STEEMROOT)/debug.cpp $(CPPFLAGS) $(STEEMFLAGS)
+shifter:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/shifter.o $(STEEMROOT)/shifter.cpp $(CPPFLAGS) $(STEEMFLAGS)
+display:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/display.o $(STEEMROOT)/display.cpp $(CPPFLAGS) $(STEEMFLAGS)
+glue:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/glue.o $(STEEMROOT)/glue.cpp $(CPPFLAGS) $(STEEMFLAGS)
+computer:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/computer.o $(STEEMROOT)/computer.cpp $(CPPFLAGS) $(STEEMFLAGS)
+disk_stw:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/disk_stw.o $(STEEMROOT)/disk_stw.cpp $(CPPFLAGS) $(STEEMFLAGS)
+disk_ghost:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/disk_ghost.o $(STEEMROOT)/disk_ghost.cpp $(CPPFLAGS) $(STEEMFLAGS)
+fdc:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/fdc.o $(STEEMROOT)/fdc.cpp $(CPPFLAGS) $(STEEMFLAGS)
+tos:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/tos.o $(STEEMROOT)/tos.cpp $(CPPFLAGS) $(STEEMFLAGS)
+floppy_drive:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/floppy_drive.o $(STEEMROOT)/floppy_drive.cpp $(CPPFLAGS) $(STEEMFLAGS)
+floppy_disk:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/floppy_disk.o $(STEEMROOT)/floppy_disk.cpp $(CPPFLAGS) $(STEEMFLAGS)
+disk_dma:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/disk_dma.o $(STEEMROOT)/disk_dma.cpp $(CPPFLAGS) $(STEEMFLAGS)
+psg:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/psg.o $(STEEMROOT)/psg.cpp $(CPPFLAGS) $(STEEMFLAGS)
+hd_acsi:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/hd_acsi.o $(STEEMROOT)/hd_acsi.cpp $(CPPFLAGS) $(STEEMFLAGS)
+interface_caps:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/interface_caps.o $(STEEMROOT)/interface_caps.cpp $(CPPFLAGS) $(STEEMFLAGS)
+disk_scp:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/disk_scp.o $(STEEMROOT)/disk_scp.cpp $(CPPFLAGS) $(STEEMFLAGS)
+disk_hfe:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/disk_hfe.o $(STEEMROOT)/disk_hfe.cpp $(CPPFLAGS) $(STEEMFLAGS)
+interface_stvl:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/interface_stvl.o $(STEEMROOT)/interface_stvl.cpp $(CPPFLAGS) $(STEEMFLAGS)
+acia:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/acia.o $(STEEMROOT)/acia.cpp $(CPPFLAGS) $(STEEMFLAGS)
+blitter:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/blitter.o $(STEEMROOT)/blitter.cpp $(CPPFLAGS) $(STEEMFLAGS)
+mfp:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/mfp.o $(STEEMROOT)/mfp.cpp $(CPPFLAGS) $(STEEMFLAGS)
+rs232:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/rs232.o $(STEEMROOT)/rs232.cpp $(CPPFLAGS) $(STEEMFLAGS)
+hd_gemdos:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/hd_gemdos.o $(STEEMROOT)/hd_gemdos.cpp $(CPPFLAGS) $(STEEMFLAGS)
+emulator:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/emulator.o $(STEEMROOT)/emulator.cpp $(CPPFLAGS) $(STEEMFLAGS)
+reset:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/reset.o $(STEEMROOT)/reset.cpp $(CPPFLAGS) $(STEEMFLAGS)
+run:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/run.o $(STEEMROOT)/run.cpp $(CPPFLAGS) $(STEEMFLAGS)
+ior:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/ior.o $(STEEMROOT)/ior.cpp $(CPPFLAGS) $(STEEMFLAGS)
+iow:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/iow.o $(STEEMROOT)/iow.cpp $(CPPFLAGS) $(STEEMFLAGS)
+sound:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/sound.o $(STEEMROOT)/sound.cpp $(CPPFLAGS) $(STEEMFLAGS)
+loadsave:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/loadsave.o $(STEEMROOT)/loadsave.cpp $(CPPFLAGS) $(STEEMFLAGS)
+draw:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/draw.o $(STEEMROOT)/draw.cpp $(CPPFLAGS) $(STEEMFLAGS)
+stports:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/stports.o $(STEEMROOT)/stports.cpp $(CPPFLAGS) $(STEEMFLAGS)
+midi:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/midi.o $(STEEMROOT)/midi.cpp $(CPPFLAGS) $(STEEMFLAGS)
+loadsave_emu:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/loadsave_emu.o $(STEEMROOT)/loadsave_emu.cpp $(CPPFLAGS) $(STEEMFLAGS)
+acc:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/acc.o $(STEEMROOT)/acc.cpp $(CPPFLAGS) $(STEEMFLAGS)
+archive:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/archive.o $(STEEMROOT)/archive.cpp $(CPPFLAGS) $(STEEMFLAGS)
+dataloadsave:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/dataloadsave.o $(STEEMROOT)/dataloadsave.cpp $(CPPFLAGS) $(STEEMFLAGS)
+gui_controls:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/gui_controls.o $(STEEMROOT)/gui_controls.cpp $(CPPFLAGS) $(STEEMFLAGS)
+cpu_ea:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/cpu_ea.o $(STEEMROOT)/cpu_ea.cpp $(CPPFLAGS) $(STEEMFLAGS)
+cpu_op:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/cpu_op.o $(STEEMROOT)/cpu_op.cpp $(CPPFLAGS) $(STEEMFLAGS)
+cpuinit:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/cpuinit.o $(STEEMROOT)/cpuinit.cpp $(CPPFLAGS) $(STEEMFLAGS)
+associate:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/associate.o $(STEEMROOT)/associate.cpp $(CPPFLAGS) $(STEEMFLAGS)
+dir_id:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/dir_id.o $(STEEMROOT)/dir_id.cpp $(CPPFLAGS) $(STEEMFLAGS)
+diskman:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/diskman.o $(STEEMROOT)/diskman.cpp $(CPPFLAGS) $(STEEMFLAGS)
+diskman_diags:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/diskman_diags.o $(STEEMROOT)/diskman_diags.cpp $(CPPFLAGS) $(STEEMFLAGS)
+diskman_drag:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/diskman_drag.o $(STEEMROOT)/diskman_drag.cpp $(CPPFLAGS) $(STEEMFLAGS)
+gui:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/gui.o $(STEEMROOT)/gui.cpp $(CPPFLAGS) $(STEEMFLAGS)
+stemwin:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/stemwin.o $(STEEMROOT)/stemwin.cpp $(CPPFLAGS) $(STEEMFLAGS)
+harddiskman:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/harddiskman.o $(STEEMROOT)/harddiskman.cpp $(CPPFLAGS) $(STEEMFLAGS)
+key_table:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/key_table.o $(STEEMROOT)/key_table.cpp $(CPPFLAGS) $(STEEMFLAGS)
+shortcutbox:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/shortcutbox.o $(STEEMROOT)/shortcutbox.cpp $(CPPFLAGS) $(STEEMFLAGS)
+patchesbox:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/patchesbox.o $(STEEMROOT)/patchesbox.cpp $(CPPFLAGS) $(STEEMFLAGS)
+infobox:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/infobox.o $(STEEMROOT)/infobox.cpp $(CPPFLAGS) $(STEEMFLAGS)
+osd:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/osd.o $(STEEMROOT)/osd.cpp $(CPPFLAGS) $(STEEMFLAGS)
+stjoy:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/stjoy.o $(STEEMROOT)/stjoy.cpp $(CPPFLAGS) $(STEEMFLAGS)
+macros:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/macros.o $(STEEMROOT)/macros.cpp $(CPPFLAGS) $(STEEMFLAGS)
+notifyinit:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/notifyinit.o $(STEEMROOT)/notifyinit.cpp $(CPPFLAGS) $(STEEMFLAGS)
+options_create:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/options_create.o $(STEEMROOT)/options_create.cpp $(CPPFLAGS) $(STEEMFLAGS)
+palette: 
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/palette.o $(STEEMROOT)/palette.cpp $(CPPFLAGS) $(STEEMFLAGS)
+screen_saver:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/screen_saver.o $(STEEMROOT)/screen_saver.cpp $(CPPFLAGS) $(STEEMFLAGS)
+steemintro:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/steemintro.o $(STEEMROOT)/steemintro.cpp $(CPPFLAGS) $(STEEMFLAGS)
+stemdialogs: 
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/stemdialogs.o $(STEEMROOT)/stemdialogs.cpp $(CPPFLAGS) $(STEEMFLAGS)
+stjoy_directinput:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/stjoy_directinput.o $(STEEMROOT)/stjoy_directinput.cpp $(CPPFLAGS) $(STEEMFLAGS)
+translate:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/translate.o $(STEEMROOT)/translate.cpp $(CPPFLAGS) $(STEEMFLAGS)
+input_prompt:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/input_prompt.o $(STEEMROOT)/input_prompt.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+# debugger
+debugger:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/debugger.o $(STEEMROOT)/debugger.cpp $(CPPFLAGS) $(STEEMFLAGS)
+dwin_edit:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/dwin_edit.o $(STEEMROOT)/dwin_edit.cpp $(CPPFLAGS) $(STEEMFLAGS)
+debug_emu:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/debug_emu.o $(STEEMROOT)/debug_emu.cpp $(CPPFLAGS) $(STEEMFLAGS)
+d2:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/d2.o $(STEEMROOT)/d2.cpp $(CPPFLAGS) $(STEEMFLAGS)
+historylist:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/historylist.o $(STEEMROOT)/historylist.cpp $(CPPFLAGS) $(STEEMFLAGS)
+mem_browser:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/mem_browser.o $(STEEMROOT)/mem_browser.cpp $(CPPFLAGS) $(STEEMFLAGS)
+mr_static:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/mr_static.o $(STEEMROOT)/mr_static.cpp $(CPPFLAGS) $(STEEMFLAGS)
+debugger_trace:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/debugger_trace.o $(STEEMROOT)/debugger_trace.cpp $(CPPFLAGS) $(STEEMFLAGS)
+iolist:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/iolist.o $(STEEMROOT)/iolist.cpp $(CPPFLAGS) $(STEEMFLAGS)
+debug_framereport:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/debug_framereport.o $(STEEMROOT)/debug_framereport.cpp $(CPPFLAGS) $(STEEMFLAGS)
+directory_tree:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/directory_tree.o $(STEEMROOT)/directory_tree.cpp $(CPPFLAGS) $(STEEMFLAGS)
+
+
+# include
+choosefolder:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/choosefolder.o $(ROOT)/include/choosefolder.cpp $(CPPFLAGS) $(STEEMFLAGS)
+scrollingcontrolswin:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/scrollingcontrolswin.o $(ROOT)/include/scrollingcontrolswin.cpp $(CPPFLAGS) $(STEEMFLAGS)
+circularbuffer:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/circularbuffer.o $(ROOT)/include/circularbuffer.cpp $(CPPFLAGS) $(STEEMFLAGS)
+configstorefile:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/configstorefile.o $(ROOT)/include/configstorefile.cpp $(CPPFLAGS) $(STEEMFLAGS)
+di_get_contents:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/di_get_contents.o $(ROOT)/include/di_get_contents.cpp $(CPPFLAGS) $(STEEMFLAGS)
+dirsearch:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/dirsearch.o $(ROOT)/include/dirsearch.cpp $(CPPFLAGS) $(STEEMFLAGS)
+easycompress:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/easycompress.o $(ROOT)/include/easycompress.cpp $(CPPFLAGS) $(STEEMFLAGS)
+easystr:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/easystr.o $(ROOT)/include/easystr.cpp $(CPPFLAGS) $(STEEMFLAGS)
+easystringlist:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/easystringlist.o $(ROOT)/include/easystringlist.cpp $(CPPFLAGS) $(STEEMFLAGS)
+mymisc:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/mymisc.o $(ROOT)/include/mymisc.cpp $(CPPFLAGS) $(STEEMFLAGS)
+portio:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/portio.o $(ROOT)/include/portio.cpp $(CPPFLAGS) $(STEEMFLAGS)
+wordwrapper:
+	$(CCP) -c -Wfatal-errors -o $(OBJECT)/wordwrapper.o $(ROOT)/include/wordwrapper.cpp $(CPPFLAGS) $(STEEMFLAGS)
+

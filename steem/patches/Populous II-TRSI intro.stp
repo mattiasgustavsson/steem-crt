@@ -1,0 +1,9 @@
+[Text]
+Description=Annoying little glitch in this intro, can be removed by patch
+ApplyWhen=intro started
+Version=Works on Steem v3.2 STF 1MB T102
+PatchAuthor=Seagal
+
+[Patch]
+044BBE = $48E7 $FFF0
+044BFA = $4CDF $0FFF

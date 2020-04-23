@@ -1,0 +1,107 @@
+Atari TOS Error Messages
+
+
+
+
+
+
+
+
+message no.             meaning of message
+-----------             ------------------
+1                       general error
+
+2                       disk drive not ready
+3                       unknown command
+
+4                       CRC error- disk checksum wrong
+5                       bad request
+
+6                       seek error- track not found
+7                       unknown media- bootsector wrong
+8                       sector not found
+
+9                       out of paper
+
+10                      write fault
+
+11                      read fault
+
+12                      general error 12
+
+13                      disk write protected
+14                      media change detected
+15                      unknown device
+
+16                      bad sector (verify)
+17                      insert other disk (request)
+32                      invalid function number
+33                      file not found
+
+34                      path not found
+
+35                      too many open files
+36                      access denied
+
+37                      invalid handle
+
+39                      out of memory
+
+40                      invalid memory block address
+46                      invalid drive specification
+49                      no more files
+
+64                      GEMDOS range error- seek wrong?
+65                      GEMDOS internal error
+66                      invalid executable file format
+67                      memory block growth failure
+
+
+
+
+
+
+                BOMBS and what they mean
+
+                ------------------------
+
+
+
+no. of bombs            explanation
+
+------------            -----------
+
+1                       not applicable
+
+2                       bus error (user does something the ST doesn't permit)
+3                       address error (usually error in program)
+4                       illegal instruction (two prgs using same memory space)
+5                       division with zero
+6                       CHK instructional error
+7                       TRAPV instructional error (usually ROM error)
+8                       conflict with a privileged command
+9                       trace vector error
+10                      line 1010 instruction- line 'a' error
+11                      line 1111 instruction- line 'f' error
+12                      not applicable, reserved
+13                      not applicable, reserved
+14                      format error
+
+15                      unitialized interrupt vector
+16-23                   not applicable, reserved
+24                      vector 24 error (might be 68901 and/or GLUE chip)
+25-31                   vector 25-31 error
+32-47                   bomb trap instruction vector error
+48-63                   not applicable, reserved
+64-255                  interrupt vector error
+
+
+PS. a large number of bombs might be the total of several errors
+
+
+ Compiled by Hallvard Tangeraas (hallvart@sn.no) 26-Feb-1995
+ _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+Greetings from Norway! -Land of the fjords and midnight sun
+
+URL hyperlink-launchpad:http://www.post1.com/~hall/

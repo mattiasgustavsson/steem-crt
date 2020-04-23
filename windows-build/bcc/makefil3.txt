@@ -1,0 +1,558 @@
+# you need to edit the following line to make them point to the right
+# directories in your system
+
+STEEMROOT = $(ROOT)\steem
+
+# the following lines should apply to all systems
+ASMINCOBJDIR = $(OUT)
+INCDIR = $(ROOT)\include
+ASMOBJDIR = $(OUT)
+3RDPARTYROOT = $(ROOT)\3rdparty
+
+# Note that we don't use unrarlib anymore. Borland linker is smart enough to 
+# not include anything useless in the EXE, but we remove it from the project
+# to avoid useless compile time.
+
+#3RDPARTYOBJS = $(OUT)\div68kCycleAccurate.obj $(OUT)\dsp.obj $(OUT)\6301.obj $(OUT)\AviFile.obj
+3RDPARTYOBJS = $(OUT)\div68kCycleAccurate.obj $(OUT)\dsp.obj $(OUT)\6301.obj
+3RDPARTYOBJS = $(3RDPARTYOBJS) $(OUT)\AviFile.obj $(OUT)\ArchiveAccessSSE.obj
+3RDPARTYOBJS = $(3RDPARTYOBJS) $(OUT)\filt.obj
+
+3RDPARTYOBJS = $(3RDPARTYOBJS) $(OUT)\CapsPlug.obj
+
+# Format: no space at all between paths in INCLUDEPATHS!!
+INCLUDEPATHS = $(STEEMROOT)\headers;$(STEEMROOT)\code;$(BCCROOT)\Include;$(INCDIR);$(3RDPARTYROOT);
+INCLUDEPATHS = $(INCLUDEPATHS)$(3RDPARTYROOT)\unrarlib;$(3RDPARTYROOT)\pasti;
+INCLUDEPATHS = $(INCLUDEPATHS)$(3RDPARTYROOT)\6301;$(3RDPARTYROOT)\d3d
+
+ALLOBJS = $(ASMOBJDIR)\asm_draw.obj c0w32.obj $(OUT)\main.obj $(ASMOBJS)
+ALLOBJS = $(ALLOBJS) $(ASMOBJDIR)\asm_osd_draw.obj $(ASMINCOBJDIR)\asm_portio.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\options.obj $(OUT)\mmu.obj $(OUT)\ikbd.obj $(OUT)\cpu.obj $(OUT)\debug.obj 
+ALLOBJS = $(ALLOBJS) $(OUT)\debug_framereport.obj $(OUT)\shifter.obj $(OUT)\display.obj $(OUT)\glue.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\computer.obj $(OUT)\disk_stw.obj $(OUT)\disk_ghost.obj 
+ALLOBJS = $(ALLOBJS) $(OUT)\fdc.obj $(OUT)\floppy_drive.obj $(OUT)\floppy_disk.obj 
+ALLOBJS = $(ALLOBJS) $(OUT)\disk_dma.obj $(OUT)\psg.obj $(OUT)\hd_acsi.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\interface_caps.obj $(OUT)\disk_scp.obj $(OUT)\disk_hfe.obj 
+ALLOBJS = $(ALLOBJS) $(OUT)\interface_stvl.obj $(OUT)\acia.obj $(OUT)\blitter.obj $(OUT)\mfp.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\rs232.obj $(OUT)\hd_gemdos.obj $(OUT)\emulator.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\reset.obj $(OUT)\run.obj $(OUT)\ior.obj $(OUT)\iow.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\sound.obj $(OUT)\loadsave.obj $(OUT)\draw.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\stports.obj $(OUT)\midi.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\loadsave_emu.obj $(OUT)\acc.obj $(OUT)\archive.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\debugger.obj $(OUT)\debug_emu.obj $(OUT)\d2.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\dataloadsave.obj $(OUT)\gui_controls.obj $(OUT)\cpu_ea.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\cpu_op.obj $(OUT)\cpuinit $(OUT)\wordwrapper.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\associate.obj $(OUT)\dir_id.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\diskman.obj $(OUT)\diskman_diags.obj $(OUT)\diskman_drag.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\dwin_edit.obj $(OUT)\gui.obj $(OUT)\stemwin.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\historylist $(OUT)\mem_browser $(OUT)\mr_static $(OUT)\debugger_trace
+ALLOBJS = $(ALLOBJS) $(OUT)\iolist.obj $(OUT)\harddiskman
+ALLOBJS = $(ALLOBJS) $(OUT)\key_table $(OUT)\shortcutbox.obj $(OUT)\patchesbox.obj $(OUT)\infobox.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\osd.obj $(OUT)\stjoy.obj $(OUT)\macros.obj 
+ALLOBJS = $(ALLOBJS) $(OUT)\notifyinit.obj $(OUT)\options_create.obj 
+ALLOBJS = $(ALLOBJS) $(OUT)\palette.obj  $(OUT)\screen_saver.obj  $(OUT)\steemintro.obj 
+ALLOBJS = $(ALLOBJS) $(OUT)\stemdialogs.obj  $(OUT)\stjoy_directinput.obj 
+ALLOBJS = $(ALLOBJS) $(OUT)\choosefolder.obj $(OUT)\scrollingcontrolswin.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\circularbuffer.obj $(OUT)\configstorefile.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\di_get_contents.obj $(OUT)\directory_tree.obj $(OUT)\dirsearch.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\easycompress.obj $(OUT)\easystr.obj $(OUT)\easystringlist.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\input_prompt.obj $(OUT)\mymisc.obj $(OUT)\portio.obj
+ALLOBJS = $(ALLOBJS) $(OUT)\translate.obj $(OUT)\tos.obj
+
+!ifdef LLVLE
+#ALLOBJS = $(ALLOBJS) $(OUT)\video_logic
+!endif
+
+!ifndef ONEGAME
+
+ALLOBJS = $(ALLOBJS) $(3RDPARTYOBJS)
+NAME =Steem
+RC_PATH = $(STEEMROOT)\rc\resource.rc
+
+!else
+
+NAME = $(ONEGAME_NAME)
+RC_PATH = $(STEEMROOT)\rc\onegame\$(ONEGAME_NAME).rc
+
+!endif
+
+###################################################################
+CPP        = $(BCCROOT)\Bin\bcc32
+CPP32      = $(BCCROOT)\Bin\cpp32
+LIBRARIAN  = $(BCCROOT)\Bin\tlib /P128
+LINKER     = $(BCCROOT)\Bin\ilink32
+RC         = $(BCCROOT)\Bin\brcc32
+
+#    Set the linker options
+LINKOPTS = -L$(BCCROOT)\Lib;$(BCCROOT)\Lib\PSDK -aa -Tpe -t -x -w -v- -C -Gn
+##LINKOPTS = -L$(BCCROOT)\Lib;$(BCCROOT)\Lib\PSDK -aa -Tpe -t -x -w -C -Gn -Rr
+#LINKOPTS = -L$(3RDPARTYROOT)\SDL-WIN\BccLib;-dSDL.DLL $(LINKOPTS)
+#LINKOPTS = -L$(3RDPARTYROOT)\UnRARDLL\bcclib;-dunrar.DLL $(LINKOPTS)
+##LINKOPTS = -L$(3RDPARTYROOT)\UnRARDLL\bcclib $(LINKOPTS)
+#LINKOPTS = -L$(3RDPARTYROOT)\caps\bcclib;-dCAPSImg.DLL $(LINKOPTS)
+##LINKOPTS = -L$(3RDPARTYROOT)\caps\bcclib $(LINKOPTS)
+#LINKOPTS = -L$(3RDPARTYROOT)\FreeImage\bcclib;-dFreeImage.DLL $(LINKOPTS)
+##LINKOPTS = -L$(3RDPARTYROOT)\FreeImage\bcclib $(LINKOPTS)
+#LINKOPTS = -L$(3RDPARTYROOT)\SDL-WIN\bcclib $(LINKOPTS)
+LINKOPTS = -L$(3RDPARTYROOT)\d3d\bcc $(LINKOPTS)
+#pragma comment(lib, "../../3rdparty/d3d/bcc/d3dx9_43.lib")
+#LINKOPTS = -L$(BCCROOT)\..\DX_SDK_2010\ $(LINKOPTS)
+#    Set the compiler options
+STEEMFLAGS = -DBCC_BUILD -DWIN32 -DSTEVEN_SEAGAL
+
+#STEEMFLAGS = -DBCC_BUILD -DWIN32
+CCOPTS = -D_NO_VCL -DWINVER=0x0400 -D_WIN32_WINNT=0x0300
+CCOPTS = -w  -O2 -OS -Oi -Ov -O -Oc -K-                  $(CCOPTS)
+CCOPTS = -jb -j10 -tWM  -r -a4  -6  -vi -d -ff -fp       $(CCOPTS)
+CCOPTS = -v- -x -xf -xp- -xd -xs- -H- -y- -X             $(CCOPTS)
+
+
+!ifndef ONEGAME
+
+OUTPUTDIR = $(OUT)
+
+!ifdef DONT_ALLOW_DEBUG
+CCOPTS = -DNO_DEBUG_BUILD                   $(CCOPTS)
+OUTPUTDIR = $(OUT)
+!endif
+
+!ifdef FORCE_DEBUG_BUILD
+CCOPTS = -DDEBUG_BUILD  -DSSE_DEBUG $(CCOPTS)
+OUTPUTDIR = $(OUT)
+!endif
+
+!else
+
+ONEGAME_IDX=0
+!if $(ONEGAME_NAME)==nm1
+ONEGAME_IDX=1
+!elif $(ONEGAME_NAME)==nm2
+ONEGAME_IDX=2
+!elif $(ONEGAME_NAME)==aw1
+ONEGAME_IDX=3
+!elif $(ONEGAME_NAME)==aw2
+ONEGAME_IDX=4
+!elif $(ONEGAME_NAME)==sat1
+ONEGAME_IDX=5
+!elif $(ONEGAME_NAME)==sat2
+ONEGAME_IDX=6
+!endif
+
+CCOPTS = -DOG_NM1_IDX=1;OG_NM2_IDX=2;OG_AW1_IDX=3        $(CCOPTS)
+CCOPTS = -DOG_AW2_IDX=4;OG_SAT1_IDX=5;OG_SAT2_IDX=6      $(CCOPTS)
+CCOPTS = -DONEGAME;ONEGAME_NAME="\"$(ONEGAME_NAME)\""    $(CCOPTS)
+CCOPTS = -DONEGAME_IDX=$(ONEGAME_IDX)                    $(CCOPTS)
+OUTPUTDIR = $(ONEGAME_PATH)
+
+!endif
+
+#!ifdef BCC_BUILD
+CCOPTS = -DBCC_BUILD                                     $(CCOPTS)
+#!endif
+
+CPPFLAGS= -I$(INCLUDEPATHS) $(CCOPTS)
+
+!ifdef SSE_DD
+CPPFLAGS = -DSSE_DD $(CPPFLAGS)
+!endif
+
+
+
+######################################################################################
+######################################################################################
+######################################################################################
+
+!ifdef LLVLE
+ALL: Steem.res  \
+  main \
+  gui_controls \
+  debug debug_framereport \
+  debug_emu debugger d2 \
+  options loadsave loadsave_emu dataloadsave \
+  display sound draw \
+  acc archive \
+  computer reset run emulator ior iow  \
+  glue cpu cpu_ea cpu_op cpuinit mmu shifter blitter mfp \
+  ikbd midi acia fdc disk_dma psg \
+  floppy_drive floppy_disk disk_stw disk_ghost disk_scp disk_hfe interface_caps \
+  hd_acsi hd_gemdos \
+  stports rs232 \
+  interface_stvl video_logic \
+  associate dir_id wordwrapper \
+  diskman diskman_diags diskman_drag harddiskman \
+  dwin_edit gui stemwin \
+  historylist mem_browser mr_static debugger_trace iolist \
+  key_table shortcutbox patchesbox infobox osd stjoy \
+  macros notifyinit options_create \
+  palette screen_saver steemintro stemdialogs stjoy_directinput \
+  choosefolder scrollingcontrolswin circularbuffer configstorefile \
+  di_get_contents directory_tree dirsearch easycompress \
+  easystr easystringlist input_prompt mymisc portio \
+  translate tos \
+  link
+!else
+ALL: Steem.res  \
+  main \
+  gui_controls \
+  debug debug_framereport \
+  debug_emu debugger d2 \
+  options loadsave loadsave_emu dataloadsave \
+  display sound draw \
+  acc archive \
+  computer reset run emulator ior iow  \
+  glue cpu cpu_ea cpu_op cpuinit mmu shifter blitter mfp \
+  ikbd midi acia fdc disk_dma psg \
+  floppy_drive floppy_disk disk_stw disk_ghost disk_scp disk_hfe interface_caps \
+  hd_acsi hd_gemdos \
+  stports rs232 \
+  interface_stvl \
+  associate dir_id wordwrapper \
+  diskman diskman_diags diskman_drag harddiskman \
+  dwin_edit gui stemwin \
+  historylist mem_browser mr_static debugger_trace iolist \
+  key_table shortcutbox patchesbox infobox osd stjoy \
+  macros notifyinit options_create  \
+  palette screen_saver steemintro stemdialogs stjoy_directinput \
+  choosefolder scrollingcontrolswin circularbuffer configstorefile \
+  di_get_contents directory_tree dirsearch easycompress \
+  easystr easystringlist input_prompt mymisc portio \
+  translate tos \
+  link
+!endif
+
+link:
+           $(LINKER) $(LINKOPTS) $(ALLOBJS), "$(OUTPUTDIR)\$(NAME).exe", ,import32.lib cw32mt.lib, ,$(OUT)\Steem.res
+
+Steem.res:
+           $(RC) $(RC_PATH) -DSTEVEN_SEAGAL -DBCC_BUILD -fo$(OUT)\Steem.res
+
+#Steem.obj:
+#           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\Steem.obj $(STEEMROOT)\Steem.cpp
+
+#helper.obj:
+#           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\helper.obj $(STEEMROOT)\helper.cpp
+
+#emu.obj:
+#           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\emu.obj $(STEEMROOT)\emu.cpp
+
+main:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\main.obj $(STEEMROOT)\main.cpp
+
+#SSE:
+#           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\SSE.obj $(STEEMROOT)\code\SSE\SSE.cpp
+
+options:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\options.obj $(STEEMROOT)\options.cpp
+
+mmu:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\mmu.obj $(STEEMROOT)\mmu.cpp
+
+mfp:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\mfp.obj $(STEEMROOT)\mfp.cpp
+
+
+ikbd:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\ikbd.obj $(STEEMROOT)\ikbd.cpp
+
+cpu:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\cpu.obj $(STEEMROOT)\cpu.cpp
+
+cpu_ea:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\cpu_ea.obj $(STEEMROOT)\cpu_ea.cpp
+
+cpu_op:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\cpu_op.obj $(STEEMROOT)\cpu_op.cpp
+
+cpuinit:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\cpuinit.obj $(STEEMROOT)\cpuinit.cpp
+
+
+debug:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\debug.obj $(STEEMROOT)\debug.cpp
+
+computer:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\computer.obj $(STEEMROOT)\computer.cpp
+
+#SSESTF.obj:
+#           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\SSESTF.obj $(STEEMROOT)\SSESTF.cpp
+
+display:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\display.obj $(STEEMROOT)\display.cpp
+
+sound:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\sound.obj $(STEEMROOT)\sound.cpp
+
+loadsave:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\loadsave.obj $(STEEMROOT)\loadsave.cpp
+
+draw:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\draw.obj $(STEEMROOT)\draw.cpp
+
+debug_framereport:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\debug_framereport.obj $(STEEMROOT)\debug_framereport.cpp
+
+shifter:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\shifter.obj $(STEEMROOT)\shifter.cpp
+
+disk_ghost:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\disk_ghost.obj $(STEEMROOT)\disk_ghost.cpp
+
+disk_stw:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\disk_stw.obj $(STEEMROOT)\disk_stw.cpp
+
+fdc:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\fdc.obj $(STEEMROOT)\fdc.cpp
+
+disk_dma:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\disk_dma.obj $(STEEMROOT)\disk_dma.cpp
+
+floppy_drive:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\floppy_drive.obj $(STEEMROOT)\floppy_drive.cpp
+
+floppy_disk:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\floppy_disk.obj $(STEEMROOT)\floppy_disk.cpp
+
+psg:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\psg.obj $(STEEMROOT)\psg.cpp
+
+ior:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\ior.obj $(STEEMROOT)\ior.cpp
+
+iow:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\iow.obj $(STEEMROOT)\iow.cpp
+
+acia:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\acia.obj $(STEEMROOT)\acia.cpp
+
+rs232:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\rs232.obj $(STEEMROOT)\rs232.cpp
+
+run:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\run.obj $(STEEMROOT)\run.cpp
+
+reset:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\reset.obj $(STEEMROOT)\reset.cpp
+
+emulator:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\emulator.obj $(STEEMROOT)\emulator.cpp
+
+interface_caps:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\interface_caps.obj $(STEEMROOT)\interface_caps.cpp
+
+glue:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\glue.obj $(STEEMROOT)\glue.cpp
+
+blitter:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\blitter.obj $(STEEMROOT)\blitter.cpp
+
+disk_scp:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\disk_scp.obj $(STEEMROOT)\disk_scp.cpp
+
+disk_hfe:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\disk_hfe.obj $(STEEMROOT)\disk_hfe.cpp
+
+hd_acsi:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\hd_acsi.obj $(STEEMROOT)\hd_acsi.cpp
+
+hd_gemdos:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\hd_gemdos.obj $(STEEMROOT)\hd_gemdos.cpp
+
+tos:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\tos.obj $(STEEMROOT)\tos.cpp
+
+stports:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\stports.obj $(STEEMROOT)\stports.cpp
+
+interface_stvl:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\interface_stvl.obj $(STEEMROOT)\interface_stvl.cpp
+
+
+midi:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\midi.obj $(STEEMROOT)\midi.cpp
+
+loadsave_emu:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\loadsave_emu.obj $(STEEMROOT)\loadsave_emu.cpp
+
+debug_emu:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\debug_emu.obj $(STEEMROOT)\debug_emu.cpp
+
+debugger:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\debugger.obj $(STEEMROOT)\debugger.cpp
+
+d2:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\d2.obj $(STEEMROOT)\d2.cpp
+
+acc:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\acc.obj $(STEEMROOT)\acc.cpp
+
+archive:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\archive.obj $(STEEMROOT)\archive.cpp
+
+dataloadsave:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\dataloadsave.obj $(STEEMROOT)\dataloadsave.cpp
+
+gui_controls:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\gui_controls.obj $(STEEMROOT)\gui_controls.cpp
+
+associate:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\associate.obj $(STEEMROOT)\associate.cpp
+
+dir_id:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\dir_id.obj $(STEEMROOT)\dir_id.cpp
+
+diskman:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\diskman.obj $(STEEMROOT)\diskman.cpp
+
+diskman_diags:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\diskman_diags.obj $(STEEMROOT)\diskman_diags.cpp
+
+diskman_drag:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\diskman_drag.obj $(STEEMROOT)\diskman_drag.cpp
+
+harddiskman:  
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\harddiskman.obj $(STEEMROOT)\harddiskman.cpp
+
+translate:  
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\translate.obj $(STEEMROOT)\translate.cpp
+
+dwin_edit:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\dwin_edit.obj $(STEEMROOT)\dwin_edit.cpp
+
+gui:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\gui.obj $(STEEMROOT)\gui.cpp
+
+stemwin:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\stemwin.obj $(STEEMROOT)\stemwin.cpp
+
+key_table:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\key_table.obj $(STEEMROOT)\key_table.cpp
+
+shortcutbox:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\shortcutbox.obj $(STEEMROOT)\shortcutbox.cpp
+
+patchesbox:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\patchesbox.obj $(STEEMROOT)\patchesbox.cpp
+
+infobox: 
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\infobox.obj $(STEEMROOT)\infobox.cpp
+
+osd: 
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\osd.obj $(STEEMROOT)\osd.cpp
+
+stjoy:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\stjoy.obj $(STEEMROOT)\stjoy.cpp
+
+macros:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\macros.obj $(STEEMROOT)\macros.cpp
+
+notifyinit:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\notifyinit.obj $(STEEMROOT)\notifyinit.cpp
+
+options_create:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\options_create.obj $(STEEMROOT)\options_create.cpp
+
+palette:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\palette.obj $(STEEMROOT)\palette.cpp
+
+screen_saver:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\screen_saver.obj $(STEEMROOT)\screen_saver.cpp
+
+steemintro:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\steemintro.obj $(STEEMROOT)\steemintro.cpp
+
+stemdialogs:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\stemdialogs.obj $(STEEMROOT)\stemdialogs.cpp
+
+stjoy_directinput:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\stjoy_directinput.obj $(STEEMROOT)\stjoy_directinput.cpp
+
+choosefolder:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\choosefolder.obj $(INCDIR)\choosefolder.cpp
+
+scrollingcontrolswin:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\scrollingcontrolswin.obj $(INCDIR)\scrollingcontrolswin.cpp
+
+circularbuffer:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\circularbuffer.obj $(INCDIR)\circularbuffer.cpp
+
+configstorefile:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\configstorefile.obj $(INCDIR)\configstorefile.cpp
+
+di_get_contents:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\di_get_contents.obj $(INCDIR)\di_get_contents.cpp
+
+dirsearch:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\dirsearch.obj $(INCDIR)\dirsearch.cpp
+
+easycompress:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\easycompress.obj $(INCDIR)\easycompress.cpp
+
+easystr:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\easystr.obj $(INCDIR)\easystr.cpp
+
+easystringlist:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\easystringlist.obj $(INCDIR)\easystringlist.cpp
+
+mymisc:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\mymisc.obj $(INCDIR)\mymisc.cpp
+
+portio:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\portio.obj $(INCDIR)\portio.cpp
+
+wordwrapper:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\wordwrapper.obj $(INCDIR)\wordwrapper.cpp
+
+
+
+directory_tree:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\directory_tree.obj $(STEEMROOT)\directory_tree.cpp
+
+input_prompt:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\input_prompt.obj $(STEEMROOT)\input_prompt.cpp
+
+
+
+
+historylist:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\historylist.obj $(STEEMROOT)\historylist.cpp
+
+mem_browser:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\mem_browser.obj $(STEEMROOT)\mem_browser.cpp
+
+mr_static:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\mr_static.obj $(STEEMROOT)\mr_static.cpp
+
+debugger_trace:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\debugger_trace.obj $(STEEMROOT)\debugger_trace.cpp
+
+iolist:
+           $(CPP) $(CPPFLAGS) $(STEEMFLAGS) -c -o$(OUT)\iolist.obj $(STEEMROOT)\iolist.cpp
+
+#3rdparty:	unrarlib div68kCycleAccurate dsp 6301
+
+#3rdparty:	div68kCycleAccurate dsp 6301 AviFile ArchiveAccessSSE
+
+3rdparty:	CapsPlug div68kCycleAccurate dsp 6301 AviFile ArchiveAccessSSE filt
+
+ArchiveAccessSSE:
+        $(CPP) $(CPPFLAGS) -DWIN32 -DSTEVEN_SEAGAL -c -o$(OUT)\ArchiveAccessSSE.obj $(3RDPARTYROOT)\ArchiveAccess\ArchiveAccess\ArchiveAccessSSE.cpp $(CFLAGS) 
+#           $(CPP) $(CPPFLAGS) -DWIN32 -c -o$(OUT)\ArchiveAccessSSE.obj $(3RDPARTYROOT)\ArchiveAccess\ArchiveAccess\ArchiveAccessSSE.cpp $(CFLAGS) 
+
+#unrarlib:
+#	$(CPP) $(CPPFLAGS) -DWIN32 -c -o$(OUT)\unrarlib.obj $(3RDPARTYROOT)\unrarlib\unrarlib\unrarlib.c $(CFLAGS) 
+div68kCycleAccurate:
+        $(CPP) $(CPPFLAGS) -DWIN32 -DSTEVEN_SEAGAL -c -o$(OUT)\div68kCycleAccurate.obj $(3RDPARTYROOT)\pasti\div68kCycleAccurate.c $(CFLAGS) 
+dsp:
+        $(CPP) $(CPPFLAGS) -DWIN32 -DSTEVEN_SEAGAL -c -o$(OUT)\dsp.obj $(3RDPARTYROOT)\dsp\dsp.cpp
+6301:
+        $(CPP) $(CPPFLAGS) -DWIN32 -DSTEVEN_SEAGAL -c -o$(OUT)\6301.obj $(3RDPARTYROOT)\6301\6301.c $(CFLAGS) 
+CapsPlug:
+        $(CPP) $(CPPFLAGS) -DWIN32 -DSTEVEN_SEAGAL -c -o$(OUT)\CapsPlug.obj $(3RDPARTYROOT)\caps\CapsPlug.cpp
+
+AviFile:
+        $(CPP) $(CPPFLAGS) -DWIN32 -DSTEVEN_SEAGAL -c -o$(OUT)\AviFile.obj $(3RDPARTYROOT)\avi\AviFile.cpp
+
+filt:
+        $(CPP) $(CPPFLAGS) -DWIN32 -DSTEVEN_SEAGAL -c -o$(OUT)\filt.obj $(3RDPARTYROOT)\dsp\FIR-filter-class\filt.cpp
+
+

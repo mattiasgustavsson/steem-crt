@@ -1,0 +1,303 @@
+GLUE
+======
+
+Sources:
+
+Wikipedia
+-Overscan Techniques by Alien/ST-Connexion (translated by Frost/Sector One, 
+plus original in French).
+-www.atari-forum.com
+-Some general Atari ST documentation
+-Various doc
+-Development of Steem
+-Hatari source
+
+Caution: incomplete, not guaranteed doc!
+
+Introduction
+==============
+
+The proper acronym is GLU for "Generalized Logic Unit".
+It's generally spelled GLUE or Glue. 
+As the name suggests, this IC glues the system together. 
+It is a custom Atari chip.
+It is responsible for address decoding and providing 'chip select' (CS) lines.
+It also handles the control of interrupt lines to the CPU, and bus arbitration 
+between CPU and DMA. 
+It also creates the video timing signals.
+On the STE, the GLUE and the MMU are one single chip, the GST MCU.
+The Shifter is a separate chip, running at 32mhz.
+
+
+Registers
+===========
+
+From the ST IO address map.
+
+$FFFF820A   R/W             |------xx|   Sync Mode
+                                   ||
+                                   | ----   External/_Internal Sync
+                                    -----   50 Hz/_60 Hz Field Rate
+
+Bit 1 corresponds to the monitor refresh rate (0 for 60Hz, 1 for 50 Hz).
+We'll call this register SYNC.
+
+(SYNCMODE&2)==0  (and SHIFTMODE<2) <-->  Frequency==60Hz
+(SYNCMODE&2)==2  (and SHIFTMODE<2) <-->  Frequency==50Hz
+
+
+$FFFF8260   R/W             |------xx|   Shift Mode
+                                   ||
+                                   00       320 x 200, 4 Plane
+                                   01       640 x 200, 2 Plane
+                                   10       640 x 400, 1 Plane
+                                   11       Reserved
+
+
+This byte can have  one of 3 values:  0 for low-,  1 for middle- and  2 for
+high-resolution.  The GLUE needs this register,  because in high-resolution
+the picture is displayed at ~70 Hz which requires different synchronization
+signals.
+
+We notice 2 things:
+1) if shift mode=3 ("reserved"), it's considered as 2 (HIRES) by the Glue
+(demo "Oyster")
+2) display timings are the same for low res and medium res, as tested on
+a STE.
+We conclude that only bit 1 is memorised/considered by the Glue, bit 0 is
+irrelevant.
+The Shifter needs 2 bits to know its frequency, # bitplanes and # colours.
+Register SHIFTMODE is held in the Shifter, line HIRES is held in the Glue.
+(In Steem we hold SHIFTMODE in two identical BYTE variables in both Glue and
+Shifter.)
+
+Internal registers
+-------------------
+
+The Glue must use some internal registers to know where it is in the frame.
+Those counters run continuously.
+
+HCTR   position in HBL
+
+The precision of this counter isn't known, maybe 4 clock cycles.
+
+Additional registers we guess:
+
+H_END    position of last cycle of this line (224, 508, 512)
+
+The GLue decides the value of this line in function of SHIFTMODE and SYNCMODE
+at cycle:
+54 + sync modifer on STF
+56 on STE.
+
+For example, a line -106, stopped because the ST was in HIRES at cycle 164, 
+will still run 512 cycles if it was at 50hz at cycles 54.
+
+Update (ijor): there are separate counters for DE and for HSYNC, because
+external sync is possible. 
+So H_END is more like a counter that is updated around cycle 54 on a colour
+screen (another one in HIRES...)
+
+Additional registers on the STE:
+--------------------------------
+
+HSCROLL  If HSCROLL<>0, video memory must be fetched in advance.
+How it exactly happens is speculative, but the Glue/MMU, as well as the
+Shifter, need the info.
+Precise HSCROLL (4bit) is held in the Shifter, a HSCROLL yes/no line is 
+held in the Glue.
+
+When HSCROLL<>0 at the start of the line, DE will be on for a raster more,
+even if HSCROLL=0 before the end of the line (TODO TEST).
+This implies a bit to hold this information.
+
+On the STE, DE is activated at the same time as on the STF if HSCROLL=0,
+earlier if not.
+One can assert that by using the Timer B in "start mode" (TIMERB05.TOS). 
+The decision to start a 50hz, 60hz or 71hz line is made earlier, at the
+time when DE would be asserted if HSCROLL<>0.
+That is 4 cycles before in HIRES (2 instead of 6).
+That is 16 cycles before in colour mode (36 instead of 52 at 60hz, 40 instead
+of 56 at 50hz).
+It is 16 cycles for both low and medium resolution.
+
+
+VCTR   HBL#
+
+Vertical counter, starting from the "VSync" signal, when the electron beam is 
+normally completely reset. It isn't important if the beam is at the very top
+or at the very bottom.
+The vertical counter is  incremented every line, i.e.  at every edge of  the HBL
+signal, and reset on each edge of the VBL.
+The first useful line is 63 at 50hz and 34 at 60hz or 72hz.
+(In Steem, this line corresponds to scan_y=0.)
+The last useful line is 247 on a colour monitor, but VBLANK starts at line
+245.
+
+Like for HSYNC (see above), external sync is possible, so there are two
+counters, one for DE, one for the number of lines.
+This implies that the number of scanlines in a frame is stable from the moment
+it is decided until the next frame.
+
+
+Reset
+======
+
+GLUE keeps running the video logic (DE,BLANK and SYNCs) on hardware reset.
+
+
+Signal descritpions
+====================
+
+Bus error
+----------
+
+The GLU will trigger a bus error only after 70 clock cycles (BUSERRTM.TOS).
+
+
+Video
+------
+
+The GLUE: Produces the vertical and  horizontal synchronization signals.  It
+also produces signals telling the SHIFTER  when it should display the useable
+screen   and  when it should show the background  colour 0  (corresponding to
+the border).
+It also tells the MMU when to send data to the SHIFTER.
+
+Note: actual traces show that DE starts before image can be displayed and stops
+while it's still being displayed.
+
+The GLUE generates the DE, Vsync, Hsync and Blank signals:
+
+- The DE (Display Enable) signal  tells the  SHIFTER when to display the  border
+  and when it has to display the  usable screen.  It also tells the MMU  when to
+  send data to the SHIFTER:  It is unnecessary  to send  data and  increment the
+  video counter  while the  border is  displayed.  If you cut the track  of this
+  signal you will obtain a  "hardware" overscan (thanks to Aragorn who confirmed
+  this by doing it). However, due to stability issues, this is  not recommended.
+  The Autoswitch Overscan board (see ST Magazine 50) works in a very similar way
+  by controlling this signal.
+
+  DE is on when two internal signals are on: V (for vertical) and H (for
+  horizontal).
+
+- The Blank signal forces the  RGB colour outputs to zero  just before,  during,
+  and just after the Hsync and Vsync synchronization signals.  Indeed,  monitors
+  require the video signal  to be 0 volts  (black colour) before  every synchro-
+  nization pulse (implemented as a negative voltage): Even the border colour has
+  to be eliminated to prevent overlaying the border colour over the screen while
+  the electron beam returns to the beginning of the next line (from the screen's
+  right to its left)  and to the next picture  (from the screen's bottom  to its
+  top).  Note that the Blank signal isn't used if the screen is displaying high-
+  resolution.
+
+The Vsync and Hsync sync signals are added to the video signal:
+
+- Vsync is the  vertical synchronization signal which specifies where the top of
+  the picture is located  in the video stream.  The VBL interrupt corresponds to
+  an edge of this signal.
+
+- Hsync is the horizontal synchronization signal. It generates the HBL interrupt
+  (vector $68).  The HBL interrupt  should not be confused  with the Timer B
+  interrupt (vector $120)  which is generated  when the DE signal goes low on an
+  input of the MFP:  The Timer B interrupt is triggered  only,  when the useable
+  screen is displayed, because DE is inactive during upper and lower border.
+
+Knowing that  the GLUE  handles these signals,  it  seems logical  that it would
+control the process of displaying the  screen. To do this, it would  require two
+counters:
+
+- a vertical counter:   the number of currenly displayed line
+
+- a horizontal counter: the position within the line currently being output
+
+
+
+Bus
+=====
+
+There's two data buses in the ST, the CPU bus and the DRAM / Shifter bus. 
+The two are bridged by a bus gateway - a buffer and a latch, controlled by 
+RDAT, WDAT and LATCH on the MMU.
+
+The DRAM bus is segmented by MMU into two phases each of two 8MHz cycles,
+one of which is a CPU phase and the other of which is a video / refresh
+(and sound on the STE) phase. If the CPU tries to access DRAM or the Shifter
+on a video phase, DTACK is withheld for two clock cycles to insert a pair of
+wait states and align the access onto the CPU phase. But anything only on 
+the CPU bus (including Glue and the MMU itself, at least in the STFM) can 
+be accessed on any phase.
+
+
+-->TODO
+
+
+
+
+
+STE
+=====
+
+In colour mode, the frequency check happens at cycles 36 for 60hz and 40 
+for 50hz instead of 52 and 56, whatever the value of HSCROLL.
+But prefetch starts (some) 16 cycles earlier only if HSCROLL is non null.
+This value of 16 cycles is the same in medium resolution.
+Prefetch ends as on a STF (cycle 376 at 50hz) because when HSCROLL 
+is non null, an extra raster is fetched to complete the line.
+When HSCROLL is null, the last prefetch also occurs at cycle 376, as
+on the STF. This points to prefetch having the same timing as on the
+STF when this condition is fulfilled.
+
+
+DE
+====
+
+from STF schematics, we draw such graphic concerning DE signal:
+
+
+
+GLUE ----------------T--------- MMU
+                     |
+                     |
+                     +--------- Shifter
+                     |
+                     |
+                     +--------- MFP (timer B in)
+
+
+There's a variable (depending on wake-up state) delay between GLUE
+and MMU on the STF, fixed delay on the STE.
+
+The Shifter is also affected by this delay.
+
+The Timer B interrupt happens so late (28 emulator cycles + jitter)
+due to processing delays in the chips, especially the MFP. [ijor]
+The MFP checks the signal during some clock cycles (at its own frequency) 
+before it decides to trigger the interrupt.
+
+
+Timings used in Steem v3.9.2
+==============================
+
+Wake-up modifiers for STF (0 on STE):
+
+WS                   1    2   3   4
+WU_res_modifier     -2   +2   0   0
+WU_sync_modifier     0   +2   0  +2
+
+  GLU_DE_ON_72=6, //+ WU_res_modifier; STE-4
+  GLU_DE_OFF_72=166,
+  GLU_DE_ON_60=52, //+ WU_sync_modifier; STE -16
+  GLU_DE_OFF_60=372,
+  GLU_DE_ON_50=56, //+ WU_sync_modifier; STE -16
+  GLU_DE_OFF_50=376,
+  GLU_HBLANK_OFF_50=28, //+ WU_sync_modifier
+  GLU_HSYNC_ON_50=464, //+ WU_res_modifier, STE-2
+  GLU_HSYNC_DURATION=40,
+  GLU_RELOAD_VIDEO_COUNTER_50=64-2, //+ WU_sync_modifier (STE -2?)
+  GLU_TRIGGER_VBI_50=64,	//STE+4
+  GLU_DECIDE_NCYCLES=54, //+ WU_sync_modifier, STE +2
+  GLU_VERTICAL_OVERSCAN_50=GLU_HSYNC_ON_50+GLU_HSYNC_DURATION // 504 //+ WU_sync_modifier, STE -2
+
+
+

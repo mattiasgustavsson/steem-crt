@@ -1,0 +1,11 @@
+[Text]
+
+Description=Pass protection
+ApplyWhen=After loading
+Version=STF, TOS 1.02, 1MB
+PatchAuthor=Seagal
+
+[Patch]
+
+00D7F8 = $6006
+

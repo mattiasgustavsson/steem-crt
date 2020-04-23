@@ -1,0 +1,5 @@
+alu   arithmetic and logic unit
+      It executes computations, comparisons... it is the working heart of the
+      CPU. 
+      It is 16bit wide.
+

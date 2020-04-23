@@ -1,0 +1,10 @@
+[Text]
+
+Description=No protection 
+ApplyWhen=Game loaded
+Version=STF, TOS 1.02, 1MB
+PatchAuthor=Seagal
+
+[Patch]
+
+01D33C = $60F8

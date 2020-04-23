@@ -1,0 +1,29 @@
+Script files to compile Steem SSE with Borland C++ 5.5.
+This was Steem's original compiler and it's still used for 
+development builds.
+
+The SET variables need to be edited according to your system 
+(build_bcc_set.bat).
+
+build_bcc_asm.bat must be called first if asm files haven't been assembled 
+yet (uncomment the line).
+
+build_debug_DD.bat will build Steem SSE Debugger.
+
+build_user_DD.bat will build regular Steem SSE.
+
+Those scripts use makefil3.txt.
+
+Advantages of BCC:
+Alternative compiler can see different problems
+Very fast rebuild
+
+Disadvantages of BCC:
+No Windows 2000+ features
+Less optimized
+
+
+
+
+
+

@@ -1,0 +1,42 @@
+From JLG
+================================================================================
+
+Name               Standard Values (9 sectors)    Minimum Values (Datasheet) 
+Gap 1 Post Index                60 x $4E                     32 x $4E 
+Gap 2 Pre ID          12 x $00 + 3 x $A1            8 x $00 + 3 x $A1 
+Gap 3a Post ID                  22 x $4E                     22 x $4E 
+Gap 3b Pre Data       12 x $00 + 3 x $A1           12 x $00 + 3 x $A1 
+Gap 4 Post Data                 40 x $4E                     24 x $4E 
+Gap 5 Pre Index ~              664 x $4E                     16 x $4E 
+
+
+# bytes 
+Name                       9 Sectors  10 Sectors  11 Sectors     Byte
+Gap 1 Post Index                  60          60          10      4E
+
+Gap 2 Pre ID                    12+3        12+3         3+3     00+A1
+Gap 3a Post ID                    22          22          22      4E 
+Gap 3b Pre Data                 12+3        12+3        12+3     00+A1
+Gap 4 Post Data                   40          40           1      4E
+
+Gap 5 Pre Index                  664          50          20      4E
+
+
+Gap 1+5: once/track                 
+Gap 2-4: for each sector
+Gap 2-4                           92          92          44 
+Record Length                    614         614         566 
+
+Total Track                     6250        6250        6250 
+
+
+Standard Record Gap Value (Gap 2 + Gap 3a + Gap 3b + Gap 4) = 92 Bytes / Record
+Minimum Record Gap Value (Gap 2 + Gap 3a + Gap 3b + Gap 4) = 72 Bytes / Record
+Standard Record Length (Record Gap + ID + DATA) = 92 + 7 + 515 = 614 bytes
+Minimum Record Length (Record GAP + ID + DATA) = 72 + 7 + 515 = 594
+
+
+Interleaving: Normally the sector number is incremented by 1 for each record 
+(i.e. there is no need to interleave with DD like it used to be with older FD)
+ however sectors can written be in any order.
+

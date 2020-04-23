@@ -1,0 +1,524 @@
+(work in progress)
+
+Effective address (EA) microcodes
+-----------------------------------
+                        .B              .W           .L
+Dn                      RORW1          RORW1        RORL1
+An                      TRAP1          RORW1        RORL1
+(An)                    ADRW1          ADRW1        ADRL1
+(An)+                   PINW1          PINW1        PINL1
+–(An)                   PDCW1          PDCW1        PDCL1
+(d16, An)               ADSW1          ADSW1        ADSL1
+(d8, An, Xn)            AIXW0          AIXW0        AIXL0
+(xxx).W                 ABWW1          ABWW1        ABWL1
+(xxx).L                 ABLW1          ABLW1        ABLL1
+(d16, PC)               ADSW1          ADSW1        ADSL1
+(d8, PC, Xn)            AIXW0          AIXW0        AIXL0
+#<data>                 E#W1           E#W1         E#L1
+Unused                  TRAP1          TRAP1        TRAP1
+
+Notes:
+1) The same microcodes are used for .B and .W
+2) The same microcodes are used for An and PC indexing.
+3) The same microcodes are used in MOVE.
+
+
+PC value at read time
+-----------------------
+
+This is done by reading the microcode schemas (not reproduced here, only
+interested by what happens to register PC).
+
+               .B, .W             .L
+Dn              PC(?)             PC(?)
+An              PC(?)             PC(?)
+(An)            PC                PC(?)
+(An)+           PC                PC(?)
+–(An)           PC+2              PC
+(d16, An)       PC                PC(?)
+(d8, An, Xn)    PC                PC(?)
+(xxx).W         PC+2              PC+2
+(xxx).L         PC+4              PC+4(?)
+(d16, PC)       PC                PC(?)
+(d8, PC, Xn)    PC                PC(?)
+#<data>         PC+2              PC+4
+
+Notes
+1) AU is the double 16bit Arithmetic Unit
+2) After the EA microcode, the proper microcode of the instruction is
+called. The first step of this one is PC=AU. So fetches may happen without
+updating PC, just AU is enough.
+3) In case of crash, this is the PC register that is copied on the stack
+by the exception routine (to check with its microcode).
+4) The values are compatible with Dio's tables 
+(also available here: Exception PC tables.txt). 
+
+
+
+
+Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+
+
+move.l *,W             -    - *124 *124 *124 *128 *132 *128 *132    -    -    -
+                               0/2  0/2 -4/2  2/2  6/2  0/4  0/6               
+                               RI5  RI5  RI5  RI5  RI5  RI5  RI5               
+                              2208 2200 2208 2200 2200 2208 2200               
+                              21D0 21D8 21E0 21E8 21F0 21F8 21F9               
+
+move.l $0.W,$24.w -SR=8700 ->
+should be +2 according to the table and to microcode, but it's no good for Phaleon...
+
+
+
+.W (d16, An): ADSW1 -> ADSW2 -> ADRW2
+
+ADSW1
+au ? aob copy effective fetch pointer (in fact it send the address in AU to the address bus)
+(dbin) ? dbe ? au use IRC (d16 -> AU)(don't understand where you get IRC in this one ? It get d16 from a buffer/latch (dbin) of the data bus not from IRC)
+edb ? dbin, irc read cycle, prefetch (fill IRC) (and the buffer/latch named dbin)
+(rya) ? ab ? au (An) -> AU, where it is added to d16 (I'm OK with this)
+
+ADSW2
+au ? ab ? aob, at AU->address busses
+(dbin) ? abd ? alu copy IRC value on address bus data section only (same remark than befor it's not IRC but the content of the buffer/latch dbin which is copied. In this pecular case the value in DBin is the same tahn the one in IRC).
+ (just in case?) (if fact it depend of the macroword execution which call ADSW2...)
+(pc) ? db ? au AU=PC
+-1 ? alu ? (as far as I understand things, ALU is activated for every nanoword, so -1 is here to say that ALU do nothing for this peculiar nanoword, but can be wrong).
++4 ? au AU=PC+4, effective fetch pointer
+
+ADRW2
+edb ? dbin read cycle, read word at EA (and store it in dbin not IRC )
+(rxd) ? ab* ? dcr ? (put the data register part of the macro instruction in a decoder for further execution)
+
+
+.W (d16, An): ADSW1 -> ADSW2 -> ADRW2
+
+ADSW1
+au->aob                 copy effective fetch pointer
+(dbin)->dbe->au         use 'IRC' value still in dbin (d16 -> AU)
+edb->dbin,irc           read cycle, prefetch (fill IRC)
+(rya)->ab->au           (An) -> AU, where it is added to d16
+
+ADSW2
+au->ab->aob,at          AU->address busses
+(dbin)->abd->alu        copy 'IRC' value 
+(pc)->db->au            AU=PC
+-1->alu                 
++4->au                  AU=PC+4, effective fetch pointer
+
+ADRW2
+adb->dbin               read cycle, read word at EA
+(rxd)->ab*->dcr         
+
+PC: no change
+
+
+
+
+
+
+
+
+
+
+Effective address microcodes
+
+Here follow the microcode sequences making up the effective address routines.
+
+
+.W -(An): PDCW1 -> PDCW2
+
+PDCW1
+au->pc                  as AU=PC+2, this increments PC as very first step
+(dbin)->dbd->alub
+(rxd)->ab*->dcr
+(rya)->db->au           (An) -> AU
+-1,-2->au               makes AU--, both for byte and word (?)
+
+PDCW2
+(alub)->alu
+au->ab->aob,at,rya      AU on address bus, update (An)
+edb->dbin               read cycle, read word at bus
+(pc)->db->au            restore in one step
+-1->alu
+0->au
+
+PC: +2
+Rounding: the 1st microcode doesn't read the bus.
+
+.L -(An): PDCL1 -> PDCL2 -> ADRL2
+
+PDCL1
+(dbin)->ab*->alu
+(rya)->db->au
+-1->alu                 (An) -> AU
+-4->au                  AU-- (long)
+
+PDCL2
+au->db->aob,au,rya      AU on address bus, update (An)
+edb->dbin               read cycle, read high word at bus
++2->au                  position AU on low word
+
+ADRL2
+au->ab->aobnat          AU on address bus, update (An)
+(dbin)->dbd->alub       copy word currently on dbin
+edb->dbin               read cycle, read low word at bus
+(pc)->db->au            restore AU...
++2->au                  in 2 steps
+
+PC: no change
+Rounding: the 1st microcode doesn't read the bus.
+
+.W (d16, An): ADSW1 -> ADSW2 -> ADRW2
+
+ADSW1
+au->aob                 copy effective fetch pointer
+(dbin)->dbe->au         copy prefetched displacement
+edb->dbin,irc           prefetch
+(rya)->ab->au           (An) -> AU, where it is added to d16
+
+ADSW2
+au->ab->aob,at          AU->address busses
+(dbin)->abd->alu        copy 'IRC' value 
+(pc)->db->au            AU=PC
+-1->alu                 
++4->au                  AU=PC+4, effective fetch pointer
+
+ADRW2
+edb->dbin               read cycle, read word at EA
+(rxd)->ab*->dcr         
+
+PC: no change
+Rounding: the 1st microcode reads the bus.
+
+
+.W (d8, An, Xn): AIXW0 -> AIXW1 -> AIXW2 -> ADSW2 -> ADRW2   (irc[11]=0)
+                                   AIXW4                     (irc[11]=1)
+
+AIXW0
+(dbin)->ab*->alu        copy prefetched displacement
+0->alu
+
+AIXW1
+alu->*e->au
+au->aob
+rya->*->au              add (An) to displacement
+
+AIXW2
+au->*->au
+edb->dbin,irc           prefetch
+(rxl)->*e->au           add index to displacement and (An)
+reset pren
+
+AIXW4
+au->*->au
+edb->dbin,irc           prefetch
+(rx)->*->au             add index to displacement and (An)
+reset pren
+
+ADSW2
+au->ab->aob,at          AU->address busses
+(dbin)->abd->alu        copy 'IRC' value 
+(pc)->db->au            AU=PC
+-1->alu                 
++4->au                  AU=PC+4, effective fetch pointer
+
+ADRW2
+edb->dbin               read cycle, read word at EA
+(rxd)->ab*->dcr         
+
+PC: no change
+Rounding: the 1st microcode doesn't read the bus
+
+
+.L (d8, An, Xn): AIXL0 -> AIXL1 -> AIXL2 -> ADSL2 (irc[11]=0)
+                                   AIXL3          (irc[11]=1)
+AIXL0
+(dbin)->ab*->alu
+0->alu
+
+AIXL1
+alu->*e->au
+au->aob
+(rya)->*->au
+
+AIXL2
+au->*->au
+edb->dbin,irc
+(rxl)->*e->au
+reset prn
+
+AIXL3
+au->*->au
+edb->dbin,irc
+(rx)->*e->au
+reset prn
+
+ADSL2
+
+
+
+
+
+
+
+
+
+
+
+
+WRONG! (movem...)
+.L (d8, An, Xn): LDMX0 -> LDMX1 -> LDMX2 -> LDMX3 -> LDMX5 -> LDMX6 (irc[11]=1)
+                                         -> LDMX4                   (irc[11]=0)
+
+
+
+LDMX0
+au->db->aob,au,pc
+(dbin)->ab->ftu
+edb->dbin,irc
++2,au
+
+LDMX1
+(dbin)->ab*->alu
+0->alu
+
+LDMX2
+alu->*e->au
+au->aob
+(rya)->*->au
+
+LDMX3
+au->*->au
+edb->irc
+(rx)->*->au
+
+LDMX4
+au->*->au
+edb->irc
+(rxl)->*e->au
+
+LDMX5
+au->ab->aob,at
+(dbin)->abd->alu
+(pc)->db->au
+-1->alu
++4->au
+
+LDMX6
+(at)->db->au
+au->pc
+edb->dbin
++2->au
+reset pren
+
+MMRW2
+(pc)->db->aob,au
++2->au
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+jmp (xxx).w
+
+jmaw1:
+
+(dbin)->abe -> at
+-> jmal2
+
+jmal2:
+
+(ath)->dbh->aob,au
+(dbin)->dbl->aob,au
+edb->irc
++2->au
+->b
+
+b:
+au->db->aob,au,pc
+(dbin)->dbd->alu
+(rxl)->ab*->alu
++2->au
+
+It's confusing and possibly contains mistakes, but what's clear is that
+PC isn't changed before the 'b' microcode.
+The address/bus error would strike before.
+
+
+jmp (xxx).l
+
+jmal1:
+
+au->db->aob,au
+(dbin)->ab->ath
+edb->dbin
++2->au
+-> jmal2
+
+jmal2:
+
+(ath)->dbh->aob,au
+(dbin)->dbl->aob,au
+edb->irc
++2->au
+->b
+
+b:
+au->db->aob,au,pc
+(dbin)->dbd->alu
+(rxl)->ab*->alu
++2->au
+
+Same conclusion regarding pc, it's updated later at step b.
+
+
+For other cases here's the microcode table.
+
+                                     JMP               JSR
+
+000	R            Dn              -                 -
+001	R            An              -                 -
+010	R            (An)            jmpa1             jsra1
+011	R            (An)+           -                 -
+100	R            –(An)           -                 -
+101	R            (d16, An)       jmpd1             jsrd1
+110	R            (d8, An, Xn)    jmpx0             jsrx0
+111	000          (xxx).W         jmaw1             jsaw0
+111	001          (xxx).L         jmal1             jsal1
+111	010          (d16, PC)       jmpd1             jsrd1
+111	011          (d8, PC, Xn)    jmpx0             jsrx0
+111	100          #<data>         -                 -
+
+It should be verified that none would change PC before a bus error
+(our hypothesis).
+
+
+
+
+PEA
+===========
+
+
+                                     PEA
+
+000	R            Dn              -    
+001	R            An              -                 
+010	R            (An)            peaa1
+011	R            (An)+           -                 
+100	R            –(An)           -                 
+101	R            (d16, An)       pead1           
+110	R            (d8, An, Xn)    peax0            
+111	000          (xxx).W         paaw1            
+111	001          (xxx).L         paal1           
+111	010          (d16, PC)       peapd1         
+111	011          (d8, PC, Xn)    peax0            
+111	100          #<data>         -                
+
+
+peaa1:
+
+au->aob,pc
+edb->dbin,irc
+(rxa)->db->au
+(rya)->ab->alu,at
+-1->alu
+-4->au
+-> peax6
+
+peax6:
+
+(ath)->ab->dob
+au->db->aob,au,rz
++2->au
+-> morw2
+
+morw2:
+
+alu->dob
+au->aob
+(ir)->ird
+(pc)->db->au
++2->au
+
+
+paaw1:
+au->aob,pc
+(dbin)->abo->at
+edb->irc
+(rxa)->db->au
+-4->au
+-> paaw2
+
+paaw2:
+
+(ath)->ab->dob
+au->db->aob,au,rz
++2->au
+-> mawl3
+
+mawl3:
+
+au->db->aob,au,pc
+(dbin)->ab->ftu
+edb->dbin,irc
++2->au
+-> b
+
+b:
+au->db->aob,au,pc
+(dbin)->dbd->alu
+(rxl)->ab*->alu
++2->au
+
+
+paal1:
+
+au->db->aob,au
+(dbin)->ab->ath
+edb->dbin
++2->au
+->paal2
+
+paal2:
+
+au->aob,pc
+(dbin)->ab->atl
+edb->irc
+(rxa)->db->au
+-4->au
+-> paaw2
+
+paaw2:
+
+(ath)->ab->dob
+au->db->aob,au,rz
++2->au
+-> mawl3
+
+mawl3:
+
+au->db->aob,au,pc
+(dbin)->ab->ftu
+edb->dbin,irc
++2->au
+-> b
+
+b:
+au->db->aob,au,pc
+(dbin)->dbd->alu
+(rxl)->ab*->alu
++2->au
+

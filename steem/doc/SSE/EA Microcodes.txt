@@ -1,0 +1,399 @@
+Steem SSE documentation
+Here's a transcript of Motorola MC68000 microcodes for Effective Address (<EA>)
+routines, based on the description in the patent.
+The patent is hard to read so there could be typos.
+The comment on the right is by Steven Seagal and isn't authoritative.
+===============================================================================
+
+
+-------------------------------------------------------------------------------
+000	R            Dn              
+
+
+-------------------------------------------------------------------------------
+001	R            An              
+
+
+-------------------------------------------------------------------------------
+010	R            (An)            
+
+.B,.W (An)  ADRW1->ADRW2
+
+ADRW1
+(dbin)->ab*->alu
+(rya)->*->aob,at
+-1->alu
+
+ADRW2
+edb->dbin               
+(rxd)->ab*->dcr
+
+PC: no change
+
+
+.L (An) ADRL1->ADRL2
+
+ADRL1
+(dbin)->ab*->alu
+edb->dbin
+(rya)->db->aob,au
+-1->alu
++2->au
+
+ADRL2
+au->ab->aob,at
+(dbin)->dbd->alub
+edb->dbin
+(pc)>db->au
++2->au
+
+PC: no change
+
+-------------------------------------------------------------------------------
+011	R            (An)+  
+
+.W (An)+: PINW1->PINW2
+
+PINW1
+(dbin)->dbd->alub
+(rxd)->ab*->dcr
+(rya)->db->aob,at,au
++1,+2->AU
+
+PINW2
+(alub)->alu
+au->ab->rya             An++
+edb->dbin               
+(pc)->db->au
+-1->alu
++2->au
+
+- PC: no change
+
+
+.L (An)+: PINL1->PINL2->PINL3
+
+PINL1
+(dbin)->ab*->alu
+edb->dbin               
+(rya)->db->aob,au
+-1->alu
++2->au
+
+PINL2
+au->db->aob,at,au
+(dbin)->dbd->alub,alue
++2->au
+
+PINL3
+au->ab->rya             update An
+edb->dbin               
+(pc)->db->au
++2->au
+
+- PC: no change
+
+-------------------------------------------------------------------------------
+100	R            –(An)          
+
+.B,.W -(An): PDCW1->PDCW2
+
+PDCW1
+au->pc                  as AU=PC+2, this increments PC as very first step
+(dbin)->dbd->alub
+(rxd)->ab*->dcr
+(rya)->db->au           (An) -> AU
+-1,-2->au               makes AU--, both for byte and word (?)
+
+PDCW2
+(alub)->alu
+au->ab->aob,at,rya      AU on address bus, update An
+edb->dbin               
+(pc)->db->au            restore in one step
+-1->alu
+0->au
+
+- PC: +2
+
+
+.L -(An): PDCL1->PDCL2->ADRL2
+
+PDCL1
+(dbin)->ab*->alu
+(rya)->db->au
+-1->alu                 (An) -> AU
+-4->au                  AU-- (long)
+
+PDCL2
+au->db->aob,au,rya      AU on address bus, update An
+edb->dbin               
++2->au                  position AU on low word
+
+ADRL2
+au->ab->aobnat          AU on address bus
+(dbin)->dbd->alub       copy word currently on dbin
+edb->dbin               read cycle, read low word at bus
+(pc)->db->au            restore AU...
++2->au                  in 2 steps
+
+- PC: no change, contrary to .W -(An)
+-------------------------------------------------------------------------------
+101	R            (d16, An)      
+111	010          (d16, PC)    
+
+
+.B,.W (d16, An): ADSW1->ADSW2->ADRW2
+
+ADSW1
+au->aob                 copy effective fetch pointer
+(dbin)->dbe->au         use 'IRC' value still in dbin (d16 -> AU)
+edb->dbin,irc           prefetch (fill IRC)
+(rya)->ab->au           (An) -> AU, where it is added to d16
+
+ADSW2
+au->ab->aob,at          AU->address busses
+(dbin)->abd->alu        copy 'IRC' value 
+(pc)->db->au            AU=PC
+-1->alu                 
++4->au                  AU=PC+4, effective fetch pointer
+
+ADRW2
+adb->dbin               
+(rxd)->ab*->dcr         
+
+PC: no change
+
+
+.L (d16,An): ADSL1->ADSL2->ADSL3
+
+ADSL1
+au->aob
+(dbin)->dbe->au
+edb->dbin,irc
+(rya)>ab->au
+
+ADSL2
+au->db->aob,au
+(dbin)->ab*->alu
+edb->dbin
+-1->alu
++2->au
+
+ADSL3
+au->ab->aob,at
+(dbin)->dbd->alub
+edb->dbin
+(pc)->db->AU
++4->AU
+
+PC: no change
+   
+-------------------------------------------------------------------------------
+110	R            (d8, An, Xn)    
+111	011          (d8, PC, Xn)   
+
+
+.B,.W (d8, An, Xn): AIXW0->AIXW1->AIXW2->ADSW2->ADRW2   (irc[11]=0)
+                                  AIXW4                 (irc[11]=1)
+
+AIXW0
+(dbin)->ab*->alu        copy prefetched displacement D8
+0->alu
+
+AIXW1
+alu->*e->au
+au->aob
+rya->*->au              add An to displacement
+
+AIXW2
+au->*->au
+edb->dbin,irc           prefetch
+(rxl)->*e->au           add index to displacement and (An)
+reset pren
+
+or
+
+AIXW4
+au->*->au
+edb->dbin,irc           prefetch
+(rx)->*->au             add index to displacement and (An)
+reset pren
+
+ADSW2
+au->ab->aob,at          AU->address busses
+(dbin)->abd->alu        copy 'IRC' value 
+(pc)->db->au            AU=PC
+-1->alu                 
++4->au                  AU=PC+4, effective fetch pointer
+
+ADRW2
+edb->dbin               
+(rxd)->ab*->dcr         
+
+PC: no change
+
+
+.L (d8, An, Xn): AIXL0->AIXL1->AIXL2->ADSL2  (irc[11]=0)
+                               AIXL3         (irc[11]=1)
+
+AIXL0
+(dbin)->ab*->alu        D8
+0->alu
+
+AIXL1
+alu->*e->au
+au->aob
+(rya)->*->au            D8+An
+
+AIXL2
+au->*->au
+edb->dbin,irc
+(rxl)->*e->au
+reset pren
+
+or
+
+AIXL3  
+au->*->au
+edb->dbin,irc
+(rx)->*e->au
+reset pren
+
+ADSL2
+au->db->aob,au
+(dbin)->ab*->alu
+edb->dbin
+-1->alu
++2->au
+
+PC: no change
+
+-------------------------------------------------------------------------------
+111	000          (xxx).W         
+
+.B,.W (XXX).W: ABWW1->ABLW3
+
+ABWW1
+au->aob,pc              PC+2
+(dbin)->dbe->at,au
+edb->dbin,irc           prefetch
+(rxd)>ab*->dcr
+0->au
+
+ABLW3
+(at)->ab->aob
+(dbin)->abd->alu
+edb->dbin               
+(pc)->db->au
+-1->alu
++2->au
+
+PC: +2
+
+
+.L (XXX).W: ABLW1->ABLW2->ABLW3
+
+ABLW1
+au->db->aob,au
+(dbin)->ab->ath
+edb->dbin
++2->au
+
+ABLW2
+(ath)->dbh->au
+au->aob,pc              PC+4
+(dbin)->dbl->atl,au
+edb->dbin,irc           prefetch
+(rxd)->ab*->dcr
+0->au
+
+ABLW3
+(at)->ab->aob
+(dbin)->abd->alu
+edb->dbin               
+(pc)->db->au
+-1->alu
++2->au
+
+PC: +4
+
+-------------------------------------------------------------------------------
+111	001          (xxx).L   
+
+
+.W (XXX).L: ABWL1->ABLL3
+
+ABWL1
+au->aob,pc              PC+2
+(dbin)->dbe->at,au
+edb->dbin,irc
+(rxd)->ab*->dcr
+0->au
+
+ABLL3
+au->db->aob,au
+(dbin)->ab*->alu
+edb->dbin               
+-1->alu
++2->au
+
+PC: +2
+
+
+.L (XXX).L: ABLL1->ABLL2->ABLL3
+
+ABLL1
+au->db->aob,au
+(dbin)->ab->ath
+edb->bin                prefetch without IRC
++2->au
+
+ABLL2
+(ath)->dbh->au
+au->aob,pc              PC+4
+(dbin)->dbl->atl,au
+edb->dbin,irc           prefetch
+(rxd)->ab*->dcr
+0->au
+
+ABLL3
+au->db->aob,au
+(dbin)->ab*->alu
+edb->dbin               
+-1->alu
++2->au
+
+PC: +4
+
+-------------------------------------------------------------------------------
+111	100          #<data>      
+
+
+.W #: E#W1 (or O#W1?)
+
+E#W1
+au->db->aob,au,pc       PC+2
+(dbin)->ab->rydl,ath
+edb->dbin,irc           prefetch
++2->au
+
+PC: +2
+
+
+.L #: O#L1->O#W1
+
+O#L1
+au->db->aob,au
+(dbin)->ab->rxh
+edb->dbin               
++2->au
+
+O#W1
+au->db->aob,au,pc       PC+4
+(dbin)->ab->rx1
+edb->dbin,irc           prefetch
++2->au
+
+PC: +4
+
+-------------------------------------------------------------------------------

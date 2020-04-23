@@ -1,0 +1,11 @@
+[Text]
+
+Description=Pass protection
+ApplyWhen=Password screen
+Version=FR, STF, TOS 1.02, 1MB
+PatchAuthor=Steven
+
+[Patch]
+
+188FE = $6012
+

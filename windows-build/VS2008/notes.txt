@@ -1,0 +1,2 @@
+Steem SSE project files for Visual Studio 2008
+

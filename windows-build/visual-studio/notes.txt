@@ -1,0 +1,5 @@
+Those are the project files for Visual C++ 6.0 on my system (SS).
+
+
+For make_draw_VC.bat and make_osd_VC.bat, please check in Steem/asm
+instead.

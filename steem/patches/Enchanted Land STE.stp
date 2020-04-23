@@ -1,0 +1,12 @@
+[Text]
+Description=This game works without patch in Steem since v.3.3. I finally found a patch that makes it work in v3.2 without having to use the "STFM" option.
+ApplyWhen=The Thalion intro appears.
+Version=Works on Steem v3.2 as is (no "STFMBORDER" option)
+PatchAuthor=Steven Seagal
+
+[Patch]
+000204 = $00bd $0002
+000208 = $005a $000c
+00020c = $000d $0001
+
+

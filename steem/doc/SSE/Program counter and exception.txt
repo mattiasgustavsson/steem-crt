@@ -1,0 +1,271 @@
+Program counter and exception
+===============================
+
+Scope
+=======
+
+This text doesn't describe the full exception process on the M68000 nor even 
+how the full exception stack frame is built.
+You need to check other doc for those aspects (Motorola MC68000 User Manual)
+It is also useful to check doc on prefetch.
+The text only focuses on the exact value of the program counter (PC) that is 
+pushed on the stack when an address or bus error exception occurs.
+
+Sources
+=========
+
+- Motorola M68000 Microprocessors User's Manual (www.freescale.com)
+- US patent 4,325,121 assigned to Motorola (which contains microcodes)
+- Discussions in Atari-Forum (www.atari-forum.com=AF)
+- Tables and schemas by 'danorf' (AF)
+- Exception PC tables by 'Dio' (AF) 
+- wikipedia.org and maybe other web sites
+- Cases (programs)
+- And of course development of Steem SSE: for this reason, Steem specifics are
+discussed.
+
+Why?
+======
+
+This aspect of ST emulation came to attention when it was realised that some
+programs work or crash based on that value being correct, mainly in the context 
+of code protection. 
+For example, the value pushed on a (sometimes very) low stack would later be 
+executed as code, which is a rather intricate procedure.
+If the value is wrong, the instruction is garbage and the program crashes.
+
+Cases (some programs sensitive to stacked PC):
+[Method to detect them: just push garbage as PC and see what crashes!]
+
+Aladin                                       move.b (a7)+,(a1)      write
+Aladin                                       clr.w (a1)             write!
+Aladin                                       move.w (a2),(a1)       write
+Aladin                                       move.l d3,(a1)         write
+Aladin                                       move.l d0,(a2)         write
+Amiga Demo                                   tst.l (a1)+            read
+BIG Demo                                     tst.l (a1)+            read
+Blood Money                                  movem.l a0-5,(a6)      write
+Darkside of the Spoon                        move.b d1,+$2476(a4)   write
+European Demos, Phaleon, Transbeauce 2       move.l $0.W,$24.w      read
+European Demos, Phaleon, Transbeauce 2       clr.w $70fff           read!
+Punish Your Machine                          move.b d1,+$2476(a4)   write
+The Teller                                   jmp $201.w             fetch
+War Heli                                     move.l d5,(a1)         write
+
+Note that the 24,960 exceptions of the BIG Demo are part of the normal loading
+procedure. 
+New record: 876,079 for The Teller.
+
+
+User Manual
+=============
+
+The M68000 User's Manual states:
+"Value saved for the program counter is advanced 2–10 bytes beyond the address 
+of the first word of the instruction that made the reference causing the bus 
+error. 
+If the bus error occurred during the fetch of the next instruction, the saved 
+program counter has a value in the vicinity of the current instruction, even 
+if the current instruction is a branch, a jump, or a return instruction."
+
+Motorola doesn't give any precise information.
+Based on just that, the programmer who would actually use the pushed PC 
+couldn't compute it. He had to be lucky or to test on real hardware.
+
+Tables
+========
+
+Dio (AF) wrote a test program that issues tables for a lot of cases 
+(also available here: "Exception PC tables"). 
+The only value of interest for us is PC (2nd value after the / on 
+line 2), values are relative to PC of current instruction, but normally
+PC is already 2 bytes beyond (so 2 in the table means no increment yet 
+at time of crash).
+
+Fetching
+==========
+
+The PC (program counter) points to a word (16bit value) in memory that is 
+supposed to be fetched. A fetch is copying the value pointed at by PC to a 
+register in the CPU (IRC). Those values are the program, made of macro-
+instructions, that is instructions and their operands. 
+Both the instructions and the operands are fetched but only the instructions 
+are decoded (going from register IRC to register IRD where decoding is done).
+Because fetching often occurs in advance, it is generally called prefetch.
+
+Increment time
+================
+
+When a word is fetched, PC is incremented (PC=PC+2, shortened as 'PC+2') to 
+point to the correct word. 
+The first question is: do we increment then fetch, or fetch then increment?
+It depends on the processor:
+"In most processors, PC is incremented after fetching an instruction, 
+and holds the memory address of (“points to”) the next instruction that 
+would be executed. (In a processor where the incrementation precedes the
+ fetch, PC points to the current instruction being executed.) "
+(http://en.wikipedia.org/wiki/Program_counter)
+On the M68000, when an instruction starts, PC generally points to the next word.
+So apparently it would be 'fetch then increment'.
+But in fact, it points to the word being currently copied in IRC (prefetch
+rule: at the start of any instruction, IRC is loaded with the next instruction
+or operand).
+It implies that PC isn't incremented right after the word in memory
+has been fetched. After fetching, PC points to the last word having been
+fetched.
+
+Separation of incrementing and fetching
+=========================================
+
+The second question is: does the fetch immediately follow PC increment, or could
+there be some delay between both events?
+In the first case, the CPU would use one unique routine to fetch program words.
+In the second case, at least two routines would be used to accomplish those 
+tasks.
+Both possibilities makes sense. On the M68000, the second possibility is true:
+increment and fetching are separate.
+
+Microcode and Internal registers
+==================================
+
+All M68000 behaviour is commanded by microcodes, sort of mini-instructions
+(and actually called 'micro' and 'nano' instructions by Motorola) or routines.
+This applies to 'PC+2' and fetching as well, and makes questions above a bit
+theoretical: fetching and 'PC+2' are not just separate, they're also split
+in different tasks themselves. In fact, 'PC+2' can be done different ways.
+There are also other internal registers in the CPU invisible to the programmer.
+Those registers are involved in fetching, it's not just PC and IRC, for any 
+reasons (performance for example).
+What's more, the address currently stored in the AU (double 16bit Arithmetic 
+Unit) is heavily used for fetching.
+This has many consequences but the one that interests us here is that the
+value of PC will not necessarily point to the word that's in IRC at any time.
+The value of PC at any given time (for example when some crash happens) is 
+perfectly determined by microcodes but doesn't follow a simple logic.
+
+Program Counter or other register?
+
+It is the PC register and nothing else that is copied on the stack in case
+of bus/address error, as established by analysis of microcodes.
+
+Effective Address
+===================
+
+On the M68000, generic microcode routines are used to read the effective 
+address in most instructions.
+This implies that prefetch can't happen before or during getting effective 
+address. 
+That there be no prefetch doesn't mean that PC is unchanged. First, of course,
+PC may be updated when operands are fetched (but not necessarily so!).
+Second, microcode may update PC as part of the <EA> routine, sometimes using
+PC as a temporary variable. The latter is what actually happens on the M68000.
+The <EA> rule we deduce from microcode is that at the end of <EA>, AU must
+contain the address of the next word to fetch/prefetch. The value of PC doesn't
+matter.
+The <EA> microwords for BYTE and for WORD are the same.
+
+Analysis of microcodes delivers the following table:
+
+b543	b210         Mode           .B, .W             .L
+
+000	R            Dn              PC                PC
+001	R            An              PC                PC
+010	R            (An)            PC                PC
+011	R            (An)+           PC                PC
+100	R            –(An)           PC+2              PC
+101	R            (d16, An)       PC                PC
+110	R            (d8, An, Xn)    PC                PC
+111	000          (xxx).W         PC+2              PC+2
+111	001          (xxx).L         PC+4              PC+4
+111	010          (d16, PC)       PC                PC
+111	011          (d8, PC, Xn)    PC                PC
+111	100          #<data>         PC+2              PC+4
+
+This table is in agreement with the table issued by the test program (Dio).
+PC here is relative to PC at the start of the instruction, that is, pointing to
+the word beyond the instruction (IRC at the start of instruction).
+The values may look strange to the M68000 expert, but they are explained
+by the use of other registers than PC to do the actual fetches.
+
+Seconds part of Instruction
+=============================
+
+It seems that in most instructions, PC is updated at the beginning of execution
+of second part, and that it takes the AU value at the end of EA.
+This AU value is the right 'fetch address' one. That is, if no fetches for 
+destination are needed, it would point to the word beyond next instruction
+already (a logical value).
+If fetches are needed, the value of PC doesn't change! AU is updated instead.
+At the end of the instruction, the correct fetch address is in AU and will be 
+used by the <EA> routine of next instruction. PC will only be updated:
+1) in some cases of <EA>, used as temporary variable
+2) at the start of second part of instruction.
+This makes real emulation easier than at first expected.
+
+For example, in Darkside of the Spoon's move.b d1,+$2476(a4), the crash happens 
+after <EA>, before write, after fetch for destination. 
+Two inaccuracies compensate each other in Steem before v3.5.1:
+PC wasn't changed at the end of <EA>, but PC+2 was (logically but not 
+accurately!) made when fetching for the destination.
+
+Another problem
+-----------------
+
+If you look at the microcodes for instructions like CLR, you realise those
+use the same <EA> microcodes to get the correct address on the bus.
+This is a simplification in the CPU design.
+That means that a crash would occur during the 'read' part, and not during
+the second part of the instruction.
+This wasn't the way in Steem, and so special care has to be taken to avoid
+confusion in case of crash ('read' or 'write').
+So at 'clr.w $70fff' of Phaleon that precedes the fatal 'move.l $0.W,$24.w',
+this is a <EA> crash, not a 'write' crash.
+On the other hand, 'clr.w (a1)' of Aladin crashes because a1 contains 0.
+The ST may read memory there but not write into it. So it crashes after <EA> 
+and PC points to next instruction. 
+
+
+Branches
+==========
+
+Bcc, BRA... use a relative displacement.
+
+JMP and JSR don't call any <EA> microcodes, but use their own microcodes.
+Since the microcodes are specific, there's no reason to think that PC would
+be incremented prior to being absolutely set, as this would waste CPU 
+resources.
+We verified this for jmp (xxx).w (The Teller) and jmp (xxx).l.
+
+
+PEA
+=====
+
+From a quick look at microcodes, which are specific, PC seems to follow the
+<EA> rules.
+
+
+Steem SSE
+===========
+
+In Steem, to be sure to push the correct PC in case of crash:
+- Create a new variable 'true PC'.
+- This variable follows Steem's pc, but at <EA> time follows the rules (see 
+table above) instead.
+- At 'get destination' stage, it is set at address of next instruction + 2,
+ except if it's a 'read before write' case. 
+If it's a 'read before write' case, we follow the <EA> rules instead, except
+if it's read-only memory (first 8 bytes of RAM).
+- We use a flag to detect 'read before write' cases. This flag is set by 
+another  macro in the body of specific instruction functions (such as CLR).
+- For branches, PC is unchanged before it's set.
+All in all, there's some more code running in the core CPU emulation but that's
+the price we pay for a more satisfying (hopefully) emulation.
+
+One may use tables based on opcode instead, but that will not be enough for
+some cases that also depend on the memory address (Aladin).
+
+
+
+
+
+

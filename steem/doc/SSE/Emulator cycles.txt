@@ -1,0 +1,75 @@
+Emulator cycles
+=================
+
+Emulator cycles are a reckoning common to Steem and Hatari that is handy
+to reference Shifter tricks.
+
+For example "switching the frequency to 60hz at cycle 376 removes the right
+border of a 50hz line".
+
+They are also called "line cycles" because they're reset for each scanline.
+
+There's a simple relation between emulator cycles and 'position' in Alien's 
+articles:
+
+Emulator cycles = position * 4
+
+Telling what "cycle 0" precisely means isn't so easy! 
+
+Notice that in his article Alien said that he did not determine the exact 
+moment the HBL interrupt takes place, and therefore a constant should be added 
+to his numbers. Similarly, for the timing of HSYNC.
+
+Here is an attempt at making the link between emulator cycles and GLUE events
+ on the STF, based on "Atari Monitor Summary Specifications" by Shiraz Shivji,
+May 14, 1986.
+Graphics are for 60hz (US standard).
+Absolute precision isn't claimed (off by 4?), we 
+
+
+
+Notice that we consider a Shifter latency of 28 cycles (16 prefetch and 12 
+"other") between 'Display Enable' (DE) and actual display of the pixel.
+
+
+Emulator 	60HZ		Emulator 	50HZ
+cycle				cycle
+
+				
+0/508   HBI pending             0/512   HBI pending
+32      End of HBLANK           32      End of HBLANK
+52      Start of DE             56      Start of DE
+80      Display first pixels    84      Display first pixels
+372     End of DE               376     End of DE
+400     Start right border      404     Start right border
+456     Start of HBLANK         460     Start of HBLANK
+464     Start of HSYNC          468     Start of HSYNC
+504     End of HSYNC            508     End of HSYNC
+
+
+Strangely, the HBLANK interrupt (HBI) is triggered by the system (GLUE) only
+after the HSYNC signal has been sent. Because of the time needed by
+the system (MC68000 + MC68901) to process the interrupt itself, 56 cycles,
+the interrupt code starts executing when the cathode ray is in the left 
+border. This makes the HBI almost useless for anything related to display.
+One wonders why it doesn't start at the start of HBLANK instead, 48
+cycles earlier.
+
+
+
+
+The Monitor Specification for vertical timing may also help us to locate
+emulator cycles of the VBI.
+Before the VBI, the video counter is reloaded with the base value. We know
+that because some programs depend on this behaviour.
+The time between those 2 events, about 1544 cycles, is equivalent to the
+0.19 ms timing given in the graphic as VSYNC duration. So apparently
+the video counter is reloaded just before VSYNC and the VBI is set pending
+just after.
+
+The indicated cycles are relative to the HBI = cycle 0 reference.
+
+The VBI is set pending by the GLUE 64 cycles after the last HBI on a
+STF, 68 on a STE.
+
+

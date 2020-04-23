@@ -1,0 +1,8 @@
+The main build is VS2008 since v3.7.
+Before that it was VC6 sice v3.3.
+Before that it was BCC.
+The BCC build is still much used for development.
+The MinGW build is experimental and will certainly not compile 
+(did work at some point, but stopped following it).
+There's a x64 build since v3.8.2 (VS2008 or VS2015). It uses C for drawing
+instead of assembly.

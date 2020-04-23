@@ -1,0 +1,252 @@
+Create a movie from an HBitmap
+==============================
+
+http://www.codeproject.com/Articles/5055/Create-a-movie-from-an-HBitmap
+
+
+Introduction
+
+As every one knows a movie is a sequence of images or bitmaps. And also it is known that HBitmap is the basic ingredient of Bitmap. And we have lots of HBitmaps with us in all our windows applications whether they are animations or just static interfaces. And it is high time for all of us to save all those beautiful sequence of HBitmaps into a file and call it as movie or animation or demo, you name it.
+
+The following presents a way of creating a Movie (AVI / WMV / MOV) from a sequence of HBitmaps. The required functionality has been wrapped in appropriate classes like CAviFile, CwmvFile and CQTMovieFile. Using these classes is fairly simple and involves a single function call AppendNewFrame(); All the necessary initialization (like frame rate settings etc..) would be taken care by the class itself when the AppendNewFrame() is called for the first time. (Except for the QuickTime class. It has its own Graphics world that need to be initialized explicitly through a call to InitGraphicsWorld()).
+
+As one can easily expect - this approach is two fold - for those who want to create movie from a set of image files, say *.jpg or *.bmp, all that is needed is - load all those images into an array of HBitmaps and call AppendNewFrame() with each of them in the order of presentation. For those who want to create movie from the program generated animation sequence - just render the drawing to an HBitmap and call AppendNewFrame() on it for each update (perhaps in WM_PAINT or OnPaint() handler).
+
+Before we move on further, I would like to mention one point worth noting. These classes that we are about to discuss are primarily aimed at providing an add-on support for otherwise complete applications (though they could be used perfectly well in your not yet designed application also). To be exact, these classes have been designed with especial care so as to not to interfere with the design or functionality of the application that is using them. If any error occurs within these classes, they would rather turn off themselves than causing the entire application to halt. Hence the user is freed from any initializations and error checking's. If every thing goes well, you would have a fine movie at the end, but if any thing goes wrong (with in these modules), still you could have your application running perfectly. 
+
+In the following sections details of each of these classes has been explained separately.
+Creating an AVI Movie
+Include files: avifile.h 
+Implementation files: avifile.cpp 
+Additional Libraries: vfw32.lib 
+
+The class CAviFile creates an AVI movie from HBitmaps. Using this class is a two step process. The first step involves creating a CAviFile object. The constructor of CAviFile has been declared in AviFile.h as:
+ Collapse | Copy Code
+class CAviFile{
+public:
+    CAviFile(LPCSTR lpszFileName=_T("Output.avi"), 
+             DWORD dwCodec = mmioFOURCC('M','P','G','4'),
+             DWORD dwFrameRate = 1);
+    ~CAviFile(void);
+    HRESULT AppendNewFrame(HBITMAP hBitmap);
+    HRESULT AppendNewFrame(int nWidth, 
+                           int nHeight, 
+                           LPVOID pBits, 
+                           int nBitsPerPixel);
+};
+
+The constructor accepts three arguments - the output file name, which by default is set to Output.avi, the Video codec to be used for compression, which by default is set to MPG4, and the Frame rate (FPS), which by default is set to 1. While creating the CAviFile object, you can either use the default parameter values, which should work fine for most of the cases, or you can pass your own choice of values. More on this is explained later.
+
+Once a CAviFile object has been created with appropriate codec and frame rate values, the second step involved in using it is the actual call to the method AppendNewFrame(). From the above it is clear that the method has two overloaded alternatives. One version is:
+ Collapse | Copy Code
+ HRESULT AppendNewFrame(HBITMAP hBitmap); 
+which is useful when all our drawing has been done on to a HBitmap and is ready to be stuffed to the end of the current movie as a new frame. The other form accepts raw bitmap bits instead of HBitmap, as shown below. 
+ Collapse | Copy Code
+     HRESULT AppendNewFrame(int nWidth, 
+                           int nHeight, 
+                           LPVOID pBits, 
+                           int nBitsPerPixel);
+If you have your rendered drawing in the form of raw bits rather than HBitmap, you might prefer this second version. However, it should be noted that once we start with one form we can not switch to other form in between during the movie creation. 
+
+The following illustrates the typical code sequence involved in using the CAviFile class:
+ Collapse | Copy Code
+#include "avifile.h" 
+CAviFile aviFile;
+OnPaint(){
+    hdc = BeginPaint(hWnd, &ps);
+    //...Drawing Code onto some hBitmap
+    EndPaint(hWnd, &ps);
+    aviFile.AppendNewFrame(hBackBitmap);
+}
+
+The method CAviFile::AppendNewFrame() returns S_OK on success and E_FAIL on failure. In case of errors, we can use the CAviFile's GetLastErrorMessage() method to retrieve the error message description in string format.
+ Collapse | Copy Code
+LPCTSTR CAviFile::GetLastErrorMessage() const { return m_szErrMsg; }
+
+The typical usage is as shown below:
+ Collapse | Copy Code
+if(FAILED(avi.AppendNewFrame(hBackBitmap)))
+{
+    MessageBox(hWnd, avi.GetLastErrorMessage(), 
+               _T("Error Occured"), MB_OK | MB_ICONERROR);
+}
+Implementation
+
+This section briefly covers the behind scene mechanisms involved in the operation of CAviFile class. One can find all these details from the implementation file AviFile.cpp itself. 
+
+AVI movie creation has been one of the most oldest forms of movie creation and has lot of support through AVIFile set of functions. Before calling any AVIFile function we should call AVIFileInit() and before exiting the application we should call AVIFileExit(). The constructor and destructor are the best places for both of them. Hence you can find them in the constructor and destructor of CAviFile class respectively.
+
+Among all the set of AVIFile functions, the ones that we are interested in are : AVIFileOpen(), AVIFileRelease(), AVIFileCreateStream(), AVIMakeCompressedStream(), AVIStreamSetFormat(), AVIStreamWrite().
+
+Among the above, AVIStreamWrite() is the main operation that actually writes the compressed image bits to the movie file. All the others are used for setting the file, stream and compression options. After creating/opening the AVI file with AVIFileOpen(), the compression options and video codec options can be chosen by settings appropriate values for the AVISTREAMINFO structure members and passing it to the function AVICreateStream(). For example, The fccHandler member of AVISTREAMINFO represents the four character code for the video codec. Typically, the four character code for the video codec is a string such as "divx" "mpg4" etc.. that would be unique for each video codec installed in the system. The function mmioFOURCC() can be used to convert these characters into the DWORD format acceptable by the fccHandler member. By default, in the CAviFile implementation we use "mpg4" codec. To choose a different codec for your application, pass the codec's fourcc as part of the constructor as shown below.
+ Collapse | Copy Code
+CAviFile  avi("Output.Avi", mmioFOURCC('D','I','V','X'), 1);
+    // Use DivX codec with 1 FPS
+
+A list of Fourcc codes and other related information can be found here.
+
+Note that you can pass 0 for the fourcc value to avoid using the codecs altogether, where by your bitmaps would be inserted into the movie as they are without being processed by any codec.
+ Collapse | Copy Code
+CAviFile  avi("Output.Avi", 0, 1); // Does not use any Codec !!
+
+The member dwRate of AVISTREAMINFO controls the Frame rate of the movie. Values between 5 to 15 are common and should be good for most animations (dwRate = 15 typically means 15 frames per second). You can change this frame rate setting by passing your own choice of value to the third parameter (dwFrameRate) of the CAviFile constructor.
+
+Once all these settings has been done successfully, we can create a new video stream in the movie file by using the function AVICreateStream() function, after which we can call the method AVIMakeCompressedStream() to setup the compression filter for the created stream. The success of AVIMakeCompressedStream() depends on the codec you are using being available on the system. If you have used an invalid fourcc value or if the codec is not available on the machine, the call to AVIMakeCompressedStream() would fail. 
+
+Finally, after setting the compression settings but before starting to write the actual image sequence, we need to set the format of our video stream, which is done by using AVIStreamSetFormat. The success of AVIStreamSetFormat() depends on the input bitmap data being suitable to the requirements of the compressor (codec). Note that each codec has different requirements for processing their input data (such as the bits per pixel value being multiple of 4 or the width and height of frames being powers of 2 etc...), and passing a bitmap (or bits) that does not meet those requirements may cause AviStreamSetFormat() to fail.
+
+Once the stream format has been set, we can start writing the HBitmap data using the function AVIStreamWrite(). This function automatically compresses the data (using the options we have set before) and writes the data to the video stream that would be saved to the output movie file. Upon completion, the movie file should be closed to flush all the buffers using the function AVIFileRelease().
+
+The set of AVIFile functions discussed above are declared in the standard header file vfw.h, and the corresponding library that should be linked is vfw32.lib.
+
+
+
+
+
+
+
+AVIFILEINFO
+The AVIFILEINFO structure contains global information for an entire AVI file. 
+
+typedef struct { 
+    DWORD dwMaxBytesPerSec; 
+    DWORD dwFlags; 
+    DWORD dwCaps; 
+    DWORD dwStreams; 
+    DWORD dwSuggestedBufferSize; 
+    DWORD dwWidth; 
+    DWORD dwHeight; 
+    DWORD dwScale; 
+    DWORD dwRate; 
+    DWORD dwLength; 
+    DWORD dwEditCount; 
+    char  szFileType[64]; 
+} AVIFILEINFO; 
+ 
+Members
+dwMaxBytesPerSec 
+Approximate maximum data rate of the AVI file. 
+dwFlags 
+Applicable flags. The following flags are defined: 
+AVIFILEINFO_HASINDEX 
+The AVI file has an index at the end of the file. For good performance, all AVI files should contain an index. 
+AVIFILEINFO_MUSTUSEINDEX 
+The file index contains the playback order for the chunks in the file. Use the index rather than the physical ordering of the chunks when playing back the data. This could be used for creating a list of frames for editing. 
+AVIFILEINFO_ISINTERLEAVED 
+The AVI file is interleaved. 
+AVIFILEINFO_WASCAPTUREFILE 
+The AVI file is a specially allocated file used for capturing real-time video. Applications should warn the user before writing over a file with this flag set because the user probably defragmented this file. 
+AVIFILEINFO_COPYRIGHTED 
+The AVI file contains copyrighted data and software. When this flag is used, software should not permit the data to be duplicated. 
+dwCaps 
+Capability flags. The following flags are defined: 
+AVIFILECAPS_CANREAD 
+An application can open the AVI file with with the read privilege. 
+AVIFILECAPS_CANWRITE 
+An application can open the AVI file with the write privilege. 
+AVIFILECAPS_ALLKEYFRAMES 
+Every frame in the AVI file is a key frame. 
+AVIFILECAPS_NOCOMPRESSION 
+The AVI file does not use a compression method. 
+dwStreams 
+Number of streams in the file. For example, a file with audio and video has at least two streams. 
+dwSuggestedBufferSize 
+Suggested buffer size, in bytes, for reading the file. Generally, this size should be large enough to contain the largest chunk in the file. For an interleaved file, this size should be large enough to read an entire record, not just a chunk. 
+If the buffer size is too small or is set to zero, the playback software will have to reallocate memory during playback, reducing performance. 
+
+dwWidth 
+Width, in pixels, of the AVI file. 
+dwHeight 
+Height, in pixels, of the AVI file. 
+dwScale 
+Time scale applicable for the entire file. Dividing dwRate by dwScale gives the number of samples per second. 
+Any stream can define its own time scale to supersede the file time scale. 
+
+dwLength 
+Length of the AVI file. The units are defined by dwRate and dwScale. 
+dwEditCount 
+Number of streams that have been added to or deleted from the AVI file. 
+szFileType 
+Null-terminated string containing descriptive information for the file type. 
+
+
+
+
+
+AVISTREAMINFO
+The AVISTREAMINFO structure contains information for a single stream. 
+
+typedef struct { 
+    DWORD fccType; 
+    DWORD fccHandler; 
+    DWORD dwFlags; 
+    DWORD dwCaps; 
+    WORD  wPriority; 
+    WORD  wLanguage; 
+    DWORD dwScale; 
+    DWORD dwRate; 
+    DWORD dwStart; 
+    DWORD dwLength; 
+    DWORD dwInitialFrames; 
+    DWORD dwSuggestedBufferSize; 
+    DWORD dwQuality; 
+    DWORD dwSampleSize; 
+    RECT  rcFrame; 
+    DWORD dwEditCount; 
+    DWORD dwFormatChangeCount; 
+    char  szName[64]; 
+} AVISTREAMINFO; 
+ 
+Members
+fccType 
+Four-character code indicating the stream type. The following constants have been defined for the data commonly found in AVI streams: Constant Description 
+streamtypeAUDIO Indicates an audio stream. 
+streamtypeMIDI Indicates a MIDI stream. 
+streamtypeTEXT Indicates a text stream. 
+streamtypeVIDEO Indicates a video stream. 
+
+
+fccHandler 
+Four-character code of the compressor handler that will compress this video stream when it is saved (for example, mmioFOURCC('M','S','V','C')). This member is not used for audio streams. 
+dwFlags 
+Applicable flags for the stream. The bits in the high-order word of these flags are specific to the type of data contained in the stream. The following flags are defined: 
+AVISTREAMINFO_DISABLED 
+Indicates this stream should be rendered when explicitly enabled by the user. 
+AVISTREAMINFO_FORMATCHANGES 
+Indicates this video stream contains palette changes. This flag warns the playback software that it will need to animate the palette. 
+dwCaps 
+Capability flags; currently unused. 
+wPriority 
+Priority of the stream. 
+wLanguage 
+Language of the stream. 
+dwScale 
+Time scale applicable for the stream. Dividing dwRate by dwScale gives the playback rate in number of samples per second. 
+For video streams, this rate should be the frame rate. For audio streams, this rate should correspond to the audio block size (the nBlockAlign member of the WAVEFORMAT or PCMWAVEFORMAT structure), which for PCM (Pulse Code Modulation) audio reduces to the sample rate. 
+
+dwRate 
+See dwScale. 
+dwStart 
+Sample number of the first frame of the AVI file. The units are defined by dwRate and dwScale. Normally, this is zero, but it can specify a delay time for a stream that does not start concurrently with the file. 
+The 1.0 release of the AVI tools does not support a nonzero starting time. 
+
+dwLength 
+Length of this stream. The units are defined by dwRate and dwScale. 
+dwInitialFrames 
+Audio skew. This member specifies how much to skew the audio data ahead of the video frames in interleaved files. Typically, this is about 0.75 seconds. 
+dwSuggestedBufferSize 
+Recommended buffer size, in bytes, for the stream. Typically, this member contains a value corresponding to the largest chunk in the stream. Using the correct buffer size makes playback more efficient. Use zero if you do not know the correct buffer size. 
+dwQuality 
+Quality indicator of the video data in the stream. Quality is represented as a number between 0 and 10,000. For compressed data, this typically represents the value of the quality parameter passed to the compression software. If set to – 1, drivers use the default quality value. 
+dwSampleSize 
+Size, in bytes, of a single data sample. If the value of this member is zero, the samples can vary in size and each data sample (such as a video frame) must be in a separate chunk. A nonzero value indicates that multiple samples of data can be grouped into a single chunk within the file. 
+For video streams, this number is typically zero, although it can be nonzero if all video frames are the same size. For audio streams, this number should be the same as the nBlockAlign member of the WAVEFORMAT or WAVEFORMATEX structure describing the audio. 
+
+rcFrame 
+Dimensions of the video destination rectangle. The values represent the coordinates of upper left corner, the height, and the width of the rectangle. 
+dwEditCount 
+Number of times the stream has been edited. The stream handler maintains this count. 
+dwFormatChangeCount 
+Number of times the stream format has changed. The stream handler maintains this count. 
+szName 
+Null-terminated string containing a description of the stream. 

@@ -1,0 +1,12 @@
+IMPORTS
+  RAROpenArchive          = "unrar.dll".RAROpenArchive
+  RAROpenArchiveEx        = "unrar.dll".RAROpenArchiveEx
+  RARCloseArchive         = "unrar.dll".RARCloseArchive
+  RARReadHeader           = "unrar.dll".RARReadHeader
+  RARReadHeaderEx         = "unrar.dll".RARReadHeaderEx
+  RARProcessFile          = "unrar.dll".RARProcessFile
+  RARProcessFileW         = "unrar.dll".RARProcessFileW
+  RARSetCallback          = "unrar.dll".RARSetCallback
+  RARSetPassword          = "unrar.dll".RARSetPassword
+  RARSetChangeVolProc     = "unrar.dll".RARSetChangeVolProc
+  RARSetProcessDataProc   = "unrar.dll".RARSetProcessDataProc

@@ -1,0 +1,12 @@
+[Text]
+
+Description=temporary patch, fixes freeze 
+ApplyWhen=Demo started
+Version=Steem 3.7 STF 1MB T102
+PatchAuthor=Seagal
+
+[Patch]
+
+012616 = $6056
+
+

@@ -1,0 +1,24 @@
+BUILDING
+
+The included Makefile makes the executable "devel".  The file
+devel.cpp is an example of using the filtering class.  The
+documentation for the class is in filt.h, and the class itself is
+implemented in filt.cpp.
+
+TESTING and USAGE
+
+The file cut.wav is about 8 seconds of an advertisement.  The file
+cut.raw is the same 8 seconds with the 44 byte wav header removed.
+The program devel.cpp is hard coded to filter the file cut.raw.  The
+filtered output ends up in a file filtered.raw.
+
+If you want to hear the results of the filtering, you need to add a
+wav header to filtered.raw.  I use the freeware program "sox" to do
+this (the sampling rate is 44.1Khz, there is 1 channel, and the data
+is in a signed integer 16 bit format).  
+
+As a shortcut, if you are in a Unix/Linux environment you can just use
+the command
+
+   cat hdr.dat filtered.raw > filtered.wav
+

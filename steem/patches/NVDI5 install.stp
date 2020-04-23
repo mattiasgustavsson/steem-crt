@@ -1,0 +1,10 @@
+[Text]
+
+Description=Pass protection
+ApplyWhen=When prompted for serial
+Version=STE, TOS 2.06, 4MB
+PatchAuthor=Seagal
+
+[Patch]
+
+019BD8 = $6600 $008E

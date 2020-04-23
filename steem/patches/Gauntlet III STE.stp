@@ -1,0 +1,10 @@
+[Text]
+
+Description=Pass protection
+ApplyWhen=After loading
+Version=STE, TOS 1.62, 4MB
+PatchAuthor=Seagal
+
+[Patch]
+
+01FFD8 = $6000 $0026

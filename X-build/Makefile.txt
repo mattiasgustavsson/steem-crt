@@ -1,0 +1,609 @@
+
+# to build XSteem SSE, enter this in the terminal:
+# make -B -fMakefile.txt 3rdparty
+# make -B -fMakefile.txt
+
+#####################################
+#      Makefile for Steem           #
+#####################################
+
+# requires tools: make, gcc, g++, nasm
+# requires libs: rtaudio, /*portaudio*/, zlib, minizip, /*urarlib*/, X
+
+# symbolic links - code, inc, 3rdparty
+
+ROOT=..
+
+# Compiler
+CC=g++
+
+# Parameters given to the compiler
+#STEEMFLAGS=-DUNIX -DLINUX -DSTEVEN_SEAGAL -DNO_PORT_AUDIO
+STEEMFLAGS=-DUNIX -DLINUX
+CFLAGS=-I$(ROOT)/include \
+-I$(ROOT)/steem/headers \
+-I$(ROOT)/3rdparty \
+-I$(ROOT)/3rdparty/dsp \
+-I$(ROOT)/3rdparty/6301 \
+-I$(ROOT)/3rdparty/zlib/contrib/minizip \
+-I$(ROOT)/3rdparty/zlib \
+-I$(ROOT)/3rdparty/rtaudio \
+-I$(ROOT)/steem/code \
+-I$(ROOT)/steem/code/x \
+-w -Wfatal-errors -fpermissive
+
+#-libasound -w -Wfatal-errors -fpermissive
+#-I$(ROOT)/steem/code
+
+RELEASE_CFLAGS=-O
+
+# Output filename
+OUTPUT="./output/steem"
+
+    LIBS=-lX11 -lXext -lpthread -lXxf86vm \
+      $(ROOT)/3rdparty/zlib/crc32.o  \
+      $(ROOT)/3rdparty/zlib/inflate.o \
+      $(ROOT)/3rdparty/zlib/adler32.o \
+      $(ROOT)/3rdparty/zlib/trees.o \
+      $(ROOT)/3rdparty/zlib/inffast.o \
+      $(ROOT)/3rdparty/zlib/inftrees.o \
+      $(ROOT)/3rdparty/zlib/deflate.o \
+      $(ROOT)/3rdparty/zlib/zutil.o \
+      $(ROOT)/3rdparty/zlib/compress.o \
+      $(ROOT)/3rdparty/zlib/contrib/minizip/unzip.o \
+      $(ROOT)/3rdparty/zlib/contrib/minizip/ioapi.o \
+      $(ROOT)/3rdparty/rtaudio/tests/Release/RtAudio.o \
+      $(ROOT)/3rdparty/rtaudio/librtaudio.a \
+      $(ROOT)/X-build/obj/6301.o \
+      $(ROOT)/X-build/obj/dsp.o \
+      $(ROOT)/X-build/obj/div68kCycleAccurate.o  \
+      $(ROOT)/X-build/obj/filt.o \
+      /usr/lib/i386-linux-gnu/libasound.so.2 \
+      /usr/lib/i386-linux-gnu/libportaudio.so.2 \
+
+#LIBTOOL=$(ROOT)/3rdparty/portaudio/libtool
+#LIBTOOL=libtool
+#LIBTOOL=g++ -o -L.
+
+# Objects
+OBJS=./obj/asm_draw.o ./obj/asm_osd.o ./obj/main.o ./obj/resource.o \
+ ./obj/options.o ./obj/mmu.o ./obj/ikbd.o ./obj/cpu.o ./obj/debug.o \
+ ./obj/debug_framereport.o ./obj/shifter.o ./obj/display.o ./obj/glue.o \
+ ./obj/computer.o ./obj/disk_stw.o ./obj/disk_ghost.o \
+ ./obj/fdc.o ./obj/floppy_drive.o ./obj/floppy_disk.o \
+ ./obj/disk_dma.o ./obj/psg.o ./obj/hd_acsi.o \
+ ./obj/interface_caps.o ./obj/disk_scp.o ./obj/disk_hfe.o \
+ ./obj/interface_stvl.o ./obj/acia.o ./obj/blitter.o ./obj/mfp.o \
+ ./obj/rs232.o ./obj/hd_gemdos.o ./obj/emulator.o \
+ ./obj/reset.o ./obj/run.o ./obj/ior.o ./obj/iow.o \
+ ./obj/sound.o ./obj/loadsave.o ./obj/draw.o \
+ ./obj/stports.o ./obj/midi.o \
+ ./obj/loadsave_emu.o ./obj/acc.o ./obj/archive.o \
+ ./obj/debugger.o ./obj/debug_emu.o ./obj/d2.o \
+ ./obj/dataloadsave.o ./obj/gui_controls.o ./obj/cpu_ea.o \
+ ./obj/cpu_op.o ./obj/cpuinit.o ./obj/wordwrapper.o \
+ ./obj/associate.o ./obj/dir_id.o ./obj/tos.o \
+ ./obj/diskman.o ./obj/diskman_diags.o \
+ ./obj/dwin_edit.o ./obj/gui.o ./obj/stemwin.o \
+ ./obj/historylist.o ./obj/mem_browser.o ./obj/mr_static.o ./obj/debugger_trace.o \
+ ./obj/iolist.o ./obj/harddiskman.o \
+ ./obj/key_table.o ./obj/shortcutbox.o ./obj/patchesbox.o ./obj/infobox.o \
+ ./obj/osd.o ./obj/stjoy.o ./obj/macros.o \
+ ./obj/notifyinit.o ./obj/options_create.o \
+ ./obj/palette.o  ./obj/screen_saver.o  ./obj/steemintro.o \
+ ./obj/stemdialogs.o  \
+ ./obj/circularbuffer.o ./obj/configstorefile.o \
+ ./obj/di_get_contents.o ./obj/directory_tree.o ./obj/dirsearch.o \
+ ./obj/easycompress.o ./obj/easystr.o ./obj/easystringlist.o \
+  ./obj/mymisc.o ./obj/portio.o \
+ ./obj/translate.o \
+ ./obj/hxc.o ./obj/hxc_alert.o ./obj/hxc_dir_lv.o  \
+ ./obj/hxc_fileselect.o ./obj/hxc_popup.o ./obj/hxc_popuphints.o \
+ ./obj/hxc_prompt.o ./obj/x_mymisc.o ./obj/x_portio.o \
+ ./obj/interface_pa.o ./obj/interface_rta.o \
+ ./obj/notwin_mymisc.o
+
+# Targets
+
+all:	asm
+	mkdir -p obj output
+	$(MAKE) -fMakefile.txt res
+	$(MAKE) -fMakefile.txt main
+	$(MAKE) -fMakefile.txt options
+	$(MAKE) -fMakefile.txt mmu
+	$(MAKE) -fMakefile.txt ikbd
+	$(MAKE) -fMakefile.txt cpu
+	$(MAKE) -fMakefile.txt debug
+	$(MAKE) -fMakefile.txt debug_framereport
+	$(MAKE) -fMakefile.txt shifter
+	$(MAKE) -fMakefile.txt display
+	$(MAKE) -fMakefile.txt glue
+	$(MAKE) -fMakefile.txt computer
+	$(MAKE) -fMakefile.txt disk_stw
+	$(MAKE) -fMakefile.txt disk_ghost
+	$(MAKE) -fMakefile.txt fdc
+	$(MAKE) -fMakefile.txt floppy_drive
+	$(MAKE) -fMakefile.txt floppy_disk
+	$(MAKE) -fMakefile.txt disk_dma
+	$(MAKE) -fMakefile.txt psg
+	$(MAKE) -fMakefile.txt hd_acsi
+	$(MAKE) -fMakefile.txt interface_caps
+	$(MAKE) -fMakefile.txt interface_pa
+	$(MAKE) -fMakefile.txt interface_rta
+	$(MAKE) -fMakefile.txt disk_scp
+	$(MAKE) -fMakefile.txt disk_hfe
+	$(MAKE) -fMakefile.txt interface_stvl
+	$(MAKE) -fMakefile.txt acia
+	$(MAKE) -fMakefile.txt blitter
+	$(MAKE) -fMakefile.txt mfp
+	$(MAKE) -fMakefile.txt rs232
+	$(MAKE) -fMakefile.txt hd_gemdos
+	$(MAKE) -fMakefile.txt emulator
+	$(MAKE) -fMakefile.txt reset
+	$(MAKE) -fMakefile.txt run
+	$(MAKE) -fMakefile.txt ior
+	$(MAKE) -fMakefile.txt iow
+	$(MAKE) -fMakefile.txt sound
+	$(MAKE) -fMakefile.txt loadsave
+	$(MAKE) -fMakefile.txt draw
+	$(MAKE) -fMakefile.txt stports
+	$(MAKE) -fMakefile.txt midi
+	$(MAKE) -fMakefile.txt loadsave_emu
+	$(MAKE) -fMakefile.txt acc
+	$(MAKE) -fMakefile.txt archive
+	$(MAKE) -fMakefile.txt debugger
+	$(MAKE) -fMakefile.txt debug_emu
+	$(MAKE) -fMakefile.txt d2
+	$(MAKE) -fMakefile.txt dataloadsave
+	$(MAKE) -fMakefile.txt gui_controls
+	$(MAKE) -fMakefile.txt cpu_ea
+	$(MAKE) -fMakefile.txt cpu_op
+	$(MAKE) -fMakefile.txt tos
+	$(MAKE) -fMakefile.txt cpuinit
+	$(MAKE) -fMakefile.txt wordwrapper
+	$(MAKE) -fMakefile.txt associate
+	$(MAKE) -fMakefile.txt dir_id
+	$(MAKE) -fMakefile.txt diskman
+	$(MAKE) -fMakefile.txt diskman_diags
+#	$(MAKE) -fMakefile.txt diskman_drag
+	$(MAKE) -fMakefile.txt dwin_edit
+	$(MAKE) -fMakefile.txt gui
+	$(MAKE) -fMakefile.txt stemwin
+	$(MAKE) -fMakefile.txt historylist
+	$(MAKE) -fMakefile.txt mem_browser
+	$(MAKE) -fMakefile.txt mr_static
+	$(MAKE) -fMakefile.txt debugger_trace
+	$(MAKE) -fMakefile.txt iolist
+	$(MAKE) -fMakefile.txt harddiskman
+	$(MAKE) -fMakefile.txt key_table
+	$(MAKE) -fMakefile.txt shortcutbox
+	$(MAKE) -fMakefile.txt patchesbox
+	$(MAKE) -fMakefile.txt infobox
+	$(MAKE) -fMakefile.txt osd
+	$(MAKE) -fMakefile.txt stjoy
+	$(MAKE) -fMakefile.txt macros
+	$(MAKE) -fMakefile.txt notifyinit
+	$(MAKE) -fMakefile.txt options_create
+	$(MAKE) -fMakefile.txt palette
+	$(MAKE) -fMakefile.txt screen_saver
+	$(MAKE) -fMakefile.txt steemintro
+	$(MAKE) -fMakefile.txt stemdialogs
+#	$(MAKE) -fMakefile.txt stjoy_directinput
+#	$(MAKE) -fMakefile.txt choosefolder
+#	$(MAKE) -fMakefile.txt scrollingcontrolswin
+	$(MAKE) -fMakefile.txt circularbuffer
+	$(MAKE) -fMakefile.txt configstorefile
+	$(MAKE) -fMakefile.txt di_get_contents
+	$(MAKE) -fMakefile.txt directory_tree
+	$(MAKE) -fMakefile.txt dirsearch
+	$(MAKE) -fMakefile.txt easycompress
+	$(MAKE) -fMakefile.txt easystr
+	$(MAKE) -fMakefile.txt easystringlist
+#	$(MAKE) -fMakefile.txt input_prompt 
+	$(MAKE) -fMakefile.txt mymisc
+	$(MAKE) -fMakefile.txt portio
+	$(MAKE) -fMakefile.txt translate
+	$(MAKE) -fMakefile.txt hxc
+	$(MAKE) -fMakefile.txt hxc_alert
+	$(MAKE) -fMakefile.txt hxc_dir_lv
+	$(MAKE) -fMakefile.txt hxc_fileselect
+	$(MAKE) -fMakefile.txt hxc_popup
+	$(MAKE) -fMakefile.txt hxc_popuphints
+	$(MAKE) -fMakefile.txt hxc_prompt
+	$(MAKE) -fMakefile.txt x_mymisc
+	$(MAKE) -fMakefile.txt x_portio
+	$(MAKE) -fMakefile.txt notwin_mymisc
+#	$(MAKE) -fMakefile.txt link_static
+	$(MAKE) -fMakefile.txt link
+
+clean:
+	rm -rf obj output
+
+fresh:
+	$(MAKE) -fMakefile_354.txt clean
+#	$(MAKE) urarlib
+	$(MAKE) -fMakefile.txt asm
+	$(MAKE) -fMakefile.txt all
+
+test:
+	$(MAKE) -fMakefile.txt all
+	$(OUTPUT)
+
+release:
+	$(MAKE) -fMakefile.txt clean
+	$(MAKE) -fMakefile.txt res
+#	$(MAKE) urarlib
+	$(MAKE) -fMakefile.txt asm
+	$(MAKE) -fMakefile.txt release_compile
+	$(MAKE) -fMakefile.txt link_static
+	strip -s $(OUTPUT)
+
+helper:
+	$(CC) -o ./obj/helper.o -c $(ROOT)/steem/helper.cpp $(CFLAGS) $(STEEMFLAGS)
+
+main:
+	$(CC) -o ./obj/main.o -c $(ROOT)/steem/main.cpp $(CFLAGS) $(STEEMFLAGS)
+
+translate:
+	$(CC) -o ./obj/translate.o -c $(ROOT)/steem/translate.cpp $(CFLAGS) $(STEEMFLAGS)
+
+options:
+	$(CC) -o ./obj/options.o -c $(ROOT)/steem/options.cpp $(CFLAGS) $(STEEMFLAGS)
+
+mmu:
+	$(CC) -o ./obj/mmu.o -c $(ROOT)/steem/mmu.cpp $(CFLAGS) $(STEEMFLAGS)
+
+ikbd:
+	$(CC) -o ./obj/ikbd.o -c $(ROOT)/steem/ikbd.cpp $(CFLAGS) $(STEEMFLAGS)
+
+cpu:
+	$(CC) -o ./obj/cpu.o -c $(ROOT)/steem/cpu.cpp $(CFLAGS) $(STEEMFLAGS)
+
+debug:
+	$(CC) -o ./obj/debug.o -c $(ROOT)/steem/debug.cpp $(CFLAGS) $(STEEMFLAGS)
+
+debug_framereport:
+	$(CC) -o ./obj/debug_framereport.o -c $(ROOT)/steem/debug_framereport.cpp $(CFLAGS) $(STEEMFLAGS)
+
+shifter:
+	$(CC) -o ./obj/shifter.o -c $(ROOT)/steem/shifter.cpp $(CFLAGS) $(STEEMFLAGS)
+
+display:
+	$(CC) -o ./obj/display.o -c $(ROOT)/steem/display.cpp $(CFLAGS) $(STEEMFLAGS)
+
+glue:
+	$(CC) -o ./obj/glue.o -c $(ROOT)/steem/glue.cpp $(CFLAGS) $(STEEMFLAGS)
+
+computer:
+	$(CC) -o ./obj/computer.o -c $(ROOT)/steem/computer.cpp $(CFLAGS) $(STEEMFLAGS)
+
+disk_stw:
+	$(CC) -o ./obj/disk_stw.o -c $(ROOT)/steem/disk_stw.cpp $(CFLAGS) $(STEEMFLAGS)
+
+disk_ghost:
+	$(CC) -o ./obj/disk_ghost.o -c $(ROOT)/steem/disk_ghost.cpp $(CFLAGS) $(STEEMFLAGS)
+
+fdc:
+	$(CC) -o ./obj/fdc.o -c $(ROOT)/steem/fdc.cpp $(CFLAGS) $(STEEMFLAGS)
+
+floppy_drive:
+	$(CC) -o ./obj/floppy_drive.o -c $(ROOT)/steem/floppy_drive.cpp $(CFLAGS) $(STEEMFLAGS)
+
+floppy_disk:
+	$(CC) -o ./obj/floppy_disk.o -c $(ROOT)/steem/floppy_disk.cpp $(CFLAGS) $(STEEMFLAGS)
+
+disk_dma:
+	$(CC) -o ./obj/disk_dma.o -c $(ROOT)/steem/disk_dma.cpp $(CFLAGS) $(STEEMFLAGS)
+
+psg:
+	$(CC) -o ./obj/psg.o -c $(ROOT)/steem/psg.cpp $(CFLAGS) $(STEEMFLAGS)
+
+hd_acsi:
+	$(CC) -o ./obj/hd_acsi.o -c $(ROOT)/steem/hd_acsi.cpp $(CFLAGS) $(STEEMFLAGS)
+
+interface_caps:
+	$(CC) -o ./obj/interface_caps.o -c $(ROOT)/steem/interface_caps.cpp $(CFLAGS) $(STEEMFLAGS)
+
+interface_pa:
+	$(CC) -o ./obj/interface_pa.o -c $(ROOT)/steem/interface_pa.cpp $(CFLAGS) $(STEEMFLAGS)
+
+interface_rta:
+	$(CC) -o ./obj/interface_rta.o -c $(ROOT)/steem/interface_rta.cpp $(CFLAGS) $(STEEMFLAGS)
+
+disk_scp:
+	$(CC) -o ./obj/disk_scp.o -c $(ROOT)/steem/disk_scp.cpp $(CFLAGS) $(STEEMFLAGS)
+
+disk_hfe:
+	$(CC) -o ./obj/disk_hfe.o -c $(ROOT)/steem/disk_hfe.cpp $(CFLAGS) $(STEEMFLAGS)
+
+interface_stvl:
+	$(CC) -o ./obj/interface_stvl.o -c $(ROOT)/steem/interface_stvl.cpp $(CFLAGS) $(STEEMFLAGS)
+
+acia:
+	$(CC) -o ./obj/acia.o -c $(ROOT)/steem/acia.cpp $(CFLAGS) $(STEEMFLAGS)
+
+blitter:
+	$(CC) -o ./obj/blitter.o -c $(ROOT)/steem/blitter.cpp $(CFLAGS) $(STEEMFLAGS)
+
+mfp:
+	$(CC) -o ./obj/mfp.o -c $(ROOT)/steem/mfp.cpp $(CFLAGS) $(STEEMFLAGS)
+
+rs232:
+	$(CC) -o ./obj/rs232.o -c $(ROOT)/steem/rs232.cpp $(CFLAGS) $(STEEMFLAGS)
+
+hd_gemdos:
+	$(CC) -o ./obj/hd_gemdos.o -c $(ROOT)/steem/hd_gemdos.cpp $(CFLAGS) $(STEEMFLAGS)
+
+emulator:
+	$(CC) -o ./obj/emulator.o -c $(ROOT)/steem/emulator.cpp $(CFLAGS) $(STEEMFLAGS)
+
+reset:
+	$(CC) -o ./obj/reset.o -c $(ROOT)/steem/reset.cpp $(CFLAGS) $(STEEMFLAGS)
+
+run:
+	$(CC) -o ./obj/run.o -c $(ROOT)/steem/run.cpp $(CFLAGS) $(STEEMFLAGS)
+
+ior:
+	$(CC) -o ./obj/ior.o -c $(ROOT)/steem/ior.cpp $(CFLAGS) $(STEEMFLAGS)
+
+iow:
+	$(CC) -o ./obj/iow.o -c $(ROOT)/steem/iow.cpp $(CFLAGS) $(STEEMFLAGS)
+
+sound:
+	$(CC) -o ./obj/sound.o -c $(ROOT)/steem/sound.cpp $(CFLAGS) $(STEEMFLAGS)
+
+loadsave:
+	$(CC) -o ./obj/loadsave.o -c $(ROOT)/steem/loadsave.cpp $(CFLAGS) $(STEEMFLAGS)
+
+draw:
+	$(CC) -o ./obj/draw.o -c $(ROOT)/steem/draw.cpp $(CFLAGS) $(STEEMFLAGS)
+
+stports:
+	$(CC) -o ./obj/stports.o -c $(ROOT)/steem/stports.cpp $(CFLAGS) $(STEEMFLAGS)
+
+midi:
+	$(CC) -o ./obj/midi.o -c $(ROOT)/steem/midi.cpp $(CFLAGS) $(STEEMFLAGS)
+
+loadsave_emu:
+	$(CC) -o ./obj/loadsave_emu.o -c $(ROOT)/steem/loadsave_emu.cpp $(CFLAGS) $(STEEMFLAGS)
+
+acc:
+	$(CC) -o ./obj/acc.o -c $(ROOT)/steem/acc.cpp $(CFLAGS) $(STEEMFLAGS)
+
+archive:
+	$(CC) -o ./obj/archive.o -c $(ROOT)/steem/archive.cpp $(CFLAGS) $(STEEMFLAGS)
+
+debugger:
+	$(CC) -o ./obj/debugger.o -c $(ROOT)/steem/debugger.cpp $(CFLAGS) $(STEEMFLAGS)
+
+debug_emu:
+	$(CC) -o ./obj/debug_emu.o -c $(ROOT)/steem/debug_emu.cpp $(CFLAGS) $(STEEMFLAGS)
+
+d2:
+	$(CC) -o ./obj/d2.o -c $(ROOT)/steem/d2.cpp $(CFLAGS) $(STEEMFLAGS)
+
+dataloadsave:
+	$(CC) -o ./obj/dataloadsave.o -c $(ROOT)/steem/dataloadsave.cpp $(CFLAGS) $(STEEMFLAGS)
+
+gui_controls:
+	$(CC) -o ./obj/gui_controls.o -c $(ROOT)/steem/gui_controls.cpp $(CFLAGS) $(STEEMFLAGS)
+
+cpu_ea:
+	$(CC) -o ./obj/cpu_ea.o -c $(ROOT)/steem/cpu_ea.cpp $(CFLAGS) $(STEEMFLAGS)
+
+cpu_op:
+	$(CC) -o ./obj/cpu_op.o -c $(ROOT)/steem/cpu_op.cpp $(CFLAGS) $(STEEMFLAGS)
+
+cpuinit:
+	$(CC) -o ./obj/cpuinit.o -c $(ROOT)/steem/cpuinit.cpp $(CFLAGS) $(STEEMFLAGS)
+
+associate:
+	$(CC) -o ./obj/associate.o -c $(ROOT)/steem/associate.cpp $(CFLAGS) $(STEEMFLAGS)
+
+dir_id:
+	$(CC) -o ./obj/dir_id.o -c $(ROOT)/steem/dir_id.cpp $(CFLAGS) $(STEEMFLAGS)
+
+diskman:
+	$(CC) -o ./obj/diskman.o -c $(ROOT)/steem/diskman.cpp $(CFLAGS) $(STEEMFLAGS)
+
+diskman_diags:
+	$(CC) -o ./obj/diskman_diags.o -c $(ROOT)/steem/diskman_diags.cpp $(CFLAGS) $(STEEMFLAGS)
+
+diskman_drag:
+	$(CC) -o ./obj/diskman_drag.o -c $(ROOT)/steem/diskman_drag.cpp $(CFLAGS) $(STEEMFLAGS)
+
+dwin_edit:
+	$(CC) -o ./obj/dwin_edit.o -c $(ROOT)/steem/dwin_edit.cpp $(CFLAGS) $(STEEMFLAGS)
+
+gui:
+	$(CC) -o ./obj/gui.o -c $(ROOT)/steem/gui.cpp $(CFLAGS) $(STEEMFLAGS)
+
+tos:
+	$(CC) -o ./obj/tos.o -c $(ROOT)/steem/tos.cpp $(CFLAGS) $(STEEMFLAGS)
+
+stemwin:
+	$(CC) -o ./obj/stemwin.o -c $(ROOT)/steem/stemwin.cpp $(CFLAGS) $(STEEMFLAGS)
+
+historylist:
+	$(CC) -o ./obj/historylist.o -c $(ROOT)/steem/historylist.cpp $(CFLAGS) $(STEEMFLAGS)
+
+mem_browser:
+	$(CC) -o ./obj/mem_browser.o -c $(ROOT)/steem/mem_browser.cpp $(CFLAGS) $(STEEMFLAGS)
+
+mr_static:
+	$(CC) -o ./obj/mr_static.o -c $(ROOT)/steem/mr_static.cpp $(CFLAGS) $(STEEMFLAGS)
+
+debugger_trace:
+	$(CC) -o ./obj/debugger_trace.o -c $(ROOT)/steem/debugger_trace.cpp $(CFLAGS) $(STEEMFLAGS)
+
+iolist:
+	$(CC) -o ./obj/iolist.o -c $(ROOT)/steem/iolist.cpp $(CFLAGS) $(STEEMFLAGS)
+
+harddiskman:
+	$(CC) -o ./obj/harddiskman.o -c $(ROOT)/steem/harddiskman.cpp $(CFLAGS) $(STEEMFLAGS)
+
+key_table:
+	$(CC) -o ./obj/key_table.o -c $(ROOT)/steem/key_table.cpp $(CFLAGS) $(STEEMFLAGS)
+
+shortcutbox:
+	$(CC) -o ./obj/shortcutbox.o -c $(ROOT)/steem/shortcutbox.cpp $(CFLAGS) $(STEEMFLAGS)
+
+patchesbox:
+	$(CC) -o ./obj/patchesbox.o -c $(ROOT)/steem/patchesbox.cpp $(CFLAGS) $(STEEMFLAGS)
+
+infobox:
+	$(CC) -o ./obj/infobox.o -c $(ROOT)/steem/infobox.cpp $(CFLAGS) $(STEEMFLAGS)
+
+osd:
+	$(CC) -o ./obj/osd.o -c $(ROOT)/steem/osd.cpp $(CFLAGS) $(STEEMFLAGS)
+
+stjoy:
+	$(CC) -o ./obj/stjoy.o -c $(ROOT)/steem/stjoy.cpp $(CFLAGS) $(STEEMFLAGS)
+
+macros:
+	$(CC) -o ./obj/macros.o -c $(ROOT)/steem/macros.cpp $(CFLAGS) $(STEEMFLAGS)
+
+notifyinit:
+	$(CC) -o ./obj/notifyinit.o -c $(ROOT)/steem/notifyinit.cpp $(CFLAGS) $(STEEMFLAGS)
+
+options_create:
+	$(CC) -o ./obj/options_create.o -c $(ROOT)/steem/options_create.cpp $(CFLAGS) $(STEEMFLAGS)
+
+palette:
+	$(CC) -o ./obj/palette.o -c $(ROOT)/steem/palette.cpp $(CFLAGS) $(STEEMFLAGS)
+
+screen_saver:
+	$(CC) -o ./obj/screen_saver.o -c $(ROOT)/steem/screen_saver.cpp $(CFLAGS) $(STEEMFLAGS)
+
+steemintro:
+	$(CC) -o ./obj/steemintro.o -c $(ROOT)/steem/steemintro.cpp $(CFLAGS) $(STEEMFLAGS)
+
+stemdialogs:
+	$(CC) -o ./obj/stemdialogs.o -c $(ROOT)/steem/stemdialogs.cpp $(CFLAGS) $(STEEMFLAGS)
+
+stjoy_directinput:
+	$(CC) -o ./obj/stjoy_directinput.o -c $(ROOT)/steem/stjoy_directinput.cpp $(CFLAGS) $(STEEMFLAGS)
+
+choosefolder:
+	$(CC) -o ./obj/choosefolder.o -c $(ROOT)/include/choosefolder.cpp $(CFLAGS) $(STEEMFLAGS)
+
+wordwrapper:
+	$(CC) -o ./obj/wordwrapper.o -c $(ROOT)/include/wordwrapper.cpp $(CFLAGS) $(STEEMFLAGS)
+
+scrollingcontrolswin:
+	$(CC) -o ./obj/scrollingcontrolswin.o -c $(ROOT)/include/scrollingcontrolswin.cpp $(CFLAGS) $(STEEMFLAGS)
+
+configstorefile:
+	$(CC) -o ./obj/configstorefile.o -c $(ROOT)/include/configstorefile.cpp $(CFLAGS) $(STEEMFLAGS)
+
+di_get_contents:
+	$(CC) -o ./obj/di_get_contents.o -c $(ROOT)/include/di_get_contents.cpp $(CFLAGS) $(STEEMFLAGS)
+
+directory_tree:
+	$(CC) -o ./obj/directory_tree.o -c $(ROOT)/include/directory_tree.cpp $(CFLAGS) $(STEEMFLAGS)
+
+dirsearch:
+	$(CC) -o ./obj/dirsearch.o -c $(ROOT)/include/dirsearch.cpp $(CFLAGS) $(STEEMFLAGS)
+
+easycompress:
+	$(CC) -o ./obj/easycompress.o -c $(ROOT)/include/easycompress.cpp $(CFLAGS) $(STEEMFLAGS)
+
+circularbuffer:
+	$(CC) -o ./obj/circularbuffer.o -c $(ROOT)/include/circularbuffer.cpp $(CFLAGS) $(STEEMFLAGS)
+
+easystr:
+	$(CC) -o ./obj/easystr.o -c $(ROOT)/include/easystr.cpp $(CFLAGS) $(STEEMFLAGS)
+
+easystringlist:
+	$(CC) -o ./obj/easystringlist.o -c $(ROOT)/include/easystringlist.cpp $(CFLAGS) $(STEEMFLAGS)
+
+notwin_mymisc:
+	$(CC) -o ./obj/notwin_mymisc.o -c $(ROOT)/include/notwin_mymisc.cpp $(CFLAGS) $(STEEMFLAGS)
+
+input_prompt:
+	$(CC) -o ./obj/input_prompt.o -c $(ROOT)/include/input_prompt.cpp $(CFLAGS) $(STEEMFLAGS)
+
+mymisc:
+	$(CC) -o ./obj/mymisc.o -c $(ROOT)/include/mymisc.cpp $(CFLAGS) $(STEEMFLAGS)
+
+portio:
+	$(CC) -o ./obj/portio.o -c $(ROOT)/include/portio.cpp $(CFLAGS) $(STEEMFLAGS)
+
+hxc:
+	$(CC) -o ./obj/hxc.o -c $(ROOT)/include/x/hxc.cpp $(CFLAGS) $(STEEMFLAGS)
+
+hxc_alert:
+	$(CC) -o ./obj/hxc_alert.o -c $(ROOT)/include/x/hxc_alert.cpp $(CFLAGS) $(STEEMFLAGS)
+
+hxc_dir_lv:
+	$(CC) -o ./obj/hxc_dir_lv.o -c $(ROOT)/include/x/hxc_dir_lv.cpp $(CFLAGS) $(STEEMFLAGS)
+
+hxc_fileselect:
+	$(CC) -o ./obj/hxc_fileselect.o -c $(ROOT)/include/x/hxc_fileselect.cpp $(CFLAGS) $(STEEMFLAGS)
+
+hxc_popup:
+	$(CC) -o ./obj/hxc_popup.o -c $(ROOT)/include/x/hxc_popup.cpp $(CFLAGS) $(STEEMFLAGS)
+
+hxc_popuphints:
+	$(CC) -o ./obj/hxc_popuphints.o -c $(ROOT)/include/x/hxc_popuphints.cpp $(CFLAGS) $(STEEMFLAGS)
+
+hxc_prompt:
+	$(CC) -o ./obj/hxc_prompt.o -c $(ROOT)/include/x/hxc_prompt.cpp $(CFLAGS) $(STEEMFLAGS)
+
+x_mymisc:
+	$(CC) -o ./obj/x_mymisc.o -c $(ROOT)/include/x/x_mymisc.cpp $(CFLAGS) $(STEEMFLAGS)
+
+x_portio:
+	$(CC) -o ./obj/x_portio.o -c $(ROOT)/include/x/x_portio.cpp $(CFLAGS) $(STEEMFLAGS)
+
+asm:
+	mkdir -p ./obj
+	nasm -felf -o./obj/asm_draw.o -i$(ROOT)/steem/asm/ $(ROOT)/steem/asm/asm_draw.asm
+	nasm -felf -o./obj/asm_osd.o -i$(ROOT)/steem/asm/ $(ROOT)/steem/asm/asm_osd_draw.asm
+
+res:
+	nasm -felf -o./obj/resource.o -i$(ROOT)/steem/ $(ROOT)/steem/rc/resource.asm
+
+link: 
+	$(CC) -o $(OUTPUT) $(CFLAGS) $(OBJS) $(LIBS)
+#	$(LIBTOOL) --tag=CC --mode=link $(CC) -o $(OUTPUT) $(CFLAGS) $(OBJS) $(LIBS)
+#	$(LIBTOOL) --tag=CC  $(CC) -o $(OUTPUT) $(CFLAGS) $(OBJS) $(LIBS)
+
+link_static:
+	$(CC) -o $(OUTPUT) $(CFLAGS) $(OBJS) $(LIBS) -static
+
+
+
+
+#3rdparty:	zlib unrarlib portaudio rtaudio div68kCycleAccurate 6301
+3rdparty:	div68kCycleAccurate 6301 dsp zlib rtaudio filt
+
+div68kCycleAccurate:
+	gcc -c $(ROOT)/3rdparty/pasti/div68kCycleAccurate.c $(CFLAGS) -o./obj/div68kCycleAccurate.o
+
+6301:
+	gcc -c $(ROOT)/3rdparty/6301/6301.c $(CFLAGS) $(STEEMFLAGS) -o./obj/6301.o
+
+dsp:
+	$(CC) -o ./obj/dsp.o -c $(ROOT)/3rdparty/dsp/dsp.cpp $(CFLAGS) $(STEEMFLAGS)
+
+filt:
+	$(CC) -o ./obj/filt.o -c $(ROOT)/3rdparty/dsp/FIR-filter-class/filt.cpp $(CFLAGS) $(STEEMFLAGS)
+
+#unrarlib:
+#	gcc -c $(ROOT)/3rdparty/unrarlib/unrarlib/unrarlib.c $(CFLAGS) -o$(ROOT)/3rdparty/unrarlib/unrarlib/unrarlib.o
+
+zlib:
+	cd $(ROOT)/3rdparty/zlib; sh configure; make test
+	cd $(ROOT)/3rdparty/zlib/contrib/minizip; make all
+
+#portaudio:
+#	cd $(ROOT)/3rdparty/portaudio; \
+#	sh configure; \
+#	make
+
+rtaudio:
+	cd $(ROOT)/3rdparty/rtaudio; sh configure --with-alsa; cd tests; make
+
+
+

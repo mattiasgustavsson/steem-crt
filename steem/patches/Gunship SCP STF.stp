@@ -1,0 +1,12 @@
+[Text]
+
+Description=Pass protection 
+ApplyWhen=Vehicule Identification screen
+Version=STF, TOS 1.02, 1MB
+PatchAuthor=Seagal
+
+[Patch]
+
+0279F8 = $6074
+
+

@@ -1,0 +1,996 @@
+This file contains specific info that is necessary to implement a 6301 keyboard
+chip (IKBD) emulation in an Atari ST emulation, specifically Steem, using the
+3rd party 6301 emulation that is part of the Sim6xx project by Arne Riiber.
+It is mainly based on the official doc for the MC6500 and the HD6301 by
+Motorola and Hitachi, the indispensable doc by Stephane Catala - Belzebub 
+/ ST Connexion, STMagazine No 53 - 55, and on its translation by Tobe, 
+with some minor (gasp) corrections and additions by Steven Seagal.
+===============================================================================
+
+Interesting ST cases
+====================
+
+Audio Sculpture
+Barbarian
+Cobra Compil 1
+Dragonnels (Menu, Unlimited Bobs, Great Plazma)
+Froggies over the Fence (Menu)
+Gauntlet
+GEM
+Jumping Jackson (Automation 239)
+Lethal Xcess
+Manchester United
+NEOchrome
+Sentinel
+Snork/Defulloir
+Transbeauce 2 (Menu)
+Warp
+
+
+Internal Registers
+==================
+
+Internal registers can be accessed by the program, but some are read-only,
+some are write-only. When reading a write-only register, one gets all bits
+set ($FF). The DDR registers are write-only. Themselves determine which bits
+of DR registers are read-only and which are write-only. If the bit is set in
+the DDR, then the corresponding bit in DR is read-only (input).
+In Sim6xx, they're identified with iram[].
+
+
+
+==============================================================================
+  * Data Registers
+------------------------------------------------------------------------------
+$0000    | B | DDR1  | Direction Data Register 1                      | WO
+$0001    | B | DDR2  | Direction Data Register 2                      | WO
+$0002    | B | DR1   | Data Register 1 (P1)                           | RW
+$0003    | B | DR2   | Data Register 2 (P2)                           | RW
+$0004    | B | DDR3  | Direction Data Register 3                      | WO
+$0005    | B | DDR4  | Direction Data Register 4                      | WO
+$0006    | B | DR3   | Data Register 3 (P3)                           | RW
+$0007    | B | DR4   | Data Register 4 (P4)                           | RW
+------------------------------------------------------------------------------
+  * 16bit Timer
+------------------------------------------------------------------------------
+$0008    | B | TCSR  | Timer Control/Status Register                  | RW
+$0009-A  | W | FRC   | Free Running Counter                           | RO
+$000B-C  | W | OCR   | Output Compare Register                        | RW
+$000D-E  | W | ICR   | Input Capture Register                         | RO
+------------------------------------------------------------------------------
+$000F    | B | CSR   | Unused Control/Status Register for DR3 SC1/SC2 |
+------------------------------------------------------------------------------
+  * Serial Communication Interface
+------------------------------------------------------------------------------
+$0010    | B | RMCR  | Rate & Mode Control Register                   |RW (WO?)
+$0011    | B | TRCSR | Transmit/Receive Control & Status Register     | RW
+$0012    | B | RDR   | Receive Data Register                          | RO
+$0013    | B | TDR   | Transmit Data Register                         | WO
+------------------------------------------------------------------------------
+  * RAM Control
+------------------------------------------------------------------------------
+$0014    | B | RCR   | RAM Control Register                           | RW
+------------------------------------------------------------------------------
+
+
+TCSR ($8)      Timer Control/Status Register
+---------
+
+-Bit 0 	OLVL	0x01	(RW) Output Level (when DDR20=1): FRC matched OCR 
+-Bit 1	IEDG	0x02	(RW) Input Edge (when DDR20=0):
+			   0=negative 1=positive for P20 trigging FRC->ICR 
+-Bit 2	ETOI	0x04	(RW) Enable Timer Overflow Interrupt	
+-Bit 3	EOCI	0x08	(RW) Enable Output Compare Interrupt	
+-Bit 4	EICI	0x10	(RW) Enable Input Capture Interrupt	
+-Bit 5	TOF	0x20	(RO) Timer OverFlow ($FFFF->0) occured	
+-Bit 6	OCF	0x40	(RO) Output Compare Flag: FRC matched OCR	
+-Bit 7	ICF	0x80	(RO) Input Capture Flag: FRC->ICR		
+
+On the ST, Input Capture is not connected, and Output Level does nothing. (?)
+
+
+TRCSR ($11)    Transmit/Receive Control & Status Register
+-----------
+
+This register controls the serial communication.
+In Sim6xx, there are defines for each bit (WU, etc.).
+-Bit 0 (RW) : Wake Up (WU 0x01)
+  ! WU set means "stand-by", not "awake".
+  It is set by software and cleared by hardware.
+  When the chip is in stand-by mode, a series of ten '1' bits will awake it.
+  It seems that a working but not transmitting serial line does just that.
+  Cases: Froggies leaving menu, Barbarian (hack in Steem gets more 
+  mysterious...)
+-Bit 1 (RW) : Transmit Enable (TE 0x02)
+-Bit 2 (RW) : Transmit Interrupt Enable (TIE 0x04)
+-Bit 3 (RW) : Receive Enable (RE 0x08)
+  This bit is never cleared by the ROM in the ST.
+-Bit 4 (RW) : Receive Interrupt Enable (RIE 0x10)
+-Bit 5 (RO) : Transmit Data Register Empty (TDRE 0x20)
+  This bit is set when a byte has been sent, and is cleared by when TRCSR is 
+  read then TDR is written, according to doc. 
+-Bit 6 (RO) : Overrun or Framing Error (ORFE 0x40)
+  Set when a byte is received if the previous byte was not read, cleared when 
+  TRCSR then RDR are read.
+  When a byte is received while the previous byte hasn't been read, the overrun
+  flag is set by the hardware, it's cleared at next read. 
+  The ROM sets the chip in stand-by mode when it detects an overrun. 
+  This must be emulated because it does happen with some programs. 
+  Fascinatingly, if you fail to emulate this Barbarian will be stuck, but for
+  a totally different reason as in fake emulation ("Psygnosys hack").
+-Bit 7 (RO) : Receive Data Register Full (RDRF 0x80)
+  Set when a byte was received, cleared when TRSCR then RDR are read
+
+The read-only bits are set and cleared by the hardware (or the emulation).
+It seems the ST ROM tries to clear bit 7:
+f990	71 ef 11	aim ef11			;TRCSR clear bit7 RDRF
+fcfe	71 ef 11	aim ef11
+
+
+RMCR ($10)
+----------
+
+bit 0 SS0 select
+bit 1 SS1 select
+bit 2 CC0 clock control/format select
+bit 3 CC1 clock control/format select
+
+RMCR is initiated with $5 (0101) on the ST:
+Internal clock, divisor 128, port 2 bit 2 not used
+
+
+Mode
+====
+Mode is selected by wiring pins P20, P21 and P22.
+Those are latched into the control bits PC0, PC1 and PC2 or Port 2,
+that is bits 5, 6 and 7 of DR2 ($0003).
+Monochip (mode 7) on the ST.
+
+
+Speed, timings 
+==============
+
+The 6301 is a 1mhz chip. It includes a divide-by-4 circuit, so a 4mhz crystal
+is used for the 'internal clock' (as opposed to 'clocked by an input port').
+The transmission speed between ACIA and 6301 is 7812.5, using 10 bits/byte.
+
+Each bit takes 128 cycles ~1mhz to be transmitted, one byte (10bit frame), 1280
+cycles (*8 for the values in m68k~8mhz cycles: 1024 and 10240).
+
+
+Double-buffering
+================
+
+According to their doc, both the ACIA and the 6301 use double-buffering, which 
+allows to have one value in the shift register (value being transmitted/
+received) and another value in the I/O register.
+You can read or write a byte while another is being shifted, it makes sense.
+
+
+Case: Froggies
+When the CPU sends '1', IKBD sends 1 byte.
+When the CPU sends '4', IKBD sends 4 bytes.
+2 bytes are ignored due to ACIA OVR, the program reads the 2 remaining bytes.
+The program uses the ACIA interrupt to get those last 2 bytes.
+
+The 'Frogies' menu is extremely sensitive to ACIA and 6301 timings.
+
+To get the right timing, we must emulate double-buffering with a 1-bit delay 
+before the first byte in TDR is transferred into TDRS, for 6301 as well as for 
+ACIA emulation.
+
+
+Overrun
+=======
+
+According to the doc, overrun is marked in SR as soon as a byte is received
+and the previous byte wasn't read. It's different from ACIA, where the overrun
+is marked only when RDR is read, but there's no reason to believe it's wrong.
+
+
+DR registers in input mode
+==========================
+
+Those registers are handled in ireg.c in Sim6xx.
+
+When you read DR registers, you really are checking the hardware. Those 
+registers must reflect the situation of the hardware, not a static value in 
+memory. For emulation, you may update the values at time of event, or when
+the register is read.
+
+
+Keyboard
+========
+
+To read the keyboard, one uses DR1, DR3 & DR4 and their associated direction
+registers DDR1, DDR3 & DDR4.
+Bits 1-7 of DR3 are mapped to the first seven keyboard's matrix columns
+(see keyboard table), and all bits of DR4 may be mapped to the remaining ones.
+DR1 is mapped to the rows of the matrix.
+DR1 is set in input mode (DDR1 0), DR3 & DR4 in ouput mode (DDR3, 4 FF), but
+maybe we must consider bit by bit.
+
+All bits of DR1 that are cleared in DDR1 (meaning input) are set. 
+But if a key is pressed in the corresponding row (see table), and the bit in 
+DDR3 or DDR4 corresponding to the column is set, and the corresponding 
+bit in DR3 or DR4 is set (and not cleared like the doc states, because setting
+the bit will trigger a diode that stops the current), the bit in DR1 is cleared.
+It seems rather complicated, but it's not hard to emulate. 
+
+This precious table indicates how the keys change the state of registers.
+The first row is shifted to the right compared with the table by Tobe (from the
+one in ST Magazine). The schematics were available in some ST service manuals.
+Decimal numbers have been converted to more common hexadecimal.
+The hex codes are the scancodes that will be returned by the 6301 program.
+We have this funny situation where we send a scancode to the emulator, so that
+it knows which registers to change to have the program send the very same 
+scancode!
+
+  //               DR3                |                  DR4                  |
+  //  1 |  2 |  3 |  4 |  5 |  6 |  7 |  0 |  1 |  2 |  3 |  4 |  5 |  6 |  7 |
+  //  FD   FB   F7   EF   DF   BF   7F   FE   FD   FB   F7   EF   DF   BF   7F
+  // 002  004  008  010  020  040  080  001  002  004  008  010  020  040  080
+  //  0    1    2    3    4    5    6    7    8    9   10   11   12   13   14
+  ///////////////////////////////////////////////////////////////////////////// DR1
+  {0x00,0x3B,0x3C,0x3D,0x3E,0x3F,0x40,0x41,0x42,0x43,0x44,0x62,0x61,0x63,0x65},// 0
+  {0x00,0x00,0x00,0x00,0x01,0x03,0x05,0x07,0x09,0x0B,0x0D,0x0E,0x48,0x64,0x66},// 1
+  {0x00,0x00,0x00,0x00,0x02,0x04,0x06,0x08,0x0A,0x0C,0x29,0x53,0x47,0x67,0x69},// 2
+  {0x00,0x00,0x00,0x00,0x0F,0x11,0x13,0x15,0x16,0x18,0x1A,0x52,0x4B,0x68,0x4A},// 3
+  {0x1D,0x00,0x00,0x00,0x10,0x12,0x14,0x22,0x17,0x19,0x1B,0x2B,0x50,0x6A,0x6C},// 4
+  {0x00,0x2A,0x00,0x00,0x1E,0x1F,0x21,0x23,0x24,0x26,0x27,0x1C,0x4D,0x6B,0x4E},// 5
+  {0x00,0x00,0x38,0x00,0x60,0x20,0x2E,0x30,0x25,0x33,0x34,0x28,0x6D,0x6E,0x6F},// 6
+  {0x00,0x00,0x00,0x36,0x2C,0x2D,0x2F,0x31,0x32,0x39,0x3A,0x35,0x70,0x71,0x72} // 7
+
+Here is a widely available, but not with those nice columns, table of 
+scancodes/keys.
+
+SCAN CODES
+
+01	Esc	    1B	]	            35	/		          4F	{ NOT USED }
+02	1 	    1C	RET	          36	(RIGHT) SHIFT	50	DOWN ARROW
+03	2	      1D	CTRL	        37	{ NOT USED }	51	{ NOT USED }
+04	3 	    1E	A	            38	ALT		        52	INSERT
+05	4 	    1F	S	            39	SPACE BAR	    53	DEL
+06	5 	    20	D	            3A	CAPS LOCK	    54	{ NOT USED }
+07	6 	    21	F	            3B	F1		        5F	{ NOT USED }
+08	7 	    22	G	            3C	F2		        60	ISO KEY
+09	8	      23	H	            3D	F3		        61	UNDO
+0A	9	      24	J	            3E	F4		        62	HELP
+0B	0	      25	K	            3F	F5		        63	KEYPAD (
+0C	-	      26	L	            40	F6		        64	KEYPAD /
+0D	==	    27	;	            41	F7		        65	KEYPAD *
+0E	BS	    28	'	            42	F8		        66	KEYPAD *
+0F	TAB	    29	`	            43	F9		        67	KEYPAD 7
+10	Q	      2A	(LEFT) SHIFT	44	F10	          68	KEYPAD 8
+11	W	      2B	\	            45	{ NOT USED }	69	KEYPAD 9
+12	E	      2C	Z	            46	{ NOT USED }	6A	KEYPAD 4
+13	R	      2D	X	            47	HOME		      6B	KEYPAD 5
+14	T	      2E	C	            48	UP ARROW	    6C	KEYPAD 6
+15	Y	      2F	V	            49	{ NOT USED }	6D	KEYPAD 1
+16	U	      30	B	            4A	KEYPAD -	    6E	KEYPAD 2
+17	I	      31	N	            4B	LEFT ARROW	  6F	KEYPAD 3
+18	O	      32	M	            4C	{ NOT USED }	70	KEYPAD 0
+19	P	      33	,	            4D	RIGHT ARROW	  71	KEYPAD .
+1A	[	      34	.	            4E	KEYPAD +	    72	KEYPAD ENTER
+
+
+The table can also be found in the ROM ($F319->$F370 + special keys),
+each column following the other from #4 on ($3E,$1,$2,$F,...).
+
+f206	1d 2a 38 36: shift etc.
+...  
+f2f3	80 01 00 02 ce f3 11 d6 8a c1 05 25 0d c0  ...........%..
+f301	04 58 58 58 3a 5f 20 01 5c 44 24 fc 3a a6  .XXX:_ .\D$.:.
+f30f	00 39 00 00 3b 3c 3d 00 00 00 3e 01 02 0f  .9..;<=...>...
+f31d	10 1e 60 2c 3f 03 04 11 12 1f 20 2d 40 05  ..`,?..... -@.
+f32b	06 13 14 21 2e 2f 41 07 08 15 22 23 30 31  ...!./A..."#01
+f339	42 09 0a 16 17 24 25 32 43 0b 0c 18 19 26  B....$%2C....&
+f347	33 39 44 0d 29 1a 1b 27 34 3a 62 0e 53 52  39D.)..'4:b.SR
+f355	2b 1c 28 35 61 48 47 4b 50 4d 6d 70 63 64  +.(5aHGKPMmpcd
+f363	67 68 6a 6b 6e 71 65 66 69 4a 6c 4e 6f 72  ghjknqefiJlNor
+
+Steem SSE can use the rom to spare some memory
+(#define SSE_IKBD_6301_ROM_KEYTABLE).
+
+
+Mouse & Joysticks buttons
+=========================
+
+Register DR2 is used to read mouse & joysticks buttons.
+Left mouse button/joystick 0 fire is mapped to bit 2.
+Right mouse button/joystick 1 fire is mapped to bit 1.
+The bits are cleared when the buttons are pressed, and supposedly if the 
+corresponding DDR bits are cleared.
+
+
+Mouse & Joysticks directions
+============================
+
+Register DR4 is also used to read mouse & joysticks directions, as shown
+here:
+
+Bit 0: XB & Up0
+Bit 1: XA & Down0
+Bit 2: YA & Left0
+Bit 3: YB & Right0
+Bit 4: Up1            NOT $10 = $EF
+Bit 5: Down1          NOT $20 = $DF
+Bit 6: Left1          NOT $40 = $BF
+Bit 7: Right1         NOT $80 = $7F
+
+XB, XA, YA, YB (mouse) are mapped on bits 4-7 if mouse is in port 1 
+
+The corresponding bits in DDR4 are then set to input.
+
+Bit 0 in DDR2 must be set, but it seems that to read the mouse, bit 0
+of DR2 may be 0 (Froggies) or 1 (GEM). For the joystick, it seems to be set.
+
+As the mouse ball rotates, two axes spin and cause the rotation
+of a 0011 bit sequence in the hardware, two bits going to the 
+registry when read. To emulate this, we rotate a $CCCCCCCC sequence and
+send the last bits to register bits 0-1 for horizontal movement, 2-3
+for vertical movement. 
+
+We rotate the sequence left for mouse moving to the left or up, right for 
+right or down.
+
+Joystick movements are a bit easier to emulate. When they're checked, set bit
+ means no movement, a 0 indicates movement.
+
+This explains the oddity of 'Jumping Jackson Auto239'.
+The DISABLE MOUSE command causes a last reading of the mouse (jump to RESUME
+in the rom), which is sent by the 6301 to the CPU as a joystick event, 
+because '0' means movement for the joystick.
+
+[Note: maybe, this is an interpretation
+Without emulating that, the game switches to a buggy black screen.]
+
+
+Mouse speed indications
+
+mouse 400 pixels = 5 rotations
+wheel : 20 ticks
+4 sensors
+4x20x5=400: vertical pixels of mono
+
+
+On the ST, moving the mouse when joystick moves were expected would trigger
+endless movements, but plugging a joystick and taking control would fix the 
+issue. IIRC.
+
+ROM
+===
+
+A disassembly of the ROM is provided in this directory.
+Since v3.6, there's also an imperfectly commented listing, and a RAM map.
+A 6301 browser in Steem Debug shows the RAM too.
+An option dumps the RAM and a disassembly (useful for custom programs) in 
+Trace.txt.
+
+
+Custom Programs
+===============
+
+On the ST, only a handful of programs reprogram the 6301:
+Audio Sculpture
+Dragonnels Menu
+Froggies over the Fence Menu
+Transbeauce 2 Menu
+
+
+
+6301 INSTRUCTION SET SUMMARY (table from Tobe, with some additions)
+==============================================================================
+
+ REGISTERS & MEMORY INSTRUCTIONS
++----+---+---+---+---+---+---+------+----------------------------------------+
+|Mne |Imp|Rel|Imm|Dir|Ind|Ext|HINZVC| Fonction                               |
++----+---+---+---+---+---+---+------+----------------------------------------+
+|CLR |   |   |   |   | 6F| 7F|..0100| M=0                                    |
+|CLRA| 4F|   |   |   |   |   |..0100| A=0                                    |
+|CLRB| 5F|   |   |   |   |   |..0100| B=0                                    |
+|LDAA|   |   | 86| 96| A6| B6|..**0.| A=M                                    |
+|LDAB|   |   | C6| D6| E6| F6|..**0.| B=M                                    |
+|LDD |   |   | CC| DC| EC| FC|..**0.| D=MM                                   |
+|LDS |   |   | 8E| 9E| AE| BE|..**0.| S=MM                                   |
+|LDX |   |   | CE| DE| EE| FE|..**0.| X=MM                                   |
+|PSHA| 36|   |   |   |   |   |......| (SP)=A,SP-                             |
+|PSHB| 37|   |   |   |   |   |......| (SP)=B,SP-                             |
+|PSHX| 3C|   |   |   |   |   |......| (SP)=X,SP-                             |
+|PULA| 36|   |   |   |   |   |......| SP+,A=(SP)                             |
+|PULB| 37|   |   |   |   |   |......| SP+,B=(SP)                             |
+(fix: http://www.atari-forum.com/viewtopic.php?f=16&t=5297&start=25#p282440
+|PULA| 32|   |   |   |   |   |......| SP+,A=(SP)                             |
+|PULB| 33|   |   |   |   |   |......| SP+,B=(SP)                             |
+)
+|PULX| 38|   |   |   |   |   |......| SP+,X=(SP)                             |
+|STAA|   |   |   | 97| A7| B7|..**0.| M=A                                    |
+|STAB|   |   |   | D7| E7| F7|..**0.| M=B                                    |
+|STD |   |   |   | DD| ED| FD|..**0.| MM=D                                   |
+|STS |   |   |   | 9F| AF| BF|..**0.| MM=S                                   |
+|STX |   |   |   | DF| EF| FF|..**0.| MM=X                                   |
+|TAB | 16|   |   |   |   |   |..**0.| B=A                                    |
+|TAP | 06|   |   |   |   |   |******| S=A                                    |
+|TBA | 17|   |   |   |   |   |..**0.| A=B                                    |
+|TPA | 07|   |   |   |   |   |......| A=S                                    |
++----+---+---+---+---+---+---+------+----------------------------------------+
+
+ ARITHMETIC INSTRUCTIONS                                                                                                              |
++----+---+---+---+---+---+---+------+----------------------------------------+
+|Mne |Imp|Rel|Imm|Dir|Ind|Ext|HINZVC| Fonction                               |
++----+---+---+---+---+---+---+------+----------------------------------------+
+|ABA | 1B|   |   |   |   |   |*.****| B=B+A                                  |
+|ABX | 3A|   |   |   |   |   |......| X=X+B (B unsigned)                     |
+|ADCA|   |   | 89| 99| A9| B9|*.****| A=A+M+C                                |
+|ADCB|   |   | C9| D9| E9| F9|*.****| B=B+M+C                                |
+|ADDA|   |   | 8B| 9B| AB| BB|*.****| A=A+M                                  |
+|ADDB|   |   | CB| DB| EB| FB|*.****| B=B+M                                  |
+|ADDD|   |   | C3| D3| E3| F3|..****| D=D+MM                                 |
+|DAA | 19|   |   |   |   |   |..****| A=BCD(A)                               |
+|DEC |   |   |   |   | 6A| 7A|..***.| M=M-1                                  |
+|DECA| 4A|   |   |   |   |   |..***.| A=A-1                                  |
+|DECB| 5A|   |   |   |   |   |..***.| B=B-1                                  |
+|DES | 34|   |   |   |   |   |......| S=S-1                                  |
+|DEX | 09|   |   |   |   |   |...*..| X=X-1                                  |
+|INC |   |   |   |   | 6C| 7C|..***.| M=M+1                                  |
+|INCA| 4C|   |   |   |   |   |..***.| A=A+1                                  |
+|INCB| 5C|   |   |   |   |   |..***.| B=B+1                                  |
+|INS | 31|   |   |   |   |   |......| S=S+1                                  |
+|INX | 08|   |   |   |   |   |...*..| X=X+1                                  |
+|MUL | 3D|   |   |   |   |   |.....*| D=A*B                                  |
+|NEG |   |   |   |   | 60| 70|..****| M=-M                                   |
+|NEGA| 40|   |   |   |   |   |..****| A=-A                                   |
+|NEGB| 50|   |   |   |   |   |..****| B=-B                                   |
+|SBA | 10|   |   |   |   |   |..****| A=A-B                                  |
+|SBCA|   |   | 82| 92| A2| B2|..****| A=A-M-C                                |
+|SBCB|   |   | C2| D2| E2| F2|..****| B=B-M-C                                |
+|SUBA|   |   | 80| 90| A0| B0|..****| A=A-M                                  |
+|SUBB|   |   | C0| D0| E0| F0|..****| B=B-M                                  |
+|SUBD|   |   | 83| 93| A3| B3|..****| D=D-MM                                 |
++----+---+---+---+---+---+---+------+----------------------------------------+
+
+ LOGICAL INSTRUCTIONS
++----+---+---+---+---+---+---+------+----------------------------------------+
+|Mne |Imp|Rel|Imm|Dir|Ind|Ext|HINZVC| Fonction                               |
++----+---+---+---+---+---+---+------+----------------------------------------+
+|ANDA|   |   | 84| 94| A4| B4|..**0.| A=A&M                                  |
+|ANDB|   |   | C4| D4| E4| F4|..**0.| B=B&M                                  |
+|COMA| 43|   |   |   |   |   |..**01| A=~A                     (=NOTA)       |
+|COMB| 53|   |   |   |   |   |..**01| B=~B                     (=NOTB)       |
+|EORA|   |   | 88| 98| A8| B8|..**0.| A=A^M                                  |
+|EORB|   |   | C8| D8| E8| F8|..**0.| B=B^M                                  |
+|NOT |   |   |   |   | 63| 73|..**01| M=~M                                   |
+|NOTA| 43|   |   |   |   |   |..**01| A=~A                                   |
+|NOTB| 53|   |   |   |   |   |..**01| B=~B                                   |
+|ORAA|   |   | 8A| 9A| AA| BA|..**0.| A=A|M                                  |
+|ORAB|   |   | CA| DA| EA| FA|..**0.| B=B|M                                  |
++----+---+---+---+---+---+---+------+----------------------------------------+
+
+ SHIFT & ROTATE INSTRUCTIONS
++----+---+---+---+---+---+---+------+----------------------------------------+
+|Mne |Imp|Rel|Imm|Dir|Ind|Ext|HINZVC| Fonction                               |
++----+---+---+---+---+---+---+------+----------------------------------------+
+|ASR |   |   |   |   | 67| 77|..****| M=M>>1                                 |
+|ASRA| 47|   |   |   |   |   |..****| A=A>>1                                 |
+|ASRB| 57|   |   |   |   |   |..****| B=B>>1                                 |
+|LSL |   |   |   |   | 68| 78|..****| M=M<<1                                 |
+|LSLA| 48|   |   |   |   |   |..****| A=A<<1                                 |
+|LSLB| 58|   |   |   |   |   |..****| B=B<<1                                 |
+|LSLD| 05|   |   |   |   |   |..****| D=D<<1                                 |
+|LSR |   |   |   |   | 64| 74|..0***| M=M>>1                                 |
+|LSRA| 44|   |   |   |   |   |..0***| A=A>>1                                 |
+|LSRB| 54|   |   |   |   |   |..0***| B=B>>1                                 |
+|LSRD| 04|   |   |   |   |   |..0***| D=D>>1                                 |
+|ROL |   |   |   |   | 69| 79|..****| M=M<<1+C (C is previous carry)         |
+|ROLA| 49|   |   |   |   |   |..****| A=A<<1+C        //                     |
+|ROLB| 59|   |   |   |   |   |..****| B=B<<1+C        //                     |
+|ROR |   |   |   |   | 66| 76|..****| M=M>>1+C<<8     //                     |
+|RORA| 46|   |   |   |   |   |..****| A=A>>1+C<<8     //                     |
+|RORB| 56|   |   |   |   |   |..****| B=B>>1+C<<8     //                     |
++----+---+---+---+---+---+---+------+----------------------------------------+
+
+ TEST & COMPARE INSTRUCTIONS
++----+---+---+---+---+---+---+------+----------------------------------------+
+|Mne |Imp|Rel|Imm|Dir|Ind|Ext|HINZVC| Fonction                               |
++----+---+---+---+---+---+---+------+----------------------------------------+
+|BITA|   |   | 85| 95| A5| B5|..**0.| A&M                                    |
+|BITB|   |   | C5| D5| E5| F5|..**0.| B&M                                    |
+|CBA | 11|   |   |   |   |   |..****| B-A                                    |
+|CMPA|   |   | 81| 91| A1| B1|..****| A-M                                    |
+|CMPB|   |   | C1| D1| E1| F1|..****| B-M                                    |
+|CPX |   |   | 8C| 9C| AC| BC|..****| X-MM                                   |
+|TST |   |   |   |   | 6D| 7D|..**00| M-0                                    |
+|TSTA| 4D|   |   |   |   |   |..**00| A-0                                    |
+|TSTB| 5D|   |   |   |   |   |..**00| B-0                                    |
++----+---+---+---+---+---+---+------+----------------------------------------+
+
+ STATUS REGISTER INSTRUCTIONS
++----+---+---+---+---+---+---+------+----------------------------------------+
+|Mne |Imp|Rel|Imm|Dir|Ind|Ext|HINZVC| Fonction                               |
++----+---+---+---+---+---+---+------+----------------------------------------+
+|CLC | 0C|   |   |   |   |   |.....0| C=0                                    |
+|CLI | 0E|   |   |   |   |   |.0....| I=0                                    |
+|CLV | 0A|   |   |   |   |   |....0.| V=0                                    |
+|SEC | 0D|   |   |   |   |   |.....1| C=1                                    |
+|SEI | 0F|   |   |   |   |   |.1....| I=1                                    |
+|SEV | 0B|   |   |   |   |   |....1.| V=1                                    |
++----+---+---+---+---+---+---+------+----------------------------------------+
+
+ BRANCHING INSTRUCTIONS
++----+---+---+---+---+---+---+------+----------------------------------------+
+|Mne |Imp|Rel|Imm|Dir|Ind|Ext|HINZVC| Fonction                               |
++----+---+---+---+---+---+---+------+----------------------------------------+
+|BCC |   | 24|   |   |   |   |......| if C=0 then PC=PC+M                    |
+|BCS |   | 25|   |   |   |   |......| if C=1 then PC=PC+M                    |
+|BEQ |   | 27|   |   |   |   |......| if Z=1 then PC=PC+M                    |
+|BGE |   | 2C|   |   |   |   |......| if N^V=0 then PC=PC+M                  |
+|BGT |   | 2E|   |   |   |   |......| if Z|(N^V) then PC=PC+M                |
+|BHI |   | 22|   |   |   |   |......| if C|Z=0 then PC=PC+M                  |
+|BLE |   | 2F|   |   |   |   |......| if Z|(N^V)=1 then PC=PC+M              |
+|BLS |   | 23|   |   |   |   |......| if C|Z=1 then PC=PC+M                  |
+|BLT |   | 2D|   |   |   |   |......| if N^V=1 then PC=PC+M                  |
+|BMI |   | 2B|   |   |   |   |......| if N=1 then PC=PC+M                    |
+|BNE |   | 26|   |   |   |   |......| if Z=0 then PC=PC+M                    |
+|BPL |   | 2A|   |   |   |   |......| if N=0 then PC=PC+M                    |
+|BVC |   | 28|   |   |   |   |......| if V=0 then PC=PC+M                    |
+|BVS |   | 29|   |   |   |   |......| if V=1 then PC=PC+M                    |
+|BRA |   | 20|   |   |   |   |......| PC=PC+M                                |
+|BRN |   | 21|   |   |   |   |......| PC=PC+0                                |
+|BSR |   | 8D|   |   |   |   |......| (SP)=PC,SP-,PC=PC+M                    |
+|JMP |   |   |   |   | 6E| 7E|......| PC=MM                                  |
+|JSR |   |   |   | 9D| AD| BD|......| (SP)=PC,SP-,PC=PC+M                    |
++----+---+---+---+---+---+---+------+----------------------------------------+
+
+ OTHER INSTRUCTIONS
++----+---+---+---+---+---+---+------+----------------------------------------+
+|Mne |Imp|Rel|Imm|Dir|Ind|Ext|HINZVC| Fonction                               |
++----+---+---+---+---+---+---+------+----------------------------------------+
+|NOP | 01|   |   |   |   |   |......|                                        |
+|RTI | 3B|   |   |   |   |   |******| Ret Interrupt                          |
+|RTS | 39|   |   |   |   |   |......| Ret                                    |
+|SWI | 3F|   |   |   |   |   |.1....| PC=SWI                                 |
+|WAI | 3E|   |   |   |   |   |......| PC=PC-1                                |
++----+---+---+---+---+---+---+------+----------------------------------------+
+
+ ADDITIONAL INSTRUCTIONS (6301 only)
++---+------+---+-------------------------------------------------------------+
+|AND| #x,M | 71| M=M&x                                                       |
+|OR | #x,M | 72| M=M|x                                                       |
+|EOR| #x,M | 75| M=M^x                                                       |
+|BIT| #x,M | 7B| M&x                                                         |
++---+------+---+-------------------------------------------------------------+
+
+ ADDITIONAL INSTRUCTIONS (6301 only)
++----+---+---+---+---+---+---+------+----------------------------------------+
+|Mne |Imp|Rel|Imm|Dir|Ind|Ext|HINZVC| Fonction                               |
++----+---+---+---+---+---+---+------+----------------------------------------+
+|AIM |   |   |71 |   |   |   |..**0.| M=M&x                            (=AND)|
+|OIM |   |   |72 |   |   |   |..**0.| M=M|x                            (=OR) |
+|TIM |   |   |7B |   |   |   |..**0.| x&M                              (=BIT)|
++----+---+---+---+---+---+---+------+----------------------------------------+
+
+
+Interrupts
+==========
+
+Interrupt vectors
+
+SCIVECTOR	0xFFF0	Serial 
+TOFVECTOR	0xFFF2	Timer Overflow	
+OCFVECTOR	0xFFF4	Timer Output Capture	
+ICFVECTOR	0xFFF6	Timer Input Capture	
+IRQVECTOR	0xFFF8	IRQ1 (ISI3)		
+SWIVECTOR	0xFFFA	Software Interrupt	
+NMIVECTOR	0xFFFC	NMI	
+RESVECTOR	0xFFFE	RESET
+
+The ST IKBD ROM manages 3 interrupts: serial, timer and reset.
+Timer has higher priority than serial.
+
+fff0	fe e2  ..		;SCI vector (serial)
+fff2	f0 00  ..
+fff4	fd 9d  ..		;OCF vector (timer)
+fff6	f0 00  ..
+fff8	f0 00  ..
+fffa	f0 00  ..
+fffc	f0 00  ..
+fffe	f0 00  ..
+
+
+Custom Programs
+===============
+Froggies
+--------
+Loader
+00b0	0f		sei
+00b1	4f		clra
+00b2	97 b5		staa b5
+00b4	8e ff ea	lds  #ffea
+00b7	dc 11		ldd  11
+00b9	2a fc		bpl  fc (B7)
+00bb	37		pshb
+00bc	20 f9		bra  f9 (B7)
+
+Main
+    	00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F
+0000	00 01 00 ff ff 00 00 20 60 f2 b6 00 00 00 00 00  ....... `.......
+0010	05 0a 04 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+0020	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+0030	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+0040	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+0050	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+0060	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+0070	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+0080	00 00 00 fc 00 ed 00 ce 31 4f 97 80 97 81 86 ff  ........1O......
+0090	97 03 97 05 4f ce 00 04 d6 02 e5 f7 26 02 aa fb  ....O.......&...
+00a0	09 26 f7 c6 80 6d 02 2a 06 7b 02 03 27 01 5f d7  .&...m.*.{..'._.
+00b0	82 6a 03 6c 05 8d 34 08 8d 31 86 f0 16 c4 0a 10  .j.l..4..1......
+00c0	48 54 1b d6 07 d7 bb 98 bb 8d 22 09 8d 1f dc 11  HT........".....
+00d0	2a bc 3a 5d 2a 03 7e f0 00 7b 20 11 27 fb a6 7f  *.:]*.~..{ .'...
+00e0	84 7f 9a 82 97 13 09 26 f0 20 9e 8d 00 e6 80 44  .......&. .....D
+00f0	c2 00 44 c9 00 e7 80 39 08 02 20 10 10 01 80 08  ..D....9.. .....
+0080	00		nop0
+0081	00		nop0
+0082	00		nop0
+0083	fc 00 ed	ldd  00ed
+0086	00		nop0
+0087	ce 31 4f	ldx  #314f
+008a	97 80		staa 80
+008c	97 81		staa 81
+008e	86 ff		ldaa #ff
+0090	97 03		staa 03
+0092	97 05		staa 05
+0094	4f		clra
+0095	ce 00 04	ldx  #0004
+0098	d6 02		ldab 02
+009a	e5 f7		bita f7,x
+009c	26 02		bne  02 (A0)
+009e	aa fb		oraa fb,x
+00a0	09		dex
+00a1	26 f7		bne  f7 (9A)
+00a3	c6 80		ldab #80
+00a5	6d 02		tst 02,x
+00a7	2a 06		bpl  06 (AF)
+00a9	7b 02 03	tim 0203
+00ac	27 01		beq  01 (AF)
+00ae	5f		clrb
+00af	d7 82		stab 82
+00b1	6a 03		dec 03,x
+00b3	6c 05		inc 05,x
+00b5	8d 34		bsr  34 (EB)
+00b7	08		inx
+00b8	8d 31		bsr  31 (EB)
+00ba	86 f0		ldaa #f0
+00bc	16		tab
+00bd	c4 0a		andb #0a
+00bf	10		sba
+00c0	48		lsla
+00c1	54		lsrb
+00c2	1b		aba
+00c3	d6 07		ldab 07
+00c5	d7 bb		stab bb
+00c7	98 bb		eora bb
+00c9	8d 22		bsr  22 (ED)
+00cb	09		dex
+00cc	8d 1f		bsr  1f (ED)
+00ce	dc 11		ldd  11
+00d0	2a bc		bpl  bc (8E)
+00d2	3a		abx
+00d3	5d		tstb
+00d4	2a 03		bpl  03 (D9)
+00d6	7e f0 00	jmp f000
+00d9	7b 20 11	tim 2011
+00dc	27 fb		beq  fb (D9)
+00de	a6 7f		ldaa 7f,x
+00e0	84 7f		anda #7f
+00e2	9a 82		oraa 82
+00e4	97 13		staa 13
+00e6	09		dex
+00e7	26 f0		bne  f0 (D9)
+00e9	20 9e		bra  9e (89)
+00eb	8d 00		bsr  00 (ED)
+00ed	e6 80		ldab 80,x
+00ef	44		lsra
+00f0	c2 00		sbcb #00
+00f2	44		lsra
+00f3	c9 00		adcb #00
+00f5	e7 80		stab 80,x
+00f7	39		rts
+
+00f8	08		inx
+00f9	02		---
+00fa	20 10		bra  10 (10C)
+00fc	10		sba
+00fd	01		nop
+00fe	80 08		suba #08
+
+Transbeauce 2
+-------------
+Loader
+00b0	0f		sei
+00b1	be f9 a1	lds  f9a1
+00b4	dc 11		ldd  11
+00b6	2a fc		bpl  fc (B4)
+00b8	37		pshb
+00b9	20 f9		bra  f9 (B4)
+00bb	00		nop0
+
+Main
+0080	00		nop0
+0081	11		cba
+0082	2a fc		bpl  fc (80)
+0084	37		pshb
+0085	20 00		bra  00 (87)
+0087	cc ff df	ldd  #ffdf
+008a	97 03		staa 03
+008c	97 05		staa 05
+008e	dd 06		std  06
+0090	96 02		ldaa 02
+0092	5f		clrb
+0093	85 02		bita #02
+0095	26 02		bne  02 (99)
+0097	ca 01		orab #01
+0099	85 10		bita #10
+009b	26 02		bne  02 (9F)
+009d	ca 02		orab #02
+009f	85 08		bita #08
+00a1	26 02		bne  02 (A5)
+00a3	ca 04		orab #04
+00a5	85 20		bita #20
+00a7	26 02		bne  02 (AB)
+00a9	ca 08		orab #08
+00ab	86 ef		ldaa #ef
+00ad	97 07		staa 07
+00af	96 02		ldaa 02
+00b1	85 01		bita #01
+00b3	26 02		bne  02 (B7)
+00b5	ca 40		orab #40
+00b7	86 fb		ldaa #fb
+00b9	97 07		staa 07
+00bb	96 02		ldaa 02
+00bd	2b 02		bmi  02 (C1)
+00bf	ca 80		orab #80
+00c1	d7 80		stab 80
+00c3	86 fe		ldaa #fe
+00c5	97 03		staa 03
+00c7	4f		clra
+00c8	97 05		staa 05
+00ca	96 07		ldaa 07
+00cc	43		coma
+00cd	44		lsra
+00ce	44		lsra
+00cf	44		lsra
+00d0	44		lsra
+00d1	84 0f		anda #0f
+00d3	7b 04 03	tim 0403
+00d6	26 02		bne  02 (DA)
+00d8	8a 80		oraa #80
+00da	9a 80		oraa 80
+00dc	7b 20 11	tim 2011
+00df	27 fb		beq  fb (DC)
+00e1	97 13		staa 13
+00e3	20 a2		bra  a2 (87)
+00e5	00		nop0
+00e6	00		nop0
+00e7	00		nop0
+00e8	00		nop0
+00e9	00		nop0
+00ea	00		nop0
+00eb	00		nop0
+00ec	00		nop0
+00ed	00		nop0
+00ee	00		nop0
+00ef	00		nop0
+00f0	00		nop0
+00f1	00		nop0
+00f2	00		nop0
+00f3	00		nop0
+00f4	00		nop0
+00f5	00		nop0
+00f6	00		nop0
+00f7	00		nop0
+00f8	00		nop0
+00f9	00		nop0
+00fa	00		nop0
+00fb	00		nop0
+00fc	00		nop0
+00fd	00		nop0
+00fe	00		nop0
+00ff	00		nop0
+
+Dragonnels
+----------
+Loader
+00a0	0f		sei
+00a1	4f		clra
+00a2	97 a5		staa a5
+00a4	8e ff ff	lds  #ffff
+00a7	dc 11		ldd  11
+00a9	2a fc		bpl  fc (A7)
+00ab	37		pshb
+00ac	20 f9		bra  f9 (A7)
+
+Main
+0080	00		nop0
+0081	00		nop0
+0082	00		nop0
+0083	00		nop0
+0084	00		nop0
+0085	00		nop0
+0086	00		nop0
+0087	00		nop0
+0088	aa 00		oraa 00,x
+008a	0e		cli
+008b	80 40		suba #40
+008d	00		nop0
+008e	00		nop0
+008f	80 00		suba #00
+0091	0a		clv
+0092	00		nop0
+0093	01		nop
+0094	00		nop0
+0095	00		nop0
+0096	00		nop0
+0097	00		nop0
+0098	00		nop0
+0099	00		nop0
+009a	00		nop0
+009b	06		tap
+009c	00		nop0
+009d	00		nop0
+009e	00		nop0
+009f	0f		sei
+00a0	0f		sei
+00a1	4f		clra
+00a2	97 a5		staa a5
+00a4	8e 00 ff	lds  #00ff
+00a7	dc 11		ldd  11
+00a9	2a fc		bpl  fc (A7)
+00ab	37		pshb
+00ac	20 00		bra  00 (AE)
+00ae	96 07		ldaa 07
+00b0	97 ef		staa ef
+00b2	96 07		ldaa 07
+00b4	d6 ef		ldab ef
+00b6	97 ef		staa ef
+00b8	54		lsrb
+00b9	54		lsrb
+00ba	84 cc		anda #cc
+00bc	c4 33		andb #33
+00be	1b		aba
+00bf	16		tab
+00c0	84 0f		anda #0f
+00c2	8b f0		adda #f0
+00c4	97 d3		staa d3
+00c6	54		lsrb
+00c7	54		lsrb
+00c8	54		lsrb
+00c9	54		lsrb
+00ca	cb f0		addb #f0
+00cc	d7 d1		stab d1
+00ce	96 ee		ldaa ee
+00d0	9b ff		adda ff
+00d2	9b f0		adda f0
+00d4	97 ee		staa ee
+00d6	dc 11		ldd  11
+00d8	2a d8		bpl  d8 (B2)
+00da	86 80		ldaa #80
+00dc	d6 03		ldab 03
+00de	54		lsrb
+00df	d4 03		anda 03
+00e1	c4 02		andb #02
+00e3	27 02		beq  02 (E7)
+00e5	96 ee		ldaa ee
+00e7	97 13		staa 13
+00e9	4f		clra
+00ea	97 ee		staa ee
+00ec	20 c4		bra  c4 (B2)
+00ee	00		nop0
+00ef	f0 00 01	subb 0001
+00f2	ff 00 ff	stx  00ff
+00f5	00		nop0
+00f6	00		nop0
+00f7	01		nop
+00f8	01		nop
+00f9	00		nop0
+00fa	00		nop0
+00fb	ff 00 ff	stx  00ff
+00fe	01		nop
+00ff	00		nop0
+
+Audio Sculpture
+---------------
+Loader
+008e	ce ff ff	ldx  #ffff
+0091	c6 0f		ldab #0f
+0093	20 45		bra  45 (DA)
+0095	20 00		bra  00 (97)
+
+Main
+0080	c6 72		ldab #72
+0082	96 11		ldaa 11
+0084	2a fc		bpl  fc (82)
+0086	96 12		ldaa 12
+0088	08		inx
+0089	a7 7f		staa 7f,x
+008b	5a		decb
+008c	26 f4		bne  f4 (82)
+008e	8e 00 fe	lds  #00fe
+0091	96 11		ldaa 11
+0093	2a fc		bpl  fc (91)
+0095	96 12		ldaa 12
+0097	ce 00 80	ldx  #0080
+009a	cc ff ff	ldd  #ffff
+009d	97 03		staa 03
+009f	dd 04		std  04
+00a1	5a		decb
+00a2	dd 06		std  06
+00a4	36		psha
+00a5	96 02		ldaa 02
+00a7	a7 00		staa 00,x
+00a9	08		inx
+00aa	32		pula
+00ab	0d		sec
+00ac	59		rolb
+00ad	49		rola
+00ae	25 f2		bcs  f2 (A2)
+00b0	96 82		ldaa 82
+00b2	81 7f		cmpa #7f
+00b4	26 e1		bne  e1 (97)
+00b6	86 39		ldaa #39
+00b8	8d 15		bsr  15 (CF)
+00ba	96 11		ldaa 11
+00bc	2a fc		bpl  fc (BA)
+00be	96 12		ldaa 12
+00c0	81 42		cmpa #42
+00c2	26 f6		bne  f6 (BA)
+00c4	86 4b		ldaa #4b
+00c6	8d 07		bsr  07 (CF)
+00c8	86 13		ldaa #13
+00ca	8d 03		bsr  03 (CF)
+00cc	7e f0 00	jmp f000
+00cf	7b 20 11	tim 2011
+00d2	27 fb		beq  fb (CF)
+00d4	97 13		staa 13
+00d6	72 04 11	oim 411
+00d9	39		rts
+
+00da	00		nop0
+00db	00		nop0
+00dc	00		nop0
+00dd	00		nop0
+00de	00		nop0
+00df	00		nop0
+00e0	00		nop0
+00e1	00		nop0
+00e2	00		nop0
+00e3	00		nop0
+00e4	00		nop0
+00e5	00		nop0
+00e6	00		nop0
+00e7	00		nop0
+00e8	00		nop0
+00e9	00		nop0
+00ea	00		nop0
+00eb	00		nop0
+00ec	00		nop0
+00ed	00		nop0
+00ee	00		nop0
+00ef	00		nop0
+00f0	00		nop0
+00f1	00		nop0
+00f2	00		nop0
+00f3	00		nop0
+00f4	00		nop0
+00f5	00		nop0
+00f6	00		nop0
+00f7	00		nop0
+00f8	00		nop0
+00f9	00		nop0
+00fa	00		nop0
+00fb	00		nop0
+00fc	00		nop0
+00fd	00		nop0
+00fe	00		nop0
+00ff	00		nop0
+

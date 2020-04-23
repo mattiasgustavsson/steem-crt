@@ -1,0 +1,246 @@
+The CPU and the MMU share access to the RAM bus: 2 cycles each every 4
+cycles.
+
+The wake up state is randomly determined at cold reset, with a state being
+more probable than another, depending on temperature too.
+
+It affects the order of cycles sharing for each chunk of 4 clock cycles.
+
+The reference is cycle 0 at cold reset.
+
+The more practical reference is the start of scanline in the 'shifter trick 
+reckoning', the latter meaning the cycles that are targeted to obtain certain
+effects. EG: cycle 376 for right border removal. The important thing is of 
+course that wake up state has an influence on those tricks.
+
+We call the wake up states '1' and '2'.
+To reduce confusion (if possible), we will try to define wake up states so
+that the demo 'Forest' by Paolo gives us the same numbers as those we use.
+
+Problem: later Paolo identified more wake-up states.
+
+
+Different concepts
+====================
+
+ijor first identified 2 wake-up states in which the ST can be at power-up.
+
+State 1 (cold)
++-----+
+| CPU |
++-----+
+| MMU | 
++-----+
+
+
+State 2 (warm)
++-----+
+| MMU |
++-----+
+| CPU |
++-----+
+
+A simplistic schema like this explains why the timings of CPU instructions
+generally need to be rounded up to 4. The CPU only gets 2 cycles of bus access
+every 4 cycles.
+
+He created a test program, wakeup.tos, that checks if top border removal at 
+timing 496/504 (WU1) or 504/512 (WU2) works.
+
+This doesn't test writing on a cycle multiple of four or not. This tests when
+the HBLANK starts?
+
+LJBK (Paolo), based on multiple tests on a STF, identified 4 wake-up states (WS
+ to avoid confusion with WU), and found the timings for shifter tricks to work
+ in those 4 states.
+
+Dio, based on actual traces, explained those wake-up states by a latency
+between the DE signal and the LOAD signal.
+
+
+[Dio:
+
+
+There's two data buses in the ST, the CPU bus and the DRAM / Shifter bus. 
+The two are bridged by a bus gateway - a buffer and a latch, controlled by 
+RDAT, WDAT and LATCH on the MMU.
+
+
+The DRAM bus is segmented by MMU into two phases each of two 8MHz cycles,
+ one of which is a CPU phase and the other of which is a video / refresh
+ (and sound on the STE) phase. If the CPU tries to access DRAM or the Shifter
+ on a video phase, DTACK is withheld for two clock cycles to insert a pair of
+ wait states and align the access onto the CPU phase. But anything only on 
+the CPU bus (including Glue and the MMU itself, at least in the STFM) can 
+be accessed on any phase.
+
+On both STE and STFM writes to the resolution register are always delayed 
+until a video phase, since they need to be transferred through the bus gateway 
+onto the DRAM/Shifter bus which is only available on video phases.
+
+
+On the STFM writes to the sync register go only to the Glue, and can happen 
+on either CPU phases or video phases. Similarly, reads from screencurrent go
+ only to MMU and can happen on either phase.
+
+On the STE reads from screencurrent can only happen on the video phases. 
+I observed this when I was writing the instruction timing tester. It's easy
+ to write a program that detects this behaviour.]
+
+
+
+Troed:
+The known detectable wakestates are the result of GLUE being offset 0-3 cycles
+ compared to the CPU - which fits with theory (unsynchronized initialisation 
+at same clock) as well as observation (DE-to-LOAD, visible pixel position on 
+screen) and empirical testing of when changes to FREQ and RES have to be made 
+for GLUE to detect them.
+Default RES values are for WS3/4. 
+In WS1 all RES state checks happen 2 cycles earlier, in WS2 2 cycles later. 
+Default FREQ values are for WS1/3, in WS2/4 all FREQ state checks happen 2 
+cycles later.
+
+
+CPU-GLUE  |   DE-to-LOAD
+ offset   |    latency     
+--------------------------
+    0     |      3        
+    1     |      4        
+    2     |      5        
+    3     |      6        
+
+
+  DL Latency       WU             WS       RES    FREQ      
+     (Dio)        (ijor)        (LJBK)
+-----------------------------------------------------------
+        3           2 (warm)       2        +2     +2  
+        4           2              4               +2
+        5           1 (cold)       3  
+        6           1              1        -2
+
+
+
+
++------------------------------------------------------------+---------------+
+| Steem  option    |              Wake-up concepts           |    Cycle      |
+|    variable      |                                         |  adjustment   |
++------------------+---------------+------------+------------+-------+-------+
+|  WAKE_UP_STATE   |   DL Latency  |     WU     |      WS    |  MODE |  SYNC |
+|                  |     (Dio)     |    (ijor)  |    (LJBK)  | (Res) |(Freq) |
++------------------+---------------+------------+------------+-------+-------+
+|   0 (ignore)     |      5        |     -      |      -     |    -  |    -  |
+|        1         |      3        |   2 (warm) |      2     |   +2  |   +2  |
+|        2         |      4        |     2      |      4     |    -  |   +2  |
+|        3         |      5        |   1 (cold) |      3     |    -  |    -  |
+|        4         |      6        |     1      |      1     |   -2  |    -  |
++------------------+---------------+------------+------------+-------+-------+
+
+
+
+SS:
+So even if the GLUE is on the CPU bus, wake-up state applies to both mode and
+sync registers, both in the GLUE.
+But where does the DE-to-LOAD latency come from? DE is sent by GLUE, LOAD
+is sent by MMU, and what's been observed is the latency between both, 
+corresponding to WS1-4.
+
+Is this compatible with the first WU theory (CPU/MMU cycles)?
+When the MMU raises LOAD, we're in a MMU pair of cycles, it fetched the video
+ data, put it on the bus and tells the Shifter to take it now. 
+All of this must happen within 2 cycles.
+Question: does the MMU write on the address bus to fetch video?
+
+Certain:
+DL 4 -> DE MMU, LOAD MMU  (WU2,WS4)
+DL 6 -> DE CPU, LOAD MMU  (WU1,WS1)
+
+We suppose:
+DL 3 -> DE MMU, LOAD MMU (WU1,WS3)
+DL 5 -> DE CPU, LOAD MMU (WU2,WS2)
+
+According to the traces, only LOAD varies, DE is always the same.
+The question is, at which emulator cycle?
+If we say 56, that would mean that cycle 56 is a CPU cycle in WU1, MMU in WU2.
+This aspect would agree with the first wake-up theory.
+
+
+Timing adjustment (for Steem):
+
+RES:  5-DL
+FREQ: 6-DL
+
+
+Shifter tricks
+================
+
+
+Sync 0-byte line
+------------------
+
+In Steem in STF mode, 'Forest' will return state 1 or 2 according to the
+following rule:
+
+In wake up state 1, changing frequency to 60Hz at cycle 56 then back to
+50Hz at cycle 64 will confuse the GLUE and produce a 0 byte line (no
+memory fetching, a black line is drawn).
+
+In wake up state 2, changing frequency to 60Hz at cycle 58 then back to
+50Hz at cycle 68 will confuse the GLUE and produce a 0 byte line (no
+memory fetching, a black line is drawn).
+
+State (STF)            1                      2
+Switch to 60          56                     58                      
+Switch to 50          64                     68
+CPU cycles         56-57                  58-59
+Shifter cycles     58-59                  56-57
+
+We derive the schemas that show how every 4 cycles are shared.
+They start at cycle 0 and all multiples of 4 after that.
+
+
+State 1
++-----+
+| CPU |
++-----+
+| MMU | 
++-----+
+
+
+State 2
++-----+
+| MMU |
++-----+
+| CPU |
++-----+
+
+
+Right border off
+------------------
+
+The 'magic cycle' to remove the right border is 376.
+
+In wake-up state 2, a write on cycle 374 will not work.
+But in wake-up state 1, it will be delayed by the MMU and hit cycle 376.
+
+-> Nostalgia menu
+
+
+State 1
++-----+
+| CPU |   372
++-----+
+| MMU |   374 -> delayed to 376, right border trick will work
++-----+
+
+
+State 2
++-----+
+| MMU |   372
++-----+
+| CPU |   374 -> taken, right border trick missed
++-----+
+
+
+Update:
+But if writes to the Sync register aren't delayed, how do we explain this?
+

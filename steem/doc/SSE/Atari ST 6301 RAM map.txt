@@ -1,0 +1,256 @@
+$00	DDR1
+$01	DDR2
+$02	DR1		keyboard lines
+$03	DR2		buttons
+$04	DDR3
+$05	DDR4
+$06	DR3		keyboard rows
+$07	DR4		keyboard rows; mouse/joystick direction
+$08	TCSR		Timer Control/Status Register
+$09	FRC		Free Running Counter
+$0A	FRC
+$0B	OCR		Output Compare Register
+$0C	OCR
+$0D	ICR
+$0E	ICR
+$0F	CSR
+$10	RMCR		should be 5 = 4MHz, 7812.5 bits/s (Steem doesn't use this register)
+$11	TRCSR		Transmit/Receive Control & Status Register
+$12	RDR
+$13	TDR
+$14	RCR
+$15	-
+$16	NULL
+$17	NULL
+$18	NULL
+$19	NULL
+$1A	NULL
+$1B	NULL
+$1C	NULL
+$1D	NULL
+$1E	NULL
+$1F	NULL
+$20	NULL
+$21	NULL
+$22	NULL
+$23	NULL
+$24	NULL
+$25	NULL
+$26	NULL
+$27	NULL
+$28	NULL
+$29	NULL
+$2A	NULL
+$2B	NULL
+$2C	NULL
+$2D	NULL
+$2E	NULL
+$2F	NULL
+$30	NULL
+$31	NULL
+$32	NULL
+$33	NULL
+$34	NULL
+$35	NULL
+$36	NULL
+$37	NULL
+$38	NULL
+$39	NULL
+$3A	NULL
+$3B	NULL
+$3C	NULL
+$3D	NULL
+$3E	NULL
+$3F	NULL
+$40	NULL
+$41	NULL
+$42	NULL
+$43	NULL
+$44	NULL
+$45	NULL
+$46	NULL
+$47	NULL
+$48	NULL
+$49	NULL
+$4A	NULL
+$4B	NULL
+$4C	NULL
+$4D	NULL
+$4E	NULL
+$4F	NULL
+$50	NULL
+$51	NULL
+$52	NULL
+$53	NULL
+$54	NULL
+$55	NULL
+$56	NULL
+$57	NULL
+$58	NULL
+$59	NULL
+$5A	NULL
+$5B	NULL
+$5C	NULL
+$5D	NULL
+$5E	NULL
+$5F	NULL
+$60	NULL
+$61	NULL
+$62	NULL
+$63	NULL
+$64	NULL
+$65	NULL
+$66	NULL
+$67	NULL
+$68	NULL
+$69	NULL
+$6A	NULL
+$6B	NULL
+$6C	NULL
+$6D	NULL
+$6E	NULL
+$6F	NULL
+$70	NULL
+$71	NULL
+$72	NULL
+$73	NULL
+$74	NULL
+$75	NULL
+$76	NULL
+$77	NULL
+$78	NULL
+$79	NULL
+$7A	NULL
+$7B	NULL
+$7C	NULL
+$7D	NULL
+$7E	NULL
+$7F	NULL
+$80	
+$81	
+$82	year 
+$83	month
+$84	day
+$85	hour
+$86	minute
+$87	second  EG Captain Blood
+$88	Init ($AA: yes), after each reset and F1 sent
+$89	
+$8A	
+$8B	
+$8C	Key?
+$8D	
+$8E	
+$8F	
+$90	
+$91	
+$92	
+$93	
+$94	
+$95	buffer
+$96	
+$97	
+$98	
+$99	
+$9A	
+$9B	Mouse(joystick) buttons
+$9C	
+$9D	0 when mouse direction been copied to $BE,$BF
+$9E	
+$9F	
+$A0	
+$A1	
+$A2	
+$A3	
+$A4	Joystick 0 ; 0 for FIRE BUTTON MONITORING
+$A5	Joystick 1 ; 8 for FIRE BUTTON MONITORING
+$A6	
+$A7	
+$A8	
+$A9	
+$AA	Abs X eg Sentinel
+$AB	Abs X
+$AC	Abs Y
+$AD	Abs Y
+$AE	Mouse keycode
+$AF	Mouse keycode
+$B0	Threshold X
+$B1	Threshold Y
+$B2	Mouse scale X
+$B3	Mouse scale Y
+$B4	Mouse button action
+$B5	Abs. mouse BUTTONS 0000dcba (see atari doc)
+$B6	XMSB
+$B7	XLSB
+$B8	YMSB       
+$B9	YLSB
+$BA	Mouse
+$BB	Mouse
+$BC	Mouse event X
+$BD	Mouse event Y
+$BE	Mouse direction X (2bits, raw)
+$BF	Mouse direction Y (2bits, raw)
+$C0	Mouse event buttons
+$C1	buttons 1=pressed
+$C2	Mouse abs buttons (copied on B5 then cleared when command $D received)
+$C3	
+$C4	
+$C5	Status report # other bytes
+$C6	Status report byte 1
+$C7	Direction (kbd)
+$C8	
+$C9	Mouse mode (bit7 enabled bit6 keycode bit5 absolute mouse bit4 mouse event bit3...  bit1 button monitoring bit0 Y reversed)
+$CA	Joystick mode (bit5 enabled bit4 interrogate bit3 event bit2 keycode bit1 monitoring bit0 trigger monitoring)
+$CB	Flags (bit7 new command bit5 input full bit4,3 no command bit0-2:#parameters still missing)
+$CC	Input buffer counter
+$CD	Input buffer (command)
+$CE	Input buffer (parameters)
+$CF	Input buffer (parameters)
+$D0	Input buffer (parameters)
+$D1	Input buffer (parameters)
+$D2	Input buffer (parameters)
+$D3	Input buffer (parameters)
+$D4	Input buffer (parameters)
+$D5	
+$D6	index in output buffer
+$D7	ouput buffer counter, <0 = OVF
+$D8	
+$D9	Output buffer
+$DA	Output buffer
+$DB	Output buffer
+$DC	Output buffer
+$DD	Output buffer
+$DE	Output buffer
+$DF	Output buffer
+$E0	Output buffer
+$E1	Output buffer
+$E2	Output buffer
+$E3	Output buffer
+$E4	Output buffer
+$E5	Output buffer
+$E6	Output buffer
+$E7	Output buffer
+$E8	Output buffer
+$E9	Output buffer
+$EA	Output buffer
+$EB	Output buffer
+$EC	Output buffer
+$ED	Output buffer
+$EE	Temp buffer 
+$EF	Temp buffer
+$F0	Temp buffer
+$F1	Temp buffer
+$F2	Temp buffer
+$F3	Temp buffer
+$F4	Temp buffer?
+$F5	Temp buffer?
+$F6	
+$F7	
+$F8	
+$F9	
+$FA	
+$FB	
+$FC	
+$FD	
+$FE	...
+$FF	Stack

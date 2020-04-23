@@ -1,0 +1,925 @@
+Cycle counting on the Atari ST
+
+ 
+
+Version 1.0
+
+Copyright © 2009 by Jorge Cwik.
+
+http://pasti.fxatari.com
+
+ 
+
+This documented may be freely distributed as long as is not modified in anyway.
+
+Atari, ST, Motorola, or other names may be trademarks of their respective 
+owners.
+
+ 
+
+This article is about how to determine the exact number of clock cycles taken 
+by a specific machine language code in the Atari ST. It assumes the reading has 
+a fair knowledge about the ST architecture and the Motorola 68000 processor. 
+Potential readers are advanced coders, emulator authors, or anyone interested 
+in understand the finer details of the ST.
+
+ 
+Introduction
+
+ 
+
+Why to count exact cycles at all? There are many reasons. For the coder, it is 
+because it is fun, because it allows achieving a goal that otherwise would be 
+impossible, and also because it is possible. For the emulator author is, 
+obviously, for reaching emulation as much accuracy as possible.
+
+ 
+
+The 68000, unlike many later 16-bit or 32-bit processors, has an easily 
+predictable timing. This allowed ST coders to realize some effects that were 
+probably far and beyond the capabilities imagined by the ST designers. 
+
+ 
+
+The most common purpose of cycle counting in the ST, is perhaps for producing 
+software overscan and the so-called “Spectrum-512” effects. Those are 
+impossible without cycle accuracy.
+
+ 
+First stage: Use the reference book.
+
+ 
+
+The most fundamental reference for cycle counting is the official Motorola 
+documentation. The usual name is “M68000 Programmer’s Reference Manual”. It is 
+detailed, comprehensive, and (at the time of this writing) is available free of 
+charge from the manufacturer web site. We’ll refer to it as PRM.
+
+ 
+
+There are plenty of third party tables, books, etc. But I find the official 
+manual extremely well written and invaluable. Depending on the edition, it 
+might have a few errors or mistakes. And all of them have a couple of 
+undocumented timings. The most important missing is probably the exact timing 
+of the division instructions. See our article at 
+(http://pasti.fxatari.com/68kdocs/div68kCycleAccurate.c) for a full detailed 
+coverage.
+
+ 
+
+For some time the ST community believed that this manual was all what was 
+needed, and that instruction timing performed always “by the book”. There was 
+no hint whatsoever in the Atari documentation to believe otherwise. 
+Unfortunately it isn’t that simple.
+
+ 
+Second stage: Round up to a multiple of four.
+
+ 
+
+I don’t remember when and where I read about it for the first time. But at one 
+point the ST community learned that there is one rule that should be followed. 
+It is the (nowadays) well know “round up to 4”. The rule means that all 
+instructions on the ST take a number of clock cycles that it is a multiple of 
+four. If the “by the book” cycles is not already a multiple of four, then it is 
+rounded up.
+
+ 
+
+What is the reason for this rule? The reason is in the ST RAM and video 
+architecture.
+
+ 
+
+The ST doesn’t have dedicated video RAM. The programmer can locate video RAM 
+anywhere on the main RAM as long as it is properly aligned. That portion of 
+RAM, besides being written (or read) by the main processor, must also be read 
+by the video subsystem to generate the actual video signals.
+
+ 
+
+This produces a conflict. Standard RAM is not designed for having two masters. 
+There is a special type of dual-port RAM designed for this purpose, and it is 
+used in some video architectures. But even today it is very expensive, and it 
+was absolutely prohibitive at the time for an architecture without dedicated 
+Video RAM.
+
+ 
+
+Some type of arbitration to RAM has to be designed therefore. There are several 
+ways to implement this arbitration. The ST implementation takes advantage of 
+the special characteristics of the 68000 bus cycle. Bus cycles on the 68000 
+take a minimum of four clock cycles. But most of the time during a bus cycle is 
+spent for control and handshake. And RAM at the time was fast enough to perform 
+an access cycle in half that time. So the ST interleaves CPU and Video access 
+to RAM, two clock cycles for each. This is performed by MMU, one of the main 
+custom chips in the ST.
+
+ 
+
+In reality it is not just CPU and Video. The MMU distinguishes between two 
+types of RAM accesses. The first is RAM access that is performed from the main 
+ST bus. It includes standard CPU bus cycles, and DMA cycles requested by the 
+DMA chip, Blitter or another DMA master. The second type of RAM access doesn’t 
+reach the main bus. It includes, of course, Video access for Shifter, but also 
+RAM refresh and in the STe, DMA sound as well. We’ll call this last type of 
+access “internal”, and the other one “external”.
+
+ 
+
+The MMU allocates two clock cycles for each type of RAM access, in a 
+round-robin fashion. Two clock cycles for “internal”, and two for “external” 
+access. There is no priority of any kind. Internal and external “slots” 
+alternate constantly. Internal accesses are always generated by MMU itself, so 
+it already manages them for always falling on an internal slot. But an access 
+generated by an external agent, as the CPU, might attempt to produce a 
+“misaligned” bus access.
+
+ 
+
+As we mentioned already, a standard 68000 bus cycle takes four clock cycles. 
+But the MMU assigns specific phases of the bus cycle to actually address and 
+access the RAM. The exact implementation is not relevant, and it’s outside the 
+scope of this article. For the purpose of our topic, what matters is that an 
+external bus cycle must start aligned. Aligned in such a way that the assigned 
+phases would fall exactly on the external slot mentioned in the previous 
+paragraph.
+
+ 
+
+If a misaligned access is attempted, MMU can’t allow it to process and inserts 
+wait states to actually force an aligned bus cycle. Note that MMU doesn’t care 
+if the “internal” slot is actually used or not, a misaligned access is always 
+delayed and forced aligned.
+
+ 
+
+Assume the CPU is performing a sequence of contiguous bus cycles. The first one 
+might be misaligned and would be delayed. But all the rest of the bus cycles 
+would be subsequently aligned and would perform at full speed. The 68000 is 
+rather orthogonal and symmetric, most instructions take a multiple of four 
+cycles, and they would naturally tend to perform an aligned bus access already. 
+So the ST implementation is possibly an acceptable compromise between cost and 
+performance.
+
+ 
+
+But not every code would perform an aligned bus access. An obvious example is 
+an instruction that takes 6 clock cycles such as CLR.L D0. The CLR.L takes 6 
+cycles according to the PRM, but because it would attempt a misaligned access, 
+it would actually take 8 cycles after the bus cycle is delayed and aligned.
+
+ 
+
+As we’ll see in the following chapters, the last sentence is not 100% accurate. 
+Furthermore, it is not always true. But in most cases, a CLR.L would contribute 
+8 clock cycles to the sequence. And this is the cause of the “round up to four” 
+rule.
+
+ 
+Stage 3: Instructions might pair with each other.
+
+ 
+
+Again I don’t know the exact dates. But for a long time, the ST community 
+followed the above rules. “Check the nominal timing, and then round up to 
+four”. At some point ST emulators were extremely accurate, and the authors 
+found that something was wrong. They found out that a 6 cycles instruction not 
+always takes 8 cycles, it depends on the code sequence. The reason is something 
+that I called “pairing”.
+
+ 
+
+As might be clear from the previous section, the key point is not precisely how 
+many cycles an instruction takes; or if the instruction cycles are a multiple 
+of four or not. The key point is the exact location of the bus cycles on the 
+code sequence. Because what really matters, is if a bus cycle is performed in a 
+four cycles boundary or not. It is only the alignment of the bus cycle what 
+would determine if MMU would insert wait states or not.
+
+ 
+
+So we should correct the rule to a more complex one:
+
+A bus cycle must be aligned, in relation to the previous one, at a four cycles 
+boundary. If it is not, it would take two clock cycles more.
+
+ 
+
+On most cases, the simple round up rule would match, but not always. For this 
+purpose, let’s consider first the following code sequence:
+
+ 
+
+NOP
+
+CLR.L DO
+
+NOP
+
+ 
+
+If we break up the bus activity of the above sequence, we get:
+
+ 
+
+Cycle  0:    NOP        Prefetch
+
+Cycle  4:    CLR.L      Prefetch
+
+Cycle  8:    CLR.L      Internal processing, bus idle.
+
+Cycle 10:    NOP        Prefetch attempt, delayed by MMU
+
+Cycle 12:    NOP        Prefetch performed
+
+Cycle 16:    Next instruction.
+
+ 
+
+The theoretical execution time of the above sequence is 14 cycles. But because 
+there was a misaligned bus cycle, the actual number of cycles would be 16. This 
+matches the simple rule of the previous section, which would arrive to the same 
+total by rounding up the CLR.L execution time from 6 to 8 cycles.
+
+ 
+
+One interesting point to note is that CLR.L above takes really 6 cycles, not 8. 
+It is at the next NOP when the CPU gets waits states. And then the second NOP 
+takes 6 cycles instead of 4. For practical purposes this really doesn’t matter, 
+you normally don’t care about how many cycles a specific instruction takes. You 
+care about the whole sequence, and about the exact timing of the bus cycles. 
+However, this brings a very relevant issue.
+
+ 
+
+The relevant issue here is that there is an implicit condition that makes CLR.L 
+to take 6 cycles, and not 8. The condition is exactly when the CPU performs the 
+bus cycle on that instruction. If you look at the execution times table on the 
+PRM, it indicates for CLR.L on a register the following timing: 6(1/0). This 
+means one bus cycle, which we already know it takes 4 clock cycles, and a total 
+of 6 clock cycles. It is obvious that there are two clock cycles where the bus 
+is idle, but which ones? The two first ones, the two last ones, or one at the 
+start and one at the end?
+
+ 
+
+The PRM doesn’t provide the answer. In this specific instruction the bus cycle 
+is performed at the start, and the bus is idle at the last two cycles. But 
+there are other instructions that take 6 cycles, where the order is reversed 
+and the bus is idle at the start. There are no cases where the bus is idle one 
+cycle at the start, and another single cycle at the end.
+
+ 
+
+In the code sequence above, it wouldn’t matter too much if the bus were idle at 
+the start or the end. In either case the total execution time would be 16 
+cycles. But it matters a lot when we combine them together. Let’s now consider 
+the slightly more complicated following code sequence:
+
+ 
+
+NOP
+
+CLR.L     DO
+
+BRA.W     target
+
+target    NOP
+
+ 
+
+BRA.W takes nominally 10 cycles. The PRM tell us it performs two bus cycles, so 
+again there are two idle clock cycles. In this case, and contrary to CLR.L, 
+they are at the beginning of the instruction. With this knowledge, let’s see 
+the bus activity of this sequence:
+
+ 
+
+Cycle  0: NOP       Prefetch
+
+Cycle  4: CLR.L     Prefetch
+
+Cycle  8: CLR.L     Bus idle for two cycles.
+
+Cycle 10: BRA.W     Bus idle for two cycles.
+
+Cycle 12: BRA.W     Prefetch
+
+Cycle 16: BRA.W     Prefetch
+
+Cycle 20: NOP       Prefetch
+
+Cycle 24: Next instruction
+
+ 
+
+The whole sequence takes 24 cycles, exactly as the nominal number. All bus 
+cycles are aligned in a 4 cycles boundary. There are no wait states inserted by 
+MMU. This breaks the round-up rule, which would compute a total of 28 cycles 
+(4+8+12+4).
+
+ 
+
+The rule is broken because CLR.L performs two idle clock cycles at the end, and 
+BRA.W does it at the start. Executed one right after the other, we get four 
+idle cycles in immediate sequence. And then the next bus cycle would naturally 
+align in a four cycles boundary.
+
+ 
+
+This would happen whenever we combine one instruction with two idle cycles at 
+the end, followed with one instruction with two idle cycles at the start. We 
+say that these instructions “pair” with each other, and we call this behavior 
+“pairing”.
+
+ 
+
+Note that pairing depends not only on the specific instructions, but also in 
+the order, it is not symmetric. Also note that the pairing, or not-pairing 
+behavior can happen inside a single instruction with multiple bus cycles and 
+multiple idle cycle sequences.
+
+ 
+
+Unfortunately the behavior of pairing depends in turn on the internal timing of 
+each instruction. Computing the exact number of cycles then requires knowing, 
+for each instruction, when exactly the idle cycles are performed. The current 
+version of this document doesn’t provide an instruction table detailing the 
+idle cycles location. We expect to provide such a table in an updated version.
+
+ 
+State 4: Some bus accesses don’t need to be aligned.
+
+ 
+
+Until not too long go, the ST community considered that the previous section 
+gave the ultimate answer for counting cycles on the ST. We recently discovered, 
+or more precisely rediscovered, that it is not accurate.
+
+ 
+
+Going back to previous sections, let’s remember that what makes the ST timing 
+to be different than nominal, is the need to arbitrate between concurrent CPU 
+(or external) and Video (or internal) access to RAM. And that MMU inserts wait 
+states as needed, to implement this arbitration and interleaving.
+
+ 
+
+But what happens when a bus cycle doesn’t access RAM? What happens when ROM is 
+accessed instead? Can a ROM access be performed concurrently with an internal 
+RAM access? Does MMU still insert wait states for unaligned bus accesses?
+
+ 
+
+The answer is in the schematics, together with a little knowledge about the ST 
+chipset. We can see that the RAM is separated from the main bus by a few TTL 
+chips. They are two buffers and two latches, all of them with tri-state 
+capability. The TTL chips are not present in the STe board, but they are 
+integrated in the newer MMU-GLUE combo IC. They are required because otherwise 
+MMU wouldn’t be able to exactly align the RAM phases with the CPU phases. But 
+yes, this also means that when RAM is not accessed, it is disconnected from the 
+main bus.
+
+ 
+
+Furthermore, MMU doesn’t manage access to devices in the main bus. In the 
+specific case of ROM, it is managed by GLUE. So not only that there is no need 
+to align a bus access to ROM. MMU can’t actually perform the alignment. GLUE 
+has no reason to perform any alignment, and doesn’t even have the information 
+to perform it.
+
+ 
+
+Then we arrive to the (almost) final rule for counting cycles on the ST:
+
+ 
+
+A bus cycle accessing the internal MMU data bus will always perform aligned, in 
+relation to the previous access on the same bus, at a four cycles boundary.
+
+ 
+
+The internal MMU bus is the one beyond the TTL chips, which connects to the RAM 
+and Shifter. In other words, only access to main RAM and Shifter must be 
+aligned. In particular, ROM access, either to internal TOS ROM or Cartridge 
+performs without any wait states.
+
+ 
+
+This means that code in ROM usually executes slightly faster than code in RAM. 
+But please note that only actual ROM accesses are faster. RAM access performed 
+from ROM code still would be aligned. And ROM access performed from RAM code is 
+not aligned (but this rarely saves any clock cycles).
+
+ 
+
+Lastly note that our discussion about RAM is about the main standard RAM. There 
+are RAM expansions implemented as “Fast RAM”. Fast RAM access is not aligned 
+and usually doesn’t require any wait states. But of course that video data 
+can’t be located on Fast RAM. 
+
+ 
+State 5: Some I/O chips are slow.
+
+ 
+
+Access to I/O chips fall in a completely separate class. Some I/O devices can 
+be accessed at full speed and without any alignment, such as GLUE or MMU 
+registers. Most other ones are too slow and some agent on the system would 
+throttle the CPU.
+
+ 
+
+The version of this document doesn’t include a table, or a complete description 
+of the access timing to I/O chips. We’ll either update this document in a 
+future version, or we’ll cover the subject in a separate article.
+
+ 
+Conclusion
+
+ 
+
+In resume, the process required to compute the number of clock cycles that a 
+given code sequence would take is as following:
+
+ 
+
+- Count the number of cycles for each instruction according to the PRM.
+
+- Identify the exact location of bus and idle cycles.
+
+- Align all bus cycle accessing RAM or Shifter.
+
+- Add wait states for the slower I/O chips.
+
+ 
+
+Note that a specific code sequence might take a different number of cycles 
+depending on which exact locations (RAM, ROM, or slow I/O chip) are being 
+accessed.
+
+ 
+Notes to emulator authors
+
+ 
+
+There doesn’t seem to be a simple, fast way to accurately emulate the cycles. 
+Ideally you should follow all bus cycles, and adjust the clock cycles on each 
+one of them. But I know several emulator authors that are far much better 
+coders than me, and they probably would be able to figure out an efficient 
+implementation. Anyway, an efficient implementation is beyond the scope of this 
+document.
+
+ 
+
+It doesn’t matter for this purpose, how do you start the alignment, if the 
+internal slot is the first or the second one, or the absolute number of cycles 
+since power-up or reset. The important procedure is that once you define an 
+aligned bus cycle, then all the others must have the same alignment.
+
+ 
+
+
+Added, from Dio
+---------------
+
+http://www.atari-forum.com/viewtopic.php?f=16&t=16240
+
+I've been working on an an automated tester for checking emulators' 68000 
+timing very precisely. I've finally solved a few of the odder issues and here's 
+the first set of results. There's two tables here:
+- the first is the cycle count for each 68000 instruction when the previous and 
+next instructions don't do anything odd with phasing, and all memory operations 
+are to main RAM (the shifter domain, subject to waitstates).
+- The second describes the phasing effects for each instruction. An 'L' 
+indicates that the instruction finishes on the odd phase ('leaves' odd phase); 
+an 'A' indicates the instruction pairs with a preceding instruction if it 
+starts on the odd phase ('accepts' odd phase). The simple rule is that if an A 
+instruction follows an L instruction in your instruction stream you save 4 
+cycles.
+
+Here's the tables of gold results:
+
+Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+add.w *,d0             4    4    8    8   12   12   16   12   16   12   16    8
+add.w d0,*                      12   12   16   16   20   16   20
+adda.w *,a1            8    8   12   12   16   16   20   16   20   16   20   12
+add.w #1,*             8        16   16   20   20   24   20   24
+addq.w #1,*            4    8   12   12   16   16   20   16   20
+addx.w *,*             4                  20
+and.w *,d0             4         8    8   12   12   16   12   16   12   16    8
+and.w d0,*                      12   12   16   16   20   16   20
+and.w #1,*             8        16   16   20   20   24   20   24
+asl.w #7,d0           20
+asl.w d0,d0           16
+asr.w #7,d0           20
+asr.w d0,d0           16
+clr.w *                4        12   12   16   16   20   16   20
+cmp.w *,d0             4    4    8    8   12   12   16   12   16   12   16    8
+cmpa.w *,a1            8    8   12   12   16   16   20   16   20   16   20   12
+cmp.w #1,*             8        12   12   16   16   20   16   20
+eor.w d0,*             4        12   12   16   16   20   16   20
+eor.w #1,*             8        16   16   20   20   24   20   24
+lsl.w #7,d0           20
+lsl.w d0,d0           16
+lsr.w #7,d0           20
+lsr.w d0,d0           16
+move.w *,d0            4    4    8    8   12   12   16   12   16   12   16    8
+move.w *,a1            4    4    8    8   12   12   16   12   16   12   16    8
+move.w *,(a1)          8    8   12   12   16   16   20   16   20   16   20   12
+move.w *,(a1)+         8    8   12   12   16   16   20   16   20   16   20   12
+move.w *,-(a1)         8    8   12   12   16   16   20   16   20   16   20   12
+move.w *,24(a1)       12   12   16   16   20   20   24   20   24   20   24   16
+move.w *,20(a1,d0.w)  16   16   20   20   24   24   28   24   28   24   28   20
+move.w *,$200.w       12   12   16   16   20   20   24   20   24   20   24   16
+move.w *,scratchpad   16   16   20   20   24   24   28   24   28   24   28   20
+movem.w *,d0-d3                 28   28        32   36   32   36
+movem.w d0-d3,*                 24        24   28   32   28   32
+movep.w d0,4(a1)      16
+movep.w 4(a0),d0      16
+neg.w *                4        12   12   16   16   20   16   20
+negx.w *               4        12   12   16   16   20   16   20
+not.w *                4        12   12   16   16   20   16   20
+or.w *,d0              4         8    8   12   12   16   12   16   12   16    8
+or.w d0,*                       12   12   16   16   20   16   20
+or.w #1,*              8        16   16   20   20   24   20   24
+rol.w #7,d0           20
+rol.w d0,d0           16
+ror.w #7,d0           20
+ror.w d0,d0           16
+roxl.w #7,d0          20
+roxl.w d0,d0          16
+roxr.w #7,d0          20
+roxr.w d0,d0          16
+sub.w *,d0             4    4    8    8   12   12   16   12   16   12   16    8
+sub.w d0,*                      12   12   16   16   20   16   20
+suba.w *,a1            8    8   12   12   16   16   20   16   20   16   20   12
+sub.w #1,*             8        16   16   20   20   24   20   24
+subq.w #1,*            4    8   12   12   16   16   20   16   20
+subx.w *,*             4                  20
+tst.w *                4         8    8   12   12   16   12   16
+add.l *,d0             8    8   16   16   20   20   24   20   24   20   24   16
+add.l d0,*                      20   20   24   24   28   24   28
+adda.l *,a1            8    8   16   16   20   20   24   20   24   20   24   16
+add.l #1,*            16        28   28   32   32   36   32   36
+addq.l #1,*            8    8   20   20   24   24   28   24   28
+addx.l *,*             8                  32
+and.l *,d0             8        16   16   20   20   24   20   24   20   24   16
+and.l d0,*                      20   20   24   24   28   24   28
+and.l #1,*            16        28   28   32   32   36   32   36
+asl.l #7,d0           24
+asl.l d0,d0           16
+asr.l #7,d0           24
+asr.l d0,d0           16
+clr.l *                8        20   20   24   24   28   24   28
+cmp.l *,d0             8    8   16   16   20   20   24   20   24   20   24   16
+cmpa.l *,a1            8    8   16   16   20   20   24   20   24   20   24   16
+cmp.l #1,*            16        20   20   24   24   28   24   28
+eor.l d0,*             8        20   20   24   24   28   24   28
+eor.l #1,*            16        28   28   32   32   36   32   36
+lsl.l #7,d0           24
+lsl.l d0,d0           16
+lsr.l #7,d0           24
+lsr.l d0,d0           16
+move.l *,d0            4    4   12   12   16   16   20   16   20   16   20   12
+move.l *,a1            4    4   12   12   16   16   20   16   20   16   20   12
+move.l *,(a1)         12   12   20   20   24   24   28   24   28   24   28   20
+move.l *,(a1)+        12   12   20   20   24   24   28   24   28   24   28   20
+move.l *,-(a1)        12   12   20   20   24   24   28   24   28   24   28   20
+move.l *,24(a1)       16   16   24   24   28   28   32   28   32   28   32   24
+move.l *,20(a1,d0.l)  20   20   28   28   32   32   36   32   36   32   36   28
+move.l *,$200.l       20   20   28   28   32   32   36   32   36   32   36   28
+move.l *,scratchpad   20   20   28   28   32   32   36   32   36   32   36   28
+movem.l *,d0-d3                 44   44        48   52   48   52
+movem.l d0-d3,*                 40        40   44   48   44   48
+movep.l d0,4(a1)      24
+movep.l 4(a0),d0      24
+neg.l *                8        20   20   24   24   28   24   28
+negx.l *               8        20   20   24   24   28   24   28
+not.l *                8        20   20   24   24   28   24   28
+or.l *,d0              8        16   16   20   20   24   20   24   20   24   16
+or.l d0,*                       20   20   24   24   28   24   28
+or.l #1,*             16        28   28   32   32   36   32   36
+rol.l #7,d0           24
+rol.l d0,d0           16
+ror.l #7,d0           24
+ror.l d0,d0           16
+roxl.l #7,d0          24
+roxl.l d0,d0          16
+roxr.l #7,d0          24
+roxr.l d0,d0          16
+sub.l *,d0             8    8   16   16   20   20   24   20   24   20   24   16
+sub.l d0,*                      20   20   24   24   28   24   28
+suba.l *,a1            8    8   16   16   20   20   24   20   24   20   24   16
+sub.l #1,*            16        28   28   32   32   36   32   36
+subq.l #1,*            8    8   20   20   24   24   28   24   28
+subx.l *,*             8                  32
+tst.l *                4        12   12   16   16   20   16   20
+asl.w #1,*             8        12   12   16   16   20   16   20
+asr.w #1,*             8        12   12   16   16   20   16   20
+lsl.w #1,*             8        12   12   16   16   20   16   20
+lsr.w #1,*             8        12   12   16   16   20   16   20
+rol.w #1,*             8        12   12   16   16   20   16   20
+ror.w #1,*             8        12   12   16   16   20   16   20
+roxl.w #1,*            8        12   12   16   16   20   16   20
+roxr.w #1,*            8        12   12   16   16   20   16   20
+bchg #1,*             12        16   16   20   20   24   20   24
+bchg d0,*              8        12   12   16   16   20   16   20
+bset #1,*             12        16   16   20   20   24   20   24
+bset d0,*              8        12   12   16   16   20   16   20
+bclr #1,*             12        16   16   20   20   24   20   24
+bclr d0,*              8        12   12   16   16   20   16   20
+btst #1,*             12        12   12   16   16   20   16   20
+btst d0,*              8         8    8   12   12   16   12   16
+pea *                           12             16   24   16   20   16   24
+lea *,a1                         4              8   16    8   12    8   16
+link a0,#4            16
+unlk a0               12
+mulu *,d0             40        64   64   48   68   76   72   72   48   52   44
+muls *,d0             44        52   52   48   68   64   60   60   48   52   48
+abcd *,*               8                  20
+nbcd *                 8        12   12   16   16   20   16   20
+sbcd *,*               8                  20
+st *                   8        12   12   16   16   20   16   20
+tas *                  4        16   16   20   20   24   20   24
+moveq #0,d0            4
+exg d0,d1              8
+ext.w d0               4
+ext.l d0               4
+swap d0                4
+nop                    4
+move.w sr,*            8        12   12   16   16   20   16   20
+move.w *,ccr          12        16   16   20   20   24   20   24   20   24   16
+move.w #$2200,sr      16
+andi #$2700,sr        20
+ori #$2200,sr         20
+eori #$0100,sr        20
+
+unlk a0               12
+bra.l/.s              12   12
+bcc.l/.s taken        12   12
+bcs.l/.s not          12    8
+bsr.l/.s              20   20
+dbcc cc true,nz,z     12   12   16
+jmp                              8             12   16   12   12   12
+jsr                             16             20   24   20   20   20
+rts/rte               16   20
+trap/illegal          36   36
+
+INSTRUCTION PAIRING:
+add.w *,d0            --   --   --   --   A-   --   A-   --   --   --   A-   --
+add.w d0,*                      --   --   A-   --   A-   --   --
+adda.w *,a1           --   --   --   --   A-   --   A-   --   --   --   A-   --
+add.w #1,*            --        --   --   --   --   --   --   --
+addq.w #1,*           --   --   --   --   A-   --   A-   --   --
+addx.w *,*            --                  A-
+and.w *,d0            --        --   --   A-   --   A-   --   --   --   A-   --
+and.w d0,*                      --   --   A-   --   A-   --   --
+and.w #1,*            --        --   --   --   --   --   --   --
+asl.w #7,d0           --
+asl.w d0,d0           -L
+asr.w #7,d0           --
+asr.w d0,d0           -L
+clr.w *               --        --   --   A-   --   A-   --   --
+cmp.w *,d0            --   --   --   --   A-   --   A-   --   --   --   A-   --
+cmpa.w *,a1           -L   -L   -L   -L   AL   -L   AL   -L   -L   -L   AL   -L
+cmp.w #1,*            --        --   --   --   --   --   --   --
+eor.w d0,*            --        --   --   A-   --   A-   --   --
+eor.w #1,*            --        --   --   --   --   --   --   --
+lsl.w #7,d0           --
+lsl.w d0,d0           -L
+lsr.w #7,d0           --
+lsr.w d0,d0           -L
+move.w *,d0           --   --   --   --   A-   --   A-   --   --   --   A-   --
+move.w *,a1           --   --   --   --   A-   --   A-   --   --   --   A-   --
+move.w *,(a1)         --   --   --   --   A-   --   A-   --   --   --   A-   --
+move.w *,(a1)+        --   --   --   --   A-   --   A-   --   --   --   A-   --
+move.w *,-(a1)        --   --   --   --   A-   --   A-   --   --   --   A-   --
+move.w *,24(a1)       --   --   --   --   A-   --   A-   --   --   --   A-   --
+move.w *,20(a1,d0.w)  A-   A-   --   --   A-   --   A-   --   --   --   A-   --
+move.w *,$200.w       --   --   --   --   A-   --   A-   --   --   --   A-   --
+move.w *,scratchpad   --   --   --   --   A-   --   A-   --   --   --   A-   --
+movem.w *,d0-d3                 --   --        --   --   --   --
+movem.w d0-d3,*                 --        --   --   --   --   --
+movep.w d0,4(a1)      --
+movep.w 4(a0),d0      --
+neg.w *               --        --   --   A-   --   A-   --   --
+negx.w *              --        --   --   A-   --   A-   --   --
+not.w *               --        --   --   A-   --   A-   --   --
+or.w *,d0             --        --   --   A-   --   A-   --   --   --   A-   --
+or.w d0,*                       --   --   A-   --   A-   --   --
+or.w #1,*             --        --   --   --   --   --   --   --
+rol.w #7,d0           --
+rol.w d0,d0           -L
+ror.w #7,d0           --
+ror.w d0,d0           -L
+roxl.w #7,d0          --
+roxl.w d0,d0          -L
+roxr.w #7,d0          --
+roxr.w d0,d0          -L
+sub.w *,d0            --   --   --   --   A-   --   A-   --   --   --   A-   --
+sub.w d0,*                      --   --   A-   --   A-   --   --
+suba.w *,a1           --   --   --   --   A-   --   A-   --   --   --   A-   --
+sub.w #1,*            --        --   --   --   --   --   --   --
+subq.w #1,*           --   --   --   --   A-   --   A-   --   --
+subx.w *,*            --                  A-
+tst.w *               --        --   --   A-   --   A-   --   --
+add.l *,d0            --   --   -L   -L   AL   -L   AL   -L   -L   -L   AL   --
+add.l d0,*                      --   --   A-   --   A-   --   --
+adda.l *,a1           --   --   -L   -L   AL   -L   AL   -L   -L   -L   AL   --
+add.l #1,*            --        --   --   --   --   --   --   --
+addq.l #1,*           --   --   --   --   A-   --   A-   --   --
+addx.l *,*            --                  A-
+and.l *,d0            --        -L   -L   AL   -L   AL   -L   -L   -L   AL   --
+and.l d0,*                      --   --   A-   --   A-   --   --
+and.l #1,*            --        --   --   --   --   --   --   --
+asl.l #7,d0           -L
+asl.l d0,d0           --
+asr.l #7,d0           -L
+asr.l d0,d0           --
+clr.l *               -L        --   --   A-   --   A-   --   --
+cmp.l *,d0            -L   -L   -L   -L   AL   -L   AL   -L   -L   -L   AL   -L
+cmpa.l *,a1           -L   -L   -L   -L   AL   -L   AL   -L   -L   -L   AL   -L
+cmp.l #1,*            -L        --   --   --   --   --   --   --
+eor.l d0,*            --        --   --   A-   --   A-   --   --
+eor.l #1,*            --        --   --   --   --   --   --   --
+lsl.l #7,d0           -L
+lsl.l d0,d0           --
+lsr.l #7,d0           -L
+lsr.l d0,d0           --
+move.l *,d0           --   --   --   --   A-   --   A-   --   --   --   A-   --
+move.l *,a1           --   --   --   --   A-   --   A-   --   --   --   A-   --
+move.l *,(a1)         --   --   --   --   A-   --   A-   --   --   --   A-   --
+move.l *,(a1)+        --   --   --   --   A-   --   A-   --   --   --   A-   --
+move.l *,-(a1)        --   --   --   --   A-   --   A-   --   --   --   A-   --
+move.l *,24(a1)       --   --   --   --   A-   --   A-   --   --   --   A-   --
+move.l *,20(a1,d0.l)  A-   A-   --   --   A-   --   A-   --   --   --   A-   --
+move.l *,$200.l       --   --   --   --   A-   --   A-   --   --   --   A-   --
+move.l *,scratchpad   --   --   --   --   A-   --   A-   --   --   --   A-   --
+movem.l *,d0-d3                 --   --        --   --   --   --
+movem.l d0-d3,*                 --        --   --   --   --   --
+movep.l d0,4(a1)      --
+movep.l 4(a0),d0      --
+neg.l *               -L        --   --   A-   --   A-   --   --
+negx.l *              -L        --   --   A-   --   A-   --   --
+not.l *               -L        --   --   A-   --   A-   --   --
+or.l *,d0             --        -L   -L   AL   -L   AL   -L   -L   -L   AL   --
+or.l d0,*                       --   --   A-   --   A-   --   --
+or.l #1,*             --        --   --   --   --   --   --   --
+rol.l #7,d0           -L
+rol.l d0,d0           --
+ror.l #7,d0           -L
+ror.l d0,d0           --
+roxl.l #7,d0          -L
+roxl.l d0,d0          --
+roxr.l #7,d0          -L
+roxr.l d0,d0          --
+sub.l *,d0            --   --   -L   -L   AL   -L   AL   -L   -L   -L   AL   --
+sub.l d0,*                      --   --   A-   --   A-   --   --
+suba.l *,a1           --   --   -L   -L   AL   -L   AL   -L   -L   -L   AL   --
+sub.l #1,*            --        --   --   --   --   --   --   --
+subq.l #1,*           --   --   --   --   A-   --   A-   --   --
+subx.l *,*            --                  A-
+tst.l *               --        --   --   A-   --   A-   --   --
+asl.w #1,*            --        --   --   A-   --   A-   --   --
+asr.w #1,*            --        --   --   A-   --   A-   --   --
+lsl.w #1,*            --        --   --   A-   --   A-   --   --
+lsr.w #1,*            --        --   --   A-   --   A-   --   --
+rol.w #1,*            --        --   --   A-   --   A-   --   --
+ror.w #1,*            --        --   --   A-   --   A-   --   --
+roxl.w #1,*           --        --   --   A-   --   A-   --   --
+roxr.w #1,*           --        --   --   A-   --   A-   --   --
+bchg #1,*             -L        --   --   --   --   --   --   --
+bchg d0,*             -L        --   --   A-   --   A-   --   --
+bset #1,*             -L        --   --   --   --   --   --   --
+bset d0,*             -L        --   --   A-   --   A-   --   --
+bclr #1,*             --        --   --   --   --   --   --   --
+bclr d0,*             --        --   --   A-   --   A-   --   --
+btst #1,*             -L        --   --   --   --   --   --   --
+btst d0,*             -L        --   --   A-   --   A-   --   --
+pea *                           --             --   A-   --   --   --   A-
+lea *,a1                        --             --   A-   --   --   --   A-
+link a0,#4            --
+unlk a0               --
+mulu *,d0             --        -L   -L   AL   --   A-   --   -L   -L   AL   --
+muls *,d0             -L        -L   -L   AL   -L   AL   -L   -L   -L   AL   -L
+abcd *,*              -L                  A-
+nbcd *                -L        --   --   A-   --   A-   --   --
+sbcd *,*              -L                  A-
+st *                  -L        --   --   A-   --   A-   --   --
+tas *                 --        --   --   A-   --   A-   --   --
+moveq #0,d0           --
+exg d0,d1             -L
+ext.w d0              --
+ext.l d0              --
+swap d0               --
+nop                   --
+move.w sr,*           -L        --   --   A-   --   A-   --   --
+move.w *,ccr          --        --   --   A-   --   A-   --   --   --   A-   --
+move.w #$2200,sr      --
+andi #$2700,sr        --
+ori #$2200,sr         --
+eori #$0100,sr        --
+
+
+
+These tables were generated on an STE. The first table has been cross-checked 
+on an STFM and found to be the same, despite slightly different hardware. (The 
+$FF8209 register seems to be in the CPU domain on STFM. On the STE it appears 
+to be in the shifter domain, so subject to phase waitstates, and in addition if 
+you read it on the odd phase you see random screwy results: I'm not sure if 
+these are extra waitstates or a bad value, perhaps due to the register being 
+read and written simultaneously). I haven't checked the second table on an FM 
+yet.
+
+STeem is very accurate on the base cycle counts, with only a very few small 
+differences (negx and tas to mem). It is less accurate on pairing. It gets most 
+of the major cases right but there are plenty of instructions with small 
+differences.
+
+The tester automatically marks any instructions that don't match the gold 
+results from a real machine. I'm expanding it to check timing and exact stack 
+contents of bus and address errors, after which I'll be releasing it for people 
+to check their emulators with.
+
+If anyone spots anything grossly odd with these, please let me know - there 
+could still be bugs here I might need to track down.
+
+
+--
+
+The BAE tester is starting to produce useful results at last, for address 
+operands at least. Here's the results from some address errors on an STE:
+
+Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+move.w *,d0            -    -   56   56   60   60   64    -    -    -    -    -
+                               1/2  1/2 -1/4  3/2  7/2                         
+                               RI5  RI5  RI5  RI5  RI5                         
+                              3010 3018 3020 3028 3030                         
+movem.w *,d0-d3                 60   60        64   68    -    -    -    -
+                               1/6  1/6       3/8  7/4                    
+                               RI5  RI5       RI5  RI5                         
+                              4C90 4C98      4CA8 4CB0                    
+movem.w d0-d3,*                 60        60   64   68    -    -
+                               1/6      -1/6  3/8  7/8          
+                               WI5       WI5  WI5  WI5                         
+                              4890      48A0 48A8 48B0      
+
+Rows are cycles, fault and PC offsets, type code and IR.
+
+Note how the stacked PC reveals different behaviour on predecrement. Also seems 
+to imply that the movem does all the prefetches before reading, which would 
+explain why I had to hack the bus error address to get Blood Money to work, as 
+my movem currently issues the final prefetch after all the reads. Also looks 
+like on the move the source read might happen before any prefetches caused by 
+extension (or perhaps the AE is tested before the move actually starts - the 
+bus error results should reveal that).
+
+--
+
+Got full results for the bus and address errors now. The full set of tables is 
+150k, presumably too big to bang in here? There's all sorts of fascinating 
+details in there:
+
+- Bus errors look to be generated by a watchdog timer in glue - my estimation 
+is that if nothing responds to a DTACK within 64 cycles it generates BERR (the 
+timings for BEs look to be exactly 68 cycles ahead of the AE, so probably 64 
+watchdog plus 4 cycles for the bus transaction). It manages to screw up my 
+timing in a few cases by making the routine take longer than a full HBL, but 
+fortunately most of them just slip under the bar. A further experiment to see 
+if stuff that's only a BE in user mode has the same timing would be nice, but 
+it's a lot more difficult.
+
+- The exact PC stacked on bus or address error is complex. It does appear to be 
+consistent between the two, and the address stacked is sometimes revealing of 
+the prefetch pattern and sometimes just plain confusing  . It looks like some 
+types of extension word cause the PC to update (abs W and abs L) but some don't 
+(displacement and indexed). Still trying to work out the exact algorithm.
+
+- The stacked IR reflects the following instruction for move.w x,-(a1) only. 
+Presumably the prefetch has already completed and transferred to IR - but why 
+it doesn't happen for the long move is intriguing.
+
+- Predecrement reads appear to work lower address, higher address for reads, 
+but higher address, lower address for writes.
+
+- Both Emu and Steem are a horrible mess accuracy-wise  .
+
+
+--
+
+From what I'm seeing, I don't think it needs a table, I think it will turn out 
+to be predictable. Just a bit illogical. The rough rules I have right now are:
+- the PC stacked is that of the next fetch. So for something like add (a0),d0 
+then it's PC+2. That seems to be because the prefetch hasn't been issued yet.
+- -(an) sources stack PC+4. The implication is that the prefetch has already 
+occurred (and there's no easy test because read ordering can't be probed from 
+software). However, the cycle count of the bus / address error might indicate 
+it hasn't. I still haven't worked that one through.
+- $(an) and $(an,dn) stack PC+2, despite having at least in theory fetched the 
+extension word or displacement. That's not absolutely required - the word's 
+already in the other prefetch register after all - but again the cycle count 
+seems to indicate the prefetch hasn't happened yet. Also needs more work
+- abs.W and .L stack the expected PC+4 and PC+6 and the cycle also indicates 
+the prefetches definitely occur before the read    

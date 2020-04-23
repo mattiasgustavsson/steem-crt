@@ -1,0 +1,2 @@
+The Linux build of Steem SSE is abandoned for the moment.
+The last released version was v3.7.2, the last compiling version was v3.8.2.

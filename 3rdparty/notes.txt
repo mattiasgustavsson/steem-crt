@@ -1,0 +1,69 @@
+General
+This is the '3rdparty' folder for Steem SSE.
+As far as we know, all files here are public.
+However this says nothing about the licence. Steem SSE is "GPL",
+we may use the tools in this folder for Steem, but it doesn't mean
+that those are "GPL" as well.
+
+
+6301
+  Sim6xx by Arne Riiber adapted for emulation of the Hitachi HD6301V1 used 
+  as an intelligent keyboard controller on the Atari ST.
+
+avi
+  Steem can produce an avi video file if the correct macro is defined.
+  DirectDraw build only (result is so so).
+
+caps  
+IPF Library by István Fábián and The Software Preservation Society
+  http://www.softpres.org - for Win32
+
+caps_linux
+  
+IPF Library by István Fábián and The Software Preservation Society
+  http://www.softpres.org - for Unix
+
+CpuUsage
+  c++ class that gives the CPU usage of a process
+  by Ben Watson
+http://www.philosophicalgeek.com/2009/01/03/determine-cpu-usage-of-current-process-c-and-c/
+  used for Statistics
+
+d3d
+  d3d (DirectX 9) support in Steem for more compatible fullscreen  
+
+doc
+  Some doc files
+
+dsp
+  Basic DSP (digital sound processing) adapted from code by Maverick 
+  (Fabio Bizzetti) used to emulate the STE's Microwire controller.
+
+  FIR filter class, by Mike Perkins
+  Used for a low-pass filter in YM2149 emulation
+
+FreeImage
+  great plugin (DLL) to save screenshots in all sorts of formats
+
+pasti
+  - Definitions for the pasti plugin by ijor aka Jorge Cwik, pasti@fxatari.com.
+  - div68kCycleAccurate.c, routines giving the exact timing for the DIV 
+  instructions, also by ijor.
+
+portaudio
+  Linux. Dead-end for the moment.
+
+rtaudio
+  Linux. We got this one working at some point.
+
+stvl
+  plugin for low-level video logic
+
+UnRARDLL
+  Win32. RAR support directly using the DLL.
+
+unrarlib
+  Windows/Linux. Dead-end for the moment.
+
+zlib
+  Linux. Operating.

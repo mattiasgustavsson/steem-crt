@@ -1,0 +1,34 @@
+#include "\masm32\include\resource.h"
+#define ICON_1			500
+
+#define IDD_DIALOG1                     200
+#define IDC_PROGRESS1                   1001
+#define IDC_PROGRESS2                   1002
+#define IDC_STATIC                      -1
+#define IDC_file						301
+#define IDC_volume						302
+#define IDC_filebytes					303
+#define IDC_totalbytes					304
+
+ICON_1 ICON "mainicon.ico"
+
+IDD_DIALOG1 DIALOGEX 0, 0, 292, 132
+STYLE DS_ABSALIGN | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+
+CAPTION "Win32ASM UnRAR Example - by F.Mücke"
+FONT 8, "MS Sans Serif"
+BEGIN
+    PUSHBUTTON      "Start",IDOK,7,113,50,14,//BS_FLAT
+    PUSHBUTTON      "Quit",IDCANCEL,235,113,50,14,//BS_FLAT
+    GROUPBOX        "Current File",IDC_STATIC,7,7,278,45
+    GROUPBOX        "Overall Progress",IDC_STATIC,7,60,278,45
+    CONTROL         "",IDC_file,"Static",SS_LEFTNOWORDWRAP | SS_CENTERIMAGE | WS_GROUP,13,16,266,9
+    CONTROL         "Progress1",IDC_PROGRESS1,"msctls_progress32",WS_BORDER,14,27,262,10	//PBS_SMOOTH|
+    CONTROL         "Progress1",IDC_PROGRESS2,"msctls_progress32",WS_BORDER,14,80,262,10	//PBS_SMOOTH|
+    CONTROL         "",IDC_filebytes,"Static",SS_LEFTNOWORDWRAP | SS_CENTERIMAGE | WS_GROUP,13,38,266,9
+    CONTROL         "",IDC_totalbytes,"Static",SS_LEFTNOWORDWRAP | SS_CENTERIMAGE | WS_GROUP,13,91,266,9
+    LTEXT           "Current Volume:",IDC_STATIC,14,69,52,9,SS_CENTERIMAGE
+    LTEXT           "",IDC_volume,70,69,200,9,SS_CENTERIMAGE
+END
+
+

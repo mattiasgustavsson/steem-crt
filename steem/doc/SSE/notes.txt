@@ -1,0 +1,6 @@
+- Documentation written or put together for Steem SSE emulator.
+The difference with the 'doc' folder in '3rdparty' is that files are edited.
+But they do contain 3rdparty documentation, sometimes copied and pasted, and
+credit isn't given all the time.
+To be honest some files probably should be deleted, they're not up-to-date,
+for instance for microcodes.

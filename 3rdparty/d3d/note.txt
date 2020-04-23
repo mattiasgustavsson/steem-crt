@@ -1,0 +1,2 @@
+This folder has been created for BCC to be able to compile the
+ D3D build of Steem

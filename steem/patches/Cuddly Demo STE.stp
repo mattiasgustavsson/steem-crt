@@ -1,0 +1,9 @@
+[Text]
+Description=timing correction for shifted screen on main menu
+ApplyWhen=menu 
+Version=v3.7.0beta
+PatchAuthor=Seagal
+
+[Patch]
+00F210=$F238
+00039A=$F238

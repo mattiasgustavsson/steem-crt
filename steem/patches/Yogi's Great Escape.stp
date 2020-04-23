@@ -1,0 +1,13 @@
+[Text]
+
+Description=Infinite lives
+ApplyWhen=When the game is loaded
+Version=Works on Steem v3.2
+
+PatchAuthor=Steven Seagal/Petari
+
+
+
+[Patch]
+
+07CC7C = $4e71

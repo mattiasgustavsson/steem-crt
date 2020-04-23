@@ -1,0 +1,47 @@
+BLiTTER
+
+This not a full documentation for the Atari blitter (Mega ST, STE),
+but some useful partial information for emulation.
+
+
+Bus arbitration
+
+Bus arbitration takes 4 clock cycles, whether it's CPU->Blitter 
+or Blitter->CPU arbitration.
+The CPU can run during bus arbitration, if it doesn't access the bus.
+
+Both the CPU and the blitter can grant the bus in the middle of an operation,
+an instruction for the CPU, a blit for the blitter (if it is in blit mode).
+
+BRI: this signal on the schematics would make the Blitter surrender the bus,
+so that disk DMA has priority, as it should.
+It comes from the bidirectional BR pad.
+
+It is also possible that Blitter action is delayed by a chain of flip flops
+to give disk DMA priority.
+
+It seems the Blitter will assert BR only when ASI is negated?
+
+
+
+Blit mode
+
+In Blit mode, the CPU and the blitter have alternative access to the bus for 
+a while until the blit is finished.
+Not clock cycles but bus accesses are counted! (thx Cyprian)
+This is why couting blit and CPU cycles was so much trouble.
+
+For its first run, the blitter gets 63 bus accesses.
+Generally, the program restarts the blitter at once in blit mode. That
+way, the blit is fast while interruptions are fielded.
+If the blitter is so restarted, it gets 64 bus accesses each time.
+If it isn't restarted, it will restart by itself after the CPU has accessed
+the bus 64 times, and it will get 63 bus accesses. There's also a latency of
+4 clock cycles after the 64th CPU access and when bus arbitration begins.
+
+The blitter will restart by itself in TOS, during interrupts because TOS 
+doesn't pause it.
+
+The counter can be found on the 1st page of Blitter schematics. It produces
+the TMOUT signal.
+

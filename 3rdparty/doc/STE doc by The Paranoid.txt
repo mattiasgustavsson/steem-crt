@@ -1,0 +1,1563 @@
+STE documentation
+
+
+--------------------------------------------------------------------------------
+
+ 
+
+Assembled after depressing hours of experiments and tests that did usually not 
+work out as planned by :
+
+The Paranoid
+
+ 
+
+Paranoia
+
+Think you can handle it ?!
+
+(of the Lunatic Asylum)
+
+
+--------------------------------------------------------------------------------
+
+ 
+
+Preface:
+
+ 
+
+The Atari STE is, without a doubt, a nice machine. It has so many features the 
+Atari ST lacked:
+
+- 4096 instead of 512 colours
+
+- Horizontal and Vertical hardware scrolling
+
+  (also called hardware windowing of large virtual screens)
+
+- Blitter
+
+- 8 Bit DMA stereo sound
+
+  (Up to 50 KHz replay rate)
+
+- National LMC 1992 soundchip, connected over Microwire serial port
+
+  Treble, Bass, Left/Right/Main Volume Control
+
+- 256KB EPROM containing the TOS, socketed
+
+- 4 30-pin SIMM-slots, up to 4 MB RAM
+
+- Extended and analogue capable joystick ports
+
+ 
+
+Unfortunately, you will pretty soon find out that the STE also contains a lot - 
+and i mean a lot - of pitfalls.Whatever feature of the STE you want to use, it 
+will either not work as planned or require special treatment. If it works as 
+planned and does not require special treatment, it will definetly not work on 
+the TT or the Falcon. So this documentation is just a little compilation of the 
+usual traps especially programming beginners might step in and how to dodge 
+these traps.
+
+ 
+
+This documentation is given on an "as is" basis. Paranoia does not give any 
+warranties about correctness about the given information here. We can not be 
+held responsible for any loss of data, damage to your hardware or whatever 
+might happen to you, your software or your hardware after reading this 
+document. Every chapter will describe the special registers for a certain 
+feature and afterwards list the traps you should look out for.
+
+ 
+
+In the bitset tables, "0" means this bit cannot be set and is automatically 
+assumed "0", "1" means this bit cannot be set and is automatically read as "1", 
+"X" means it can be read/written and can feature "0" or "1". In the Tables, 
+"yes" means this register exists in the model mentioned while "no" means that 
+this register does not exist. "ro" means "read only" and refers to a register 
+that cannot be written to, "rw" means "read/write" and declares a register that 
+can be read as well as written to.
+
+
+1.) The Hardware Scrolling
+
+The Registers:
+
+  Video Base Address:                             ST     STE
+
+    $FFFF8201    0 0 X X X X X X   High Byte      yes    yes
+
+    $FFFF8203    X X X X X X X X   Mid Byte       yes    yes
+
+    $FFFF820D    X X X X X X X 0   Low Byte       no     yes
+
+The first two registers are identical with those of the ST and can be read and 
+written to. The last one (low byte) did not exist on the ST. While on the ST 
+this meant that a Video Base address had to be even on a 256-byte basis ( 
+lowbyte was assumed #$00 then ), on the STE it only has to be even sincebit 0 
+is automatically assumed #0.
+
+   Video Address Counter:
+
+    $FFFF8205    0 0 X X X X X X   High Byte      ro     rw  
+
+    $FFFF8207    X X X X X X X X   Mid Byte       ro     rw
+
+    $FFFF8209    X X X X X X X 0   Low Byte       ro     rw
+
+This set of registers already existed on the ST but could not be written to. 
+The Shifter uses this actually for counting through the whole screen it is 
+building up. Write access has of course immediate effect.  
+
+  Line-Offset Register
+
+    $FFFF820F  X X X X X X X X X                  no     yes
+
+This register contains the value how many WORDS (not BYTES!) the Shifter is 
+supposed to skip after each Rasterline. This register enables virtual screens 
+that are (horizontally) larger than the displayed screen by making the Shifter 
+skip the set number of words when a line has been drawn on screen.    
+
+  Video Base Address Pixel Offset
+
+    $FFFF8265  0 0 0 0 X X X X                   no      yes
+
+This register allows to skip from a single to 15 pixels at the start of each 
+rasterline to allow horizontal fine-scrolling. The registers are easy to 
+understand. 
+
+So why didn't it work ?
+
+? Writing to the Video Base Address registers seems to have no direct affect on 
+the screen contents.
+
+! No. These registers only contain the "reset" value for the Shifter after a 
+whole screen has been drawn. It does not affect the current screen, but the one 
+for the next VBL. To make immediate changes on the screen, use the Video 
+Address Counter.
+
+? There's only junk on the screen. It looks like the STE reads the screen 
+content from a totally wrong address.
+
+! For compatibility reasons, the low-byte of the Video Base Address is ALWAYS 
+set to 0 when the mid- or high-byte of the Video Base Address are set. This is 
+easy to understand, seeing that the ST did not have this register - hence ST 
+software that never sets the low-byte might have problems setting the correct 
+Video Base Address. The solution on the STE is simple: Always set the Low-Byte 
+last. First set High and Mid-Byte (in no special order), then do the low-byte.
+
+? Scrolling in 16-pixels blocks works, but fine-scrolling totally
+
+  screws up the screen contents.
+
+ 
+
+! The Line Offset Register is very critical. Make sure it contains the correct 
+value at any time. If the Pixel Offset Register contains a zero, the Line 
+Offset Register contains the exact number of words to skip after each line. But 
+if you set the Pixel Offset Register to "X", the Shifter will still display 320 
+(640) pixels a line and therefore has to read "X" pixels from the NEXT word 
+which it would have skipped if the Pixel offset Register contained a "0". 
+Hence, for any Pixel Offset Value > 0, please note that the Shifter has to read 
+(a few bits) more each rasterline and these bits must NOT be skipped using the 
+Line Offset Register. 
+
+? Tried. Screen content is still screwed up.
+
+! Please also note that in Low-Resolution (4 Bitplanes), the Video-Shifter 
+reads 4 words at once. In Low-Res, the Line Offset therefore always has to be a 
+multiple of 4, otherwise the Shifter will not display the bitplanes correctly 
+next rasterline.
+
+? In Hires (Monochrome 640x400), my scrolling does not work on the Falcon
+
+! On the STE, the Video Base Address only has to be a multiple of 2 since bit 0 
+is always "0". On the Falcon, the least significant 2 bits of the Base Address 
+are "0", hence, on the Falcon, you can horizontally scroll a minimum of 2 
+words, which, in monochrome mode, is not sufficient for fine-scrolling. There 
+is no way to do horizontal-fine scrolling on the Falcon in a monochrome mode. 
+Midres (640x200 2 bitplanes) will already work since every address has to be a 
+multiple of 4 then
+
+? Gah! On the TT neither hires nor midres works.
+
+! It's even worse on the TT since the TT-Shifter lacks the 3 least significant 
+bits of the Video Base Address, hence all Video Base Addresses have to be a 
+multiple of 8. In hi- and midres however, any "sound" Base Address is a 
+multiple of 2 or 4. There is no way to horizontally fine-scroll on the TT in 
+these resolutions.
+
+? It scrolls, but the screen-content seems to jump sometimes.
+
+! The Atari STE shifter has a slight timing problem regarding the Pixel Skip 
+Register. Whenever this registers "jumps" from a value >"0" to "0", the STE 
+might display the wrong screen address. This is a known problem and Atari 
+affirms it. Atari officially suggests to NOT set the Pixel Skip register in the 
+VBL as this causes the problem. Since changes on this register have immediate 
+effect, Atari suggests to use a HBL routine that sets all registers connected 
+to Video hardware not in the VBL but in (for example) a HBL interrupt after the 
+VBL.
+
+? On the Falcon and TT, fine-scrolling seems to work without the jumping in 
+low-res, even when the registers are set in the VBL-interrupt.
+
+! Affirmed. Both TT and Falcon do not suffer "visibly" from this bug. However, 
+in case there are other bus-timing critical jobs running (like MOD-replay 
+routines or heavily loaded interupt routines that occur more often than the 
+VBL), this bug MIGHT become visible as well. Besides, if you are coding Falcon 
+or TT for STE compatibility, you should follow Atari's suggestion and not use 
+VBL to set the registers. You will learn later on that the STE behaves very 
+very critical to anything done in the VBL anyway.
+
+? I tried to write a screen splitting routine that changes a lot of 
+Video-related parameters after a certain rasterline. But it is highly fragile 
+and does not work very well.
+
+! The STE with an 8 MHz CPU is not very fast and timing becomes critical when 
+trying to change Video-registers on the fly during the screen build-up. There 
+is no general solution for this, just that you should, during screen build-up, 
+never change too many registers or at least not in a way that it costs too much 
+time. If you do need to change many registers,  make a table with all the 
+values long before they are used (for example in the VBL) and try to write 
+these values as quickly as possible. Sometimes, an empty line in exactly that 
+HBL you change all the registers, can help a lot.
+
+? So now i fixed it and it works fine on the STE, but often enough, bitplanes 
+are screwed up on the Falcon. Why ?
+
+! Remember that the Falcon only allows screen addresses as multiples of 4, 
+which is not as flexible as on the STE, where it only has to be a multiple of 
+2. This is also the case for the Video Counter Registerts, not only for the 
+Video Base Address. Make sure that your screen data is stored on an address 
+that is a multiple of 4 and it will work.
+
+? My screen splitting routine now works fine on the STE and on the Falcon, but 
+not on the TT.
+
+! On the TT, it's even worse and each Video Base Address has to be a multiple 
+of 8. According to Ray/tSCc, the TT allows write access to the Video Counter - 
+in contrast to what some books say. However, officially, the TT does not allow 
+to change video address on the fly by writing to the address counter.
+
+
+
+ 2.) 4096 Colours
+
+Registers:
+
+  Palette Register:                                 ST     STE
+
+    $FFFF8240  0 0 0 0 x X X X x X X X x X X X       X     x+X
+
+    $FFFF8242  0 0 0 0 x X X X x X X X x X X X ...
+
+    ...
+
+    $FFFF825E  0 0 0 0 x X X X x X X X x X X X    (16 in total)
+
+                       ---_--- ---_--- ---_---
+
+                         red    green    blue
+
+These 16 registers serve exactly the same purpose as in the ST. The only 
+difference is that each Nibble for Red, Green or Blue consists of 4 bits 
+instead of 3 on the ST.
+
+This time, Atari did good work (almost). So what are the pitfalls:
+
+ 
+
+? I tried to program a fade and it works in general, but flashes during the 
+fade, why ?
+
+! For compatibility reasons, each nibble encoding the Red, Green or Blue values 
+is not ordered "8 4 2 1", meaning the least significant bit represents the 
+value "1" while the most significant one represents the value "8" - This would 
+make the STE rather incompatible with the ST and only display dark colours. The 
+sequence of Bits is "0 3 2 1" encoding the values "1 8 4 2". Therefore to fade 
+from black to white, the sequence of colours would be $000, $888, $111, $999, 
+$222, $AAA, ...
+
+? My program sets the palette correctly on the STE in lowres (320x200 16 
+colours). Will it also work on the TT in TT midres (640x480 16 colours) ?
+
+! Yes, it will. Even though the TT uses its own palette registers, 256 in 
+total, it can "mask in" a set of 16 colours in the ST palette registers, which 
+are of course at the same address as on your STE. Meaning: Whatever values you 
+write in the ST palette registers on the TT, in TT midres, they will be used. 
+Your program will even work correctly in TT Low (320 x 480 256 colours), if the 
+TT Shiftmode register is set accordingly.
+
+? So it does work on the TT alright. But i have a Falcon and not a TT. Now what 
+?
+
+! The Falcon can be switched to "ST compatible mode". This is not a 100% term 
+since it does not - in contrast to the TT - mean either 320x200, 640x200 or 
+640x400 pixels in 16,4 or 2 colours but only means that the ST palette 
+registers are being used, hence this flag can only be used when displaying 16, 
+4 or 2 colours. If you do not set this flag, the Falcon will NOT - in contrast 
+to the TT - read the ST palette registers. This change has been necessary since 
+the Falcon has 18 bits per colour in bitplane mode while the TT only has 12, 
+just like the STE has. The Falcon RGB format for a palette mode is: 00RRRRRR 
+00000000 00GGGGGG 00BBBBBB (VGA compatible).
+
+  
+
+3.) The Blitter
+
+(The Blitter in the STE is, at least from the programmers view, identical to 
+the Blitter in the Mega ST. Hardware-wise, it is not)
+
+Registers:
+
+  Halftone RAM:                            
+
+    $FFFF8A00  Halftone RAM, Word 0    (16 Words in total)
+
+    ...
+
+    $FFFF8A1E  Halftone RAM, Word 15
+
+    
+
+  Halftone RAM is a 32 Byte zero-waitstate Blitter-exclusive RAM that can be 
+used for lightning-quick manipulations of copied data. Its main purpose was to 
+combine monochrome picture data with (16 x 16 pixel) patterns, usually to make 
+them a bit darker or brighter (halftone).
+
+Source X Increment Register:
+
+    $FFFF8A20  X X X X X X X X X X X X X X X 0
+
+Source Y Increment Register:
+
+    $FFFF8A22  X X X X X X X X X X X X X X X X
+
+ These registers encode how many bytes the Blitter increments the counter after 
+each copied word ($FFFF8A20) or after each line ($FFFF8A22). Source Y Inc has 
+to be even since the Blitter only  works on a Word-basis and can not access 
+single Bytes.
+
+Source Address Register:
+
+    $FFFF8A24  XXXXXXXX XXXXXXXX XXXXXXXX XXXXXXX0
+
+The 32-Bit address of the source, meaning the Blitter will start reading from 
+this address. This address has to be even as the Blitter cannot access single 
+Bytes. The Blitter actually accepts real 32-Bit addresses, but the MMU filters 
+the upper 10 bytes out.
+
+Endmask Registers
+
+    $FFFF8A28  X X X X X X X X X X X X X X X X  Endmask 1
+
+    $FFFF82AA  X X X X X X X X X X X X X X X X  Endmask 2
+
+    $FFFF82AC  X X X X X X X X X X X X X X X X  Endmask 3
+
+The Endmask is a Bitmask that can be applied upon the copied data in a 
+blockwise way. Endmask 1 is being applied on every first word copied in a row, 
+Endmask 2 for all other words in this row except for the last one, which is 
+combined with Endmask 3. Clever usage of these registers allow to start copies 
+from basically every bit in memory.
+
+Destination X Increment Register:
+
+    $FFFF8A2E  X X X X X X X X X X X X X X X X
+
+Destination Y Increment Register:
+
+    $FFFF8A30  X X X X X X X X X X X X X X X X
+
+Similar to the Source X/Y Increment Register. These two denote how many Bytes 
+after each copied word/line the Blitter proceeds.
+
+Destination Address Register:
+
+    $FFFF8A32  XXXXXXXX XXXXXXXX XXXXXXXX XXXXXXX0
+
+This contains the address where the Blitter copies all the data to that it 
+computes. A real 32 Bit word that has to be even.
+
+X Count Register:
+
+    $FFFF8A36  X X X X X X X X X X X X X X X X
+
+Y Count Register:
+
+    $FFFF8A38  X X X X X X X X X X X X X X X X
+
+These two registers contain the information about how the 2D bitblock the 
+Blitter copies are shaped. The X Count Register contains how many words a line 
+of this rectangular block has, the Y-Count how many lines the bitblock has in 
+total. This does not include the skipped words, only those the Blitter really 
+copies (hence the name count).
+
+Blit HOP (Halftone OPeration) Register:
+
+    $FFFF8A3A  0 0 0 0 0 0 X X
+
+How to combine Halftone-Data and copied data is given here. A "00" means all 
+copied bits will be set to "1" (blind copy), "01" means ONLY halftone content 
+will be copied, "10" implies that ONLY source content will be copied (1:1 
+copy). "11" makes the halftone-pattern work as supposed and does a copy 
+"Halftone AND source".
+
+Blit OP (logical OPeration) Register:
+
+    $FFFF8A3B  0 0 0 0 X X X X
+
+The Blitter can carry out 0-cycles logical operations with source and target. 
+The table of possible values follow:
+
+    0 0 0 0    - Target will be zeroed out (blind copy)
+
+    0 0 0 1    - Source AND Target         (inverse copy)
+
+    0 0 1 0    - Source AND NOT Target     (mask copy)
+
+    0 0 1 1    - Source only               (replace copy)
+
+    0 1 0 0    - NOT Source AND Target     (mask copy)
+
+    0 1 0 1    - Target unchanged          (null copy)
+
+    0 1 1 0    - Source XOR Target         (xor copy)
+
+    0 1 1 1    - Source OR Target          (combine copy)
+
+    1 0 0 0    - NOT Source AND NOT Target (complex mask copy)
+
+    1 0 0 1    - NOT Source XOR Target     (complex combine copy)
+
+    1 0 1 0    - NOT Target                (reverse, no copy)
+
+    1 0 1 1    - Source OR NOT Target      (mask copy)
+
+    1 1 0 0    - NOT Source                (reverse direct copy)
+
+    1 1 0 1    - NOT Source OR Target      (reverse combine)
+
+    1 1 1 0    - NOT Source OR NOT Target  (complex reverse copy)
+
+    1 1 1 1    - Target is set to "1"      (blind copy)
+
+  Blitter Control Register:
+
+    $FFFF8A3C  X X X 0 X X X X
+
+This register serves multiple purposes. The lowest 4 bit represents the number 
+of the line in the Halftone pattern to start with.The upper 3 bits feature 
+extended options of the Blitter.
+
+    Bit 5  -  Smudge-mode
+
+              Which line of the halftone pattern to start with is
+
+              read from the first source word when the copy starts
+
+    Bit 6  -  Blit-Mode Register
+
+              Decides wether to copy in BLIT Mode (0) or in 
+
+              HOG Mode (1). In Blit Mode (also known as cooperative),
+
+              CPU and Blitter get 64 clockcycles in turns, in Hog 
+
+              Mode, the Blitter reserves and hogs the bus for as long
+
+              as the copy takes, CPU and DMA get no Bus access.
+
+    Bit 7  -  Busy Bit
+
+              Turns on the Blitter activity and stays "1" until the copy is 
+finished
+
+    Blitter Skew Register:
+
+    $FFFF8A3D  X X 0 0 X X X X
+
+The lowest 4 bit of this register allow to shift the data while copying by up 
+to 15 bits to the right. The upper 2 bits are
+
+    Bit 6  -  NFSR (No final source read)
+
+    Bit 7  -  FXSR (Force extra Source Read).
+
+NFSR means the last word of course is not being read anymore. This is only 
+sensible with certain Endmask and skew values. FXSR is the opposite and forces 
+the Blitter to read one more word. Also only sensible with certain Endmask/Skew 
+combinations.
+
+So much for the theory. Unfortunately, the Blitter is a lovely but also pretty 
+stubborn little chip. What went wrong this time ?
+
+ ? After feeding the Blitter values and activating it, the STE totally crashes.
+
+! All the address-related auxilary registers such as X-Count/Y-Count, 
+X/Y-Increments etc. are signed values. In other words, the Blitter can go 
+backwards in memory as well as forward. Please check if your values are correct.
+
+ ? I am trying a simple and direct copy and set all the important registers, 
+but it does not work as i planned.
+
+! The Blitter is a chip and not a software, meaning it does not know
+
+  any default values. Especially when starting to learn "Blitter" it is 
+important to ALWAYS set EVERY Register correctly. Especially Endmask, Smudge, 
+Skew and OP-Register can lead to very funny results if not set correctly. So 
+set ALL the registers at least once, for all subsequent copies you do not need 
+to set them ALL anymore.
+
+ ? The copy appears at the right spot, but is scrambled.
+
+! Make sure your X/Y-Increments are correct for both Source and Destination. 
+Especially if you are copying a "tight" block (like a 32x32 pixel compact 
+block) to a larger area (like the screen) you definetly need to watch the 
+increment registers.
+
+ ? Now the first copy works, but even though i am copying blocks of identical 
+size, just setting addresses does not work.
+
+! No, the Blitter uses a few of the registers accessible by the CPU for its own 
+counting. Set Addresses, X and Y-Count Registers every time you do a copy in 
+any case. 
+
+  ? So i set all the registers, but the copies are incomplete when i do 
+multiple copies.
+
+! Before feeding the Blitter new values, make sure it has finished its task 
+already by checking the Busy-Bit. Do not write new values into the Blitter's 
+registers as long as it is still operating.
+
+ ? It looks like the copy itself works, but it flickers. And i was using the 
+Blitter to speed things up, not to make them flicker.
+
+! After feeding the Blitter all the values and activating it, the CPU is done 
+and can do other tasks, the Blitter however has just started. If the Blitter 
+does critical things in your program make sure the "Blit Busy" has returned 
+from "1" to "0" before your CPU proceeds when using the Blitter in Blit-mode.
+
+? To make it even faster, i turned the Blitter into Hog-mode. But now my 
+program crashes almost at random.
+
+! The Hog-Mode of the Blitter does not allow the CPU to access to bus while the 
+Blitter is active - Not even for interrupts. Make sure that your software does 
+not require the CPU to react to an interrupt immediatelly - Otherwise, the STE 
+will crash.
+
+ ? Is there a way to make the Blitter faster in Blit-mode ?
+
+! Yes, there is. Atari used this to speed up the Blitter in GEM without risking 
+to use Hog-mode: Check the Busy-Bit. The CPU cannot access the bus and 
+therefore not the Busy-Bit if the Blitter is "active". If the CPU can finally 
+check the Busy-Bit the Blitter has "paused" and will wait for 64 clockcycles. 
+Now if the Busy-Bit is 0, the Blitter is done and you can leave. If not, set it 
+to "1" manually and do a NOP. Writing the Busy-Register will relaunch the 
+Blitter immediatelly, but the Blitter needs a few clockcycles to reserve the 
+bus (around 7), so the NOP is carried out in any case.This gives about 90% the 
+speed of the HOG-mode without losing the option to execute interrupts within 
+the next 64 clockcycles. Here's an extract from the ST Profibook:
+
+     Loop:    bset.b #7,$FFFF8A3B  ;test and set Busy-Bit
+
+              nop                  ;do a NOP in any case
+
+              bne.s Loop           ;if Busy-Bit was "1", go to Loop
+
+ ? Huh ? My program does not work on the TT ?
+
+! No, it does not. The TT does not have a Blitter.
+
+? I am coding the Blitter on the Falcon to reduce CPU usage a bit but the 
+program has slowed down even more.
+
+! Unfortunately, the Falcon Blitter is rather useless since the 68030 is, when 
+doing a simple 1:1 copy, about a factor of 4 to 5 faster than the Blitter in 
+the Falcon is, even though the Falcon Blitter is running at 16 MHz. On the 
+Falcon, the Blitter can become useful if you plan to heavily use 
+Halftone-pattern, bitwise-shifts and logical operations. Otherwise, use the CPU 
+instead.
+
+ ? I was trying to use the shift-operations of the Blitter to have my objects 
+on screen (ST Lowres) move pixelwise, but instead, Bitplanes are being screwed 
+up.
+
+! Please bear in mind the interleaved bitplane structure of the ST Low 
+resolution. Trying to copy and shift all bitplanes at once will make the 
+Blitter shift single bits from bitplane X to bitplane Y. Copy bitplane by 
+bitplane and it will work.
+
+? Copying and shifting blocks with the Blitter works now, but sometimes, a few 
+bits get lost.
+
+! In some cases, depending on the Endmask- and the Skew-registers, the Blitter 
+requires to read a word more than planned. Try the FXSR-Register in these 
+certain conditions.
+
+ ? I copy around large chunks of memory in one go, but i can't really say it 
+has gotten very fast on the Mega STE.
+
+! The Blitter in the STE does nearly 2 MB/sec. Per frame this is roughly 40 
+KB/sec. The CPU in the STE comes nowhere near that, but the CPU of the Mega STE 
+(16 MHz, cache on) can almost compete when it comes to direct 1:1 copies.
+
+ ? I heard somewhere, that the Blitter can be used for generating software 
+sprites all by itself. Is that true ?
+
+! Yes, you can have software sprites using the Blitter, that can be freely 
+positioned (pixel-perfect) without any other interference of the CPU than just 
+feeding values into the Blitter registers. However, the Blitter cannot produce 
+a 4 bitplane software-sprite in 1 go. The simplest solution is to copy bitplane 
+by bitplane, and each bitplane twice: First NOT Source AND Target, then Source 
+OR Target. Since the shifts do not need any additional time for the Blitter to 
+carry out, this will, on the STE, result in lightning fast sprites since the 
+68000 is very slow doing the shifts. 
+
+? I program the Falcon in true-colour mode and i would like to take advantage 
+of the Blitter.
+
+! Even though of course the Blitter works well in TC-mode, its special 
+features, bitwise shifts, extremely fast logical operations, masks for bitwise 
+copy and the halftone pattern, are basically useless and for a direct copy, the 
+CPU is a lot faster.
+
+  ? Is it just my imagination or is the Blitter in the Mega ST really a bit 
+faster than the Blitter in the STE ?
+
+! Actually, this is true. Due to the fact that the Blitter is a sole chip in 
+the Mega ST and has been combined in a chip named COMBEL in the STE, it is 
+really very slightly slower in the STE than it was in the Mega ST. This however 
+is almost invisible.
+
+
+
+4. DMA-Sound - the simple way to make music
+
+Registers:
+
+  DMA-Sound Control Register:
+
+    $FFFF8900  0 0 0 0 0 0 0 0 0 0 0 0 0 0 X X
+
+Writing a "00" to the last 2 bits terminate DMA sound replay.
+
+Bit 0 controls Replay off/on, Bit 1 controls Loop off/on (0=off, 1=on).
+
+DMA-Sound Start Address Register:
+
+    $FFFF8902  0 0 X X X X X X X X X X X X X X   Hibyte
+
+    $FFFF8904  X X X X X X X X X X X X X X X X   Midbyte
+
+    $FFFF8906  X X X X X X X X X X X X X X X 0   Lowbyte
+
+These three registers contain the 24-bit address of the sample to play. Even 
+though the samples are built on a byte-base, the DMA chip also only allows even 
+addresses
+
+  DMA-Sound Count Register:
+
+    $FFFF8908  0 0 X X X X X X X X X X X X X X   Hibyte  (ro)
+
+    $FFFF890A  X X X X X X X X X X X X X X X X   Midbyte (ro)
+
+    $FFFF890C  X X X X X X X X X X X X X X X 0   Lowbyte (ro)
+
+Used internally for the DMA-soundchip to count from start- to end-address. No 
+write access.
+
+  DMA-Sound End Register:
+
+    $FFFF890E  0 0 X X X X X X X X X X X X X X   Hibyte
+
+    $FFFF8910  X X X X X X X X X X X X X X X X   Midbyte
+
+    $FFFF8912  X X X X X X X X X X X X X X X 0   Lowbyte
+
+The address that the sample ends at. When the count registers have reached this 
+address, the DMA-sound system will either stop or loop.
+
+  DMA-Soundmode Register:
+
+    $FFFF8920  0 0 0 0 0 0 0 0 X 0 0 0 X X X X
+
+Allows to toggle between several replay methods. Bit 7 switches Mono/Stereo (1 
+= Mono, 0 = Stereo), Bit 0 and 1 encode the replay rate:
+
+      0 0  -  6258 Hz
+
+      0 1  - 12517 Hz
+
+      1 0  - 25033 Hz
+
+      1 1  - 50066 Hz
+
+Sounds fairly easy, right ? Unfortunately, it's not.
+
+? I set all the registers, but there is no sound at all.
+
+! The DMA-Soundsystem expects you to write the high-byte of the Start- and 
+Endaddress first. Even though this serves no purpose at all, writing the 
+highbyte clears the others. Hence it must be written first.
+
+? I can't hear anything on my Falcon when trying to replay a 6 KHz sample.
+
+! The Falcon DMA-soundsystem does not support 6 KHz. The value "00" in the 
+Soundmode-register means "OFF" on the Falcon.
+
+? The sound is awful. This does not sound like my sample.
+
+! On the STE, the DMA-soundsystem only works with signed sample files, 
+featuring values from -128 over 0 to +127. Some sample programs use unsigned 
+formats, ranging from 0 to 255 with 128 representing zero-line of the sample. 
+Those samples need to be converted first.
+
+? I want to replay stereo samples. How can i know which sample will be played 
+on which channel ?
+
+! Stereo Samples have to be organized wordwise like Lowbyte -> right channel
+
+  Hibyte  -> left channel
+
+? My STE program to replay samples does not work very well on the Falcon.
+
+! No, the Falcon's soundsystem is way more complex and can without any major 
+programming interfere very well with the parts of the STE-soundsystem, 
+especially since identical addresses are used for some purposes. If you want 
+Falcon-compatibility of your STE-code, do not use "move"-instructions to 
+set/unset bits of $FFFF8900 and $FFFF8920 as this might override 
+Falcon-specific registers. Best, leave them as they are and use AND to unset 
+and OR to set certain bits.
+
+? Will my STE code work on the TT ?
+
+! Yes, it will. The TT's DMA-sound subsystem is identical to the one of the STE.
+
+? I am trying to change the addresses of the sample while the DMA-sound plays, 
+but it does not work.
+
+! No, the DMA-Soundsystem latches the Start- and End-Register internally, so 
+writing to these values only takes influence when the values are re-read, which 
+happens when the sample has been played, even if the DMA-soundsystem is 
+switched to loop.
+
+? Argh, i have now implemented DMA-sound to my program and now my whole 
+screen-management goes wild
+
+! This easily happens. The DMA-sound subsystem of the STE houses the "shifting 
+logic" in the STE-Shifter. When starting the DMA sound to play a sample, you 
+should not try to access the Shifter's registers directly afterwards but "wait" 
+a few cycles. The simplest solution is to wait a single VBL after starting the 
+DMA-sound before proceeding with your program. Once the DMA-sound plays, you 
+can change DMA-sound registers without risking to screw up screen management.
+
+? Can i get a "notice" from the DMA-soundsystem when it finished playing a 
+sample ?
+
+! Yes, you can use TIMER A as event counter which will be notified when a 
+sample has been played completely.  
+
+? I want to replay a sample backwards.
+
+! Does not work on the STE. The sample-counter can only be increased, not 
+decreased.
+
+ 
+
+5. The National LMC 1992 and the Microwire
+
+ 
+
+Preface:
+
+  There's a little, but common mistake of minor importance when it comes to 
+this combo that allows manipulation of the DMA sound to enhance trebble and 
+bass as well as left, right and main volume. It is not the Microwire interface 
+that manipulates the sound, it is a chip named National LMC 1992. This chip 
+however has not been integrated into the Atari STE hardware directly but can 
+only be communicated with using a 3-bit serial interface, the so-called 
+Microwire. It is a bit hard to handle for a beginner, but luckily, it is also 
+hard to crash the STE using this register. And since the Microwire can 
+basically connect more than just one device, it needs a 2 bit address to which 
+device to transfer data to. The LMC1992 is at "address" 2 (binary 10). Each 
+address-data-pack written to the LMC1992 therefore consists of an 11 bit 
+package. The communication is a bit similar to communicating with the YM2149 
+since the Microwire also requires to encode data in a certain way.
+
+National LMC 1992
+
+  Adress and Data register
+
+    $FFFF8922  x x x x  x x x x  x x x x  x x x x
+
+This address is being used to feed the National LMC both address and data bits 
+for a certain setting. The choice which bits are being read are being described 
+in the mask register at $FFFF8924. As described above, the first two bits of 
+the 11 bit package need to be a "10" to address the LMC1992. Then there are 3 
+more "address" and 6 more data bits. The address bits are 3 in total and are 
+being used as follows:
+
+      0 1 1  -  Master Volume (followed by 6 bits of data)
+
+      1 0 1  -  Left channel volume (followed by 6 bits of data)
+
+      1 0 0  -  Right channel volume (followed by 6 bits of data)
+
+      0 1 0  -  Trebble control (followed by 6 bits of data)
+
+      0 0 1  -  Bass control (followed by 6 bits of data)
+
+      0 0 0  -  Mixer (followed by 6 bits of data).
+
+However, not all bits of the 6 general data bits are being used. It is 
+necessary to have a multiple of 6 though since the Microwire is a 3-bit serial 
+interface. The explanation of the 6 data bits are (d means necessary data bit, 
+x means bit is ignored)
+
+          Master Volume: d d d  d d d  (all 6 bits used)
+
+                     0 0 0  0 0 0  = -80 db volume
+
+                     0 1 0  1 0 0  = -40 db volume
+
+                     1 0 1  x x x  =   0 db volume (max)
+
+Each increment represents 2 db. If the 3 left bit encode "101", the last 3 bits 
+are being ignored.
+
+      Left channel:  x d d  d d d  (left bit ignored)
+
+                       0 0  0 0 0  = -40 db volume
+
+                       0 1  0 1 0  = -20 db volume
+
+                       1 0  1 x x  =   0 db volume (max)
+
+Each increment represents 2 db. If the 3 left bit carry "101", the last 2 bits 
+are being ignored.
+
+            Right channel: x d d  d d d  (left bit ignored)
+
+                       0 0  0 0 0  = -40 db volume
+
+                       0 1  0 1 0  = -20 db volume
+
+                       1 0  1 x x  =   0 db volume (max)
+
+Each increment represents 2 db. If the left 3 bit are "101", the last 2 bits 
+are being ignored.
+
+            Trebble:       x x d  d d d  (left 2 bits are ignored)
+
+                         0  0 0 0  = -12 db (min)
+
+                         0  1 1 0  =   0 db (linear)
+
+                         1  1 0 0  =  12 db (max)
+
+Each increment represents 2 db, normalized at 15 KHz.
+
+            Bass:          x x d  d d d  (left 2 bits are ignored)
+
+                         0  0 0 0  = -12 db (min)
+
+                         0  1 1 0  =   0 db (linear)
+
+                         1  1 0 0  =  12 db (max)
+
+Each increment represents 2 db, normalized at 50 Hz.
+
+            Mixer control: x x x  x d d  (left 4 bits are ignored)
+
+                              0 0  = DMA + (YM2149 - 12 db)
+
+                              0 1  = DMA + YM2149
+
+                              1 0  = DMA only
+
+                              1 1  = reserved
+
+Setting "00" mixes the output of the YM2149 and the output of the DMA-sound, 
+but the YM2149 sound is being downsized by 12 db. "01" mixes DMA and YM2149 
+linearly, "00" means DMA sound output only.
+
+       Mask Register
+
+    $FFFF8924  x x x x  x x x x  x x x x  x x x x
+
+This contains in a bitfield which bits of the Address+Data Register are 
+explicetely used. Since the Microwire, as it is being used in the STE, requires 
+11 bits of data (in general, the Microwire can transport 14 bits), it is 
+essential to let the Microwire know WHICH of the 16 bits of this register are 
+to be taken into account.As being used in the STE, this register will always 
+feature 11 "1"s and 5 "0"s.
+
+Example:
+
+Let's say we want to feed the LMC the data "011101000", we would need to write 
+a "10 011101000" to the address+data register. We can use whatever bits we like 
+of the 16 bits of this register, so we use the mask register to mask out the 
+unused bits, which might look like:
+
+      $FFFF8924  0 0 0 0  0 1 1 1  1 1 1 1  1 1 1 1
+
+      $FFFF8922  0 0 0 0  0 1 0 0  1 1 1 0  1 0 0 0
+
+or
+
+      $FFFF8924  0 1 1 0  0 1 1 1  1 1 1 0  1 1 0 1
+
+      $FFFF8922  0 1 0 0  0 0 1 1  1 0 1 0  0 0 0 0
+
+both have the same effect.
+
+    
+
+Sounds complicated enough but can boost the DMA-sound output of the STE quite a 
+lot. When programming it first time however you might easily see that it did 
+not work as planned. Why ?
+
+? Can't hear any changes on my Falcon ...
+
+! Unfortunately, the Falcon does neither have a Microwire interface nor the 
+National Semiconductors LMC1992. The Falcon cannot manipulate bass, treble, 
+main, left and right volume as easily as the STE can. The Falcon will not 
+report an error either though. The TT does have the Microwire interface as well 
+as the LMC1992.
+
+? I write both address+data and the mask register correctly, still it doesn't 
+have the expected effect.
+
+! You need to write the mask before you write address and data. As soon as 
+address+data register has been written to, the Microwire starts to operate 
+(which means shifting to the left). Writing the mask register after writing the 
+address+data register is therefore useless.
+
+? I write data into the mask-register, then address and data but it still 
+doesn't do what i wanted to.
+
+! Always make sure you have a total of "11" bits, and always make sure, the 
+leading bits on the left side are a "10". Otherwise, the Microwire will try to 
+access other peripherals that the STE does not have - which will not lead to an 
+error, but result in no changes at all.
+
+? I tried to achieve sound manipulation effects by writing a lot of values to 
+the LMC1992 to change DMA sound output. It does seem to ignore a lot of my 
+values.
+
+! The LMC1992 is connected to the Microwire and is being fed data in a serial 
+way. The Microwire is more or less a parallel to serial converter and it does 
+that by shifting the 16 bit value (along with the mask) to the left 16 times 
+and passing each bit for that the mask-bit is "1" to the LMC. That takes some 
+time and during its operational state, the Microwire cannot be written to.
+
+? How can i find out wether the Microwire interface is done ?
+
+! Simply check the value in the address+data register after you wrote your 
+value into it. If the value at $FFFF8922 is identical with the value you wrote 
+into it, the Microwire is done shifting and can once again be written to. In 
+all other cases, the Microwire is still shifting and cannot be written to.
+
+? I successfully wrote to the LMC1992, but now YM2149 sound output is pure 
+torture. What happened ?
+
+! Well, the LMC1992 is not a chip that controls the DMA-sound in its digital 
+form but manipulates the analogue sound that comes out of the DMA chip. If you 
+now put the mixer to mix YM2149 and DMA sound, the LMC1992 will also manipulate 
+the YM sound output. However, the YM2149 as a soundchip is not really meant to 
+have Bass and Trebble enhanced. This might result in a very ugly sound.
+
+? My program works fine and also exits cleanly, but then any subsequent sound 
+output is awful. How come ?
+
+! You should save the contents of the LMC1992 right at the start of your 
+program and when exiting, you should restore the original value - and the 
+easiest way is to save both mask and address+data register. Restoring can be 
+done by just writing mask and address+data registers. The Microwire does not 
+need any further software support once you wrote the values, so it does not 
+harm if your program terminates in the meantime. Programs you launch when your 
+program is terminated that do use DMA or YM2149 sound might be affected by your 
+LMC1992 settings otherwise.
+
+? How come the Falcon does not have this feature ?
+
+! When the Falcon was initially planned (and named Sparrow), it had a chip that 
+was supposed to bear similar features named RASCAL. It is probable that this 
+chip was supposed to "simulate" a Microwire + LMC 1992 duo as well as give 
+enhanced possibilites towards the 16-bit stereo sound of the Falcon (Sparrow) 
+as well as the DSP. Either Atari did not finish this chip in time, it was too 
+expensive or too complex, we don't know. It appeared in the first Sparrow 
+prototypes as well as the first few Falcon (exhibitors) boards. However, it is 
+so far unknown wether this chip is compatible to the Microwire+LMC1992 duo or 
+not and why it has been canned.
+
+? Why is the handling of the LMC1992 so complicated ?Wouldn't there have been 
+an easier way to give the STE these features ?
+
+! Yes, of course, but the LMC1992 was very cheap. The LMC1992 was never meant 
+to serve in a computer but was commonly used in TV sets, Radios etc. and any 
+other Audio-device that had the option to control volumes, bass and trebble 
+electronically, and those preferred a "1-bit serial" implementation. The 
+Microwire is just the connection of the STE's architecture to the LMC1992.
+
+
+
+6. Advanced Joystick, Paddle and Lightpen ports
+
+Registers:
+
+  Fire-Buttons for 4 Joysticks:
+
+    $FFFF9200  - - - -  - - - -  - - - -  X X X X
+
+This address features the fire buttons of 4 joysticks that can be connected to 
+these ports. Bit 0 represents joystick 0, bit 1 joystick 2, bit 2 joystick 1 
+and bit 3 joystick 3. This register is "low active", meaning that a "0" implies 
+"active" (button pressed) and a "1" means "inactive" (button not pressed).
+
+  Joysticks:
+
+    $FFFF9202  X X X X  X X X X  X X X X  X X X X
+
+Read this address to get the directions of 4 digital joysticks connected. The 
+lowest 4 bits (0-3) represent joystick 0, the middle low 4 bits (4-7) represent 
+joystick 2, the next 4 bits (8-11) joystick 1 and the highest 4 bits (12-15) 
+joystick 3. The lowest bit encodes "right", the next bit "left", the next bit 
+means "down" and the highest bit "up". This whole register is low-active as 
+well.  
+
+  Paddles:
+
+    $FFFF9210  - - - -  - - - -  X X X X  X X X X  Paddle 0 X
+
+    $FFFF9212  - - - -  - - - -  X X X X  X X X X  Paddle 0 Y
+
+    $FFFF9214  - - - -  - - - -  X X X X  X X X X  Paddle 1 X
+
+    $FFFF9216  - - - -  - - - -  X X X X  X X X X  Paddle 1 Y
+
+The advanced joystick ports allow analogue devices such as paddles. Two paddles 
+usually connect to one port, meaning the connection of 4 paddles are possible. 
+Instead of "paddle X/Y coordinate", you might also read this as "paddle 1/2 
+coordinate". The fire buttons of each paddle can be read at the same address as 
+for the joysticks, $FFFF9200.
+
+     Lightpen:
+
+    $FFFF9220  - - - -  - - X X  X X X X  X X X X  X-Position
+
+    $FFFF9222  - - - -  - - X X  X X X X  X X X X  Y-Position
+
+Connection of a light-pen is only possible at port 0. It has a precision of 4 
+pixels in ST Low, 8 pixels in ST Mid and 16 pixels in ST High resolution 
+(horizontally). Vertically, the light-pen is pixel-perfect. The values read in 
+this register always refer to ST Low. For usage in midres, you need to multiply 
+by 2, for usage in hires, you need to multiply by 4.
+
+These interfaces allow a lot of connections. What do you need to watch out for ?
+
+? Can't read out these registers. Why ?
+
+! In contrast to any joystick/mouse/keyboard function on the ordinary ST, these 
+interfaces are _not_ being maintained and supervised by the IKBD subsystem of 
+the ST keyboard but are directly accessible by hardware. You need to be in 
+supervisor mode to access these registers.
+
+? The paddles i have from my good old 800XL can't be connected since the plug 
+doesn't fit. Can i connect and use them on the ordinary joystick port of the ST 
+?
+
+! No, unfortunately, the IKBD does not have the hardware that is necessary to 
+drive paddles. Paddles are very "dumb" devices that need quite a bit of 
+hardware logic to work in a "digital" environment. You will need to built 
+yourself an adapter.
+
+? I want to build myself a 4-player adapter so i can connect 4 joysticks to 
+these ports. What pins do i need to connect ?
+
+! The hardware layout of each of these joystick ports is (seen from the outside 
+of each connector):
+
+    _______________________________  1 - Joystick 0 "up"
+
+    \   5   4    3    2    1      /  2 - Joystick 0 "down"
+
+     \     10   9    8    7   6  /   3 - Joystick 0 "left"
+
+      \ 15  14   13  12   11    /    4 - Joystick 0 "right"
+
+   \_______________________/     5 - Paddle 0 Y coord
+
+     6 - Joystick 0 "fire"          11 - Joystick 2 "up"
+
+     7 - VCC                        12 - Joystick 2 "down"
+
+     8 - NC                         13 - Joystick 2 "left"
+
+     9 - Mass                       14 - Joystick 2 "right"
+
+    10 - Joystick 2 "fire"          15 - Paddle 0 X coord
+
+The ordinary 9 pin socket for an ordinary digital joystick look like this:
+
+     ___________________           1 - Up     5 - reserved
+
+     \  1  2  3  4  5  /           2 - Down   6 - fire
+
+      \  6  7   8  9  /            3 - Left   7 - +5V
+
+       \_____________/             4 - Right  8 - Mass
+
+                       (9 is officially unused, might be 2nd "fire")
+
+This should be sufficient to build an adapter.
+
+? Which models have the extended joystick ports ? Is it sensible to use them at 
+all ?
+
+! Depends on what you are planning to do. Only the 1040 STE and the Falcon have 
+these additional ports. Neither the Mega STE nor the TT have these. 
+Games/Programs that can only use joysticks/paddles connected to these ports 
+cannot be played on Mega STE/TT computers.
+
+? How can i write a program that uses paddle controllers for the Mega STE and 
+TT then ?
+
+! You cannot. Both these computers lack the logic required to drive paddle 
+controllers.
+
+? But isn't the mouse a paddle controller, too ?
+
+! No, surprisingly, it is not. The mouse is using an internal logic to convert 
+"analogue" movement into digital impulses, similar to rapidly moving a joystick 
+in a direction and letting it go again. The mouse is, unlike a paddle, not 
+being read "by position", but like a joystick "by movement". For games however, 
+you might use the mouse as a paddle. GEM programs can use an AES routine to 
+read mouse position, otherwise you can use the IKBD to read the mouse.
+
+? My light pen doesn't work at all.
+
+! The light pen is only supported on connector 0. Connector 1 cannot be used to 
+drive a light pen.
+
+? I want to connect jaguar powerpads, which can connect directly to the 
+advanced joystick ports. How do i read those ?
+
+! The directional pad and the 3 action buttons can be read relatively easily. 
+The D-pad represents one joystick connected to the port, the 3 fire buttons and 
+the Option button the other joystick. The Pause-Button is the firebutton of one 
+joystick. Reading the numerical pad of the powerpad is more difficult however.
+
+ 
+
+7. Hardware related questions
+
+Here come some typical questions and answers concerning the 1040 STE's 
+hardware, not seen by the programmer but for upgrades and installations.
+
+? I want to upgrade my STE to 4 MB. What shall i do ?
+
+! The 1040 STE uses 30 pin SIMMs and the 1040 STE is not really picky about the 
+SIMMs you use. By using 4 x 1 MB SIMM you will achieve 4 MB in total.
+
+? I only have 2 1 MB SIMMs. Can i use them ?
+
+! All 4 SIMM-slots (2 banks) need to be filled by SIMMs, otherwise the STE 
+won't boot at all. You might try to replace 2 of the SIMMs in your 1040 STE to 
+have either 2.5 MB (2 x 256KB + 2 x 1 MB) or 3 MB (2 x 512 KB + 2 x 1 MB), but 
+unfortunately, both only work with restrictions: There is a program that 
+"reserves 1.5 MB" while booting which are exactly those 1.5MB that a 2.5 MB STE 
+lacks to the 4 MB. The STE then "believes" to have 4 MB with 1.5 MB permanently 
+used. This is not a wise choice however since it will require you to always run 
+this program. Most games will crash.
+
+? I want to upgrade my STE to TOS 2.06. Do i need a TOS-card ?
+
+! No, you don't. The 1040 STE has 2 EPROM-sockets for 2 128KB EPROMs, exactly 
+the size of TOS 2.0x. Simply purchase the TOS-ROMs, open your 1040 STE and 
+replace chip by chip. They are marked "E" for "Even" and "O" for "Odd". Make 
+sure the "O" chip you take out is replaced by the "O" chip of your TOS 2.06. 
+The same goes for the "E" chips. TOS-cards were only necessary for ST computers 
+that had 6 x 32 KB EPROMs and could not handle 2 x 128KB.
+
+? Is it possible to have an internal IDE harddisk in the 1040 STE ?
+
+! Yes, it definetly is. There is room for a 2.5" IDE-harddisk just above the 
+memory on the metal shielding and it is even easy to mount the harddisk there. 
+The PSU of the STE is also powerful enough to drive a 2.5" IDE harddisk 
+usually. Then you need an IDE interface and a cable.
+
+? The IDE interface i bought doesn't fit anywhere. Help!
+
+! Well, the 1040 STE uses a PLCC-socketed 68000 while all ST computers had a 
+DIL-version of the 68000. IDE interfaces either connect to the Megabus of the 
+Mega ST series directly or to the CPU and usually that implies a DIL CPU. Mario 
+Becroft, T.U.S. and Gellermann & Felmuth produced IDE interfaces especially for 
+the 1040 STE. So before you order,  make sure the IDE interface can be used on 
+a PLCC 68000. GE Soft produced a simple adapter called "speed-bridge", which 
+connected to the PLCC-socket of the STE and had a DIL-like socket on the top. 
+This allowed to use ST expansions on the STE, too, but please note that this 
+means additional space being occupied by the adapter - Speed bridge + IDE 
+interface might not fit anymore into your 1040 STE.
+
+? The IDE interface is mounted, it works and the IDE harddisk is identified 
+correctly and installed by my software. Yet my STE can't boot from it.
+
+! A common problem. To boot from an IDE device, you need TOS 2.06 in your STE. 
+Otherwise, you will need a boot-disk that features your harddisk driver.
+
+? Help! I just removed my IDE interface and now my 1040 STE doesn't work 
+anymore at all, i only get a black screen!
+
+! The pins of the socket and the 68000 have been bent a little when you had the 
+IDE interface mounted. Now that you removed it, the pins of the socket do not 
+connect 100% anymore to the pins of your CPU. Now all you need is patience and 
+a needle. Open the STE, carefully pull out the CPU by using the needle as a 
+lever. Now carefully bent the pins on the socket towards the middle. Do not 
+push them hard since they break relatively easily. When done with this, 
+carefully bent the pins of the 68000 a little to the outside. Then push the CPU 
+in gently and try to switch on your STE.
+
+ 
+
+8. Miscelleanous questions and other STE compatible computers
+
+This section simply features a few questions about what compatibility problems 
+you might expect when coding STE or what to do when you want to use additional 
+features of certain models like the TT, the MegaSTE, the Falcon without 
+abandoning STE compatibility totally.
+
+? How compatible is the STE with the Mega STE, TT and Falcon ?
+
+! Here's a small chart of the additional features of the 1040 STE and their 
+existance on the other models (including the Mega ST and ST for completeness):
+
+                                     ST  MegaST   STE   MegaSTE     TT  Falcon 
+Note:
+
+                                 
+--------------------------------------------------------------------
+
+  4096 colours                   no     no    yes        yes     yes     yes  
+(1)
+
+  Blitter                              no    yes    yes        yes      no     
+yes  
+
+  Hardware scroll              no     no    yes        yes     yes     yes  (2)
+
+  screen splitting               no     no    yes        yes      no     yes  
+(3)
+
+  DMA sound                    no     no    yes        yes     yes     yes  (4)
+
+  LMC1992/Microwire     no     no    yes        yes     yes      no
+
+  Adv.Joystick port  no     no    yes         no      no     yes
+
+Notes:
+
+  (1) The Falcon has to be in an ST compatible resolution for this. On the ST, 
+programs that try to use 4096 will not crash, but still be limited to 512 
+colours.
+
+  (2) Both Base Address and Counter have to be multiples of 4 on the Falcon and 
+multiples of 8 on the TT.
+
+  (3) On the Falcon, the Video Counter can only contain values that are 
+multiples of 4.
+
+  (4) There is no 6.125KHz DMA sound on the Falcon.
+
+The Mega STE and its features:
+
+  ? The TT features quite a complex SCSI subsystem but i cannot find any 
+information of the Mega STE's SCSI subsystem ?
+
+  ! That is simply because the Mega STE does not have a SCSI subsystem. If your 
+Mega STE is equipped with an internal SCSI harddisk, it has an internal SCSI 
+hostadapter that is mounted on an internal ACSI-bus. Hence, the Mega STE sees 
+your harddisk as ACSI, not as SCSI and can also not directly access the SCSI 
+controller on it.
+
+  ? I see the Mega STE has a socket for a math coprocessor. Which types can i 
+connect ?
+
+  ! The Mega STE was intended to drive a 16 MHz MC68881, but it should (!) also 
+work with a 16 MHz MC68882 if it fits. The coprocessor will be driven with 16 
+MHz.
+
+  ? How do i program the Mega STE's MC68881 if present ?
+
+  ! That's unfortunately more complicated than for the Falcon and the TT since 
+the 68030 used in TT and Falcon can operate an MC68882 directly while the 68000 
+in the ST, STE and Mega STE cannot. The Mega STE has a coprocessor interface 
+register from $FFFFFA40 to $FFFFFA5C, but it also requires a so-called 
+"coprocessor protocol" to communicate with the MC68881. This is rather complex 
+and too much to list here. The operation of the MC68881 in the Mega STE is 
+identical to the operation of the FPU-cards for the Mega ST, so i recommend the 
+documentation of these.
+
+  ? I want to make sure that my software uses the Mega STE in "high speed", but 
+when i boot the Mega STE "cleanly", it always is in "8 MHz cache off" mode. How 
+do i switch itinto 16 MHz cache on ?
+
+  ! The Mega STE has a register to control speed and cach status:
+
+     $FFFF8E21  - - - -  - - X X
+
+Bit 0 controls the clockspeed (0 = 8 MHz, 1 = 16 MHz), the upper bit controls 
+the cache (0 = Cache off, 1 = cache on). Some docs say that all upper 15 bits 
+of $FFFF8E20 need to be set to "1" to turn the cache on. Writing to this 
+register in anything but a Mega STE will most probably lead to a crash, so be 
+sure to check the Cookie Jar for _MCH to estimate wether this is a Mega STE or 
+not (Upper word is 1 for STE, lower word is 0x0010 for Mega STE, 0x0000 for 
+anything else).
+
+     
+
+  ? How come the Controlfield only allows 16 MHz Cache On, 16 MHz Cache off and 
+8 MHz Cache off when the hardware also allows 8 MHz Cache on ?
+
+  ! Because the setting "8 MHz Cache On" is senseless. The cache operates at 16 
+MHz and is meant to reduce real memory accesses for the 16 MHz CPU since the 
+bus and therefore the memory only runs at 8 MHz. When you run the CPU in 8 MHz, 
+the cache will operate at 8 MHz, too, and hence be as quick as the bus - giving 
+no more speedup.
+
+    
+
+  ? Can the Cache of the Mega STE lead to problems with demo effects since it 
+does not influence memory directly ?
+
+  ! Yes and no. From the docs i have - and they are not really very detailed 
+about the Cache of the Mega STE - any hardware register access is not being 
+cached but carried out directly. If your "demo" just does a lot of hardware 
+register accesses, the cache should not really be a problem. However, screen 
+memory and other buffers are in the main memory and therefore cached. If timing 
+is critical for accesses on these parts of the memory, better turn the cache 
+off.
+
+  
+
+  ? How fast is the Mega STE at 16 MHz without the cache ?
+
+  ! Unfortunately, not very much faster than an ordinary 8 MHz STE. The cache 
+might seem small according to todays standard (16 KBytes), but for a system 
+like the Mega STE, it reduces memory accesses dramatically. If you turn off the 
+cache, the 68000 has to fetch everything directly over the 8 MHz bus. Only 
+operations that completely work in the 68000's registers will gain performance.
+
+The Atari TT and its features:
+
+  ? Urghs. The TT also has this ugly internal speaker thatsounds awful. How can 
+i turn it off ?
+
+  ! The internal speaker is being controlled by the YM2149 directly over port 
+IOA6. The settings are
+
+      OnGIbit: ($40) - switch internal speaker off
+
+      OffGIbit: ($BF) - switch internal speaker on
+
+  ? Say, is the 8-bit resolution of the TT a chunky resolution ? That would be 
+cool for demos and games.
+
+  ! Unfortunately, it has the same interleaved bitplane structure like the ST 
+and STE have. Screen memory is organized:
+
+      Word 0   X X X X  X X X X  X X X X  X X X X  pixel  0-15 plane 0
+
+      Word 1   X X X X  X X X X  X X X X  X X X X  pixel  0-15 plane 1
+
+      ...
+
+      Word 7   X X X X  X X X X  X X X X  X X X X  pixel  0-15 plane 7
+
+      Word 8   X X X X  X X X X  X X X X  X X X X  pixel 16-31 plane 0
+
+      etc.
+
+   ? I read somewhere that the Falcon can be switched to an STE compatible 
+mode. Is there something similar for the TT ?
+
+  ! No. STE compatibility for the Falcon also only refers to STE compatible 
+resolutions (ST Low, Mid, Hi) and STE compatible DMA-sound (8 bit). The TT has 
+the ST(E) resolutions anyway and the DMA-sound is identical to the one of the 
+STE as well. But, the TT lacks the Blitter, cannot change screen addresses in 
+the middle of a screen and does not have the enhaced joystick ports. So, since 
+the TT lacks important hardware specs of the STE, a compatibility mode would be 
+rather useless anyway.
+
+    ? Why does the TT lack the feature to change Video Counter during a screen 
+build anyway ?
+
+  ! At least according to Ray/tSCc, it actually allows write accesses. However, 
+the official documentation states this register as read/only. In the monochrome 
+hires mode it is not advisable to write to these registers since the TT shifter 
+does 95 MHz (74 Khz at 1280x960), which is almost 3 times the speed of the TT's 
+CPU and 6 times the speed of the TT's bus. So be careful in this mode.
+
+      ? I toyed around with the SYNC-Mode register but it behaves odd on the 
+TT. Why ?
+
+  ! Even though this register is called "ST Sync Mode" officially, it's the 
+direct opposite. Only Bit 0 is used and if it is "0", screen is off, otherwise 
+screen is on (On the ST, "0" was on).
+
+  ? What's the difference between the ST Shift Mode Register and the TT Shift 
+Mode Register ?
+
+  ! The ST Shift mode register is supposed to be only 2 bits wide and contain a 
+"00" for ST Low, "01" for ST Mid and "10" for ST High. However, the ST Shift 
+Mode Register on the TT also contains ALL other bits of the TT Shift Mode 
+Register as well. The ST Shift Mode Register is more or less a mirror of the TT 
+Shift Mode Register. Hence, be careful when writing to this register for STE 
+compatibility, you might turn on/off TT specific features.  
+
+  ? What is that funky greyscale mode of the TT i read about ? Is it any useful 
+?
+
+  ! The so called "Hper Mono"-mode is a mode in which each pixel can have 1 of 
+256 greyscales. To enable this mode, you need to set bit 12 of the TT Shift 
+Mode register:
+
+      $FFFF8262  X - - X  - X X X  - - - -  X X X X
+
+This mode will combine the green and blue channel (=8 bits) to gather 256 
+greyscales. Obviously, it is not a chunky but still a palette mode, however, 
+not using the original TT palette (4096 colours can only feature 16 
+greyscales). It is not a chunky mode either but still uses the same interleaved 
+bitplane format. Then again, it seems that this mode can be engaged not only in 
+the 256 colours resolution. But, this mode _only_ exists on the TT. This mode 
+is _not_ available on the ST, the STE or the Falcon. Please note that using 
+this mode will limit your software to run solely on the TT.
+
+  ? Then i read about a smear mode on the TT. What is that ?
+
+  ! The so called "Hold & Sample" mode of the TT an be engaged by switching bit 
+13 of the TT Shift mode Register:
+
+      $FFFF8262  X - - X  - X X X  - - - -  X X X X
+
+In this mode, every pixel with a colour different from 0 will "smear", meaning 
+that all pixels with colour 0 to the right of a pixel with colour X will be 
+drawn in colour X. Only the left border resets the smear mode and really draws 
+colour 0 as colour 0 until a pixel with colour<>0 follows.This mode was meant 
+to make programming of filled-vector 3D graphics about as easy as programming 
+wireframe vectors. Unfortunately, it stayed widely unused. Please note that 
+this mode _only_ exists on the TT and is_not_ available on the ST, STE or the 
+Falcon.
+
+    ? What TOS does the TT have ? If i use routines from TOS 1.0x or 2.0x 
+directly, will it work on the TT, too ?
+
+  ! Unfortunately, there are 5 series of TOS for the TT, TOS  3.01 to 3.06, not 
+counting the very first TT-TOS called TOS030. So please, if using TOS routines, 
+program as cleanly as possible to ensure compatibility.
+
+    ? How come that the TT only uses 2/3 of the width of my VGA monitor but 
+displays a stupid white border ?
+
+  ! When Atari designed the TT and especially the TT shifter which has 
+VGA-compatible elements, IBM decided to change the specs of the VGA standard 
+(at least some docs say so, there are no official affirmations for this). This 
+is why the TT displays a rather pointless border and also only uses 2/3 of the 
+screen width. The simplest solution to go around this is an OverScan TT which 
+simply uses up the whole space the TT reserves for the border, giving up to 896 
+x 496 pixels in TT Mid and 448 x 496 in TT Low.
+
+The Falcon030 and its features:
+
+  ? How compatible is the Falcon to the STE ? Will my STE code work flawlessly 
+on the Falcon ?
+
+  ! Yes, the Falcon was meant to be an (68000-based) successor to the 1040 STE, 
+therefore it is easy to code Falcon-compatible STE-code. The only exceptions 
+are:
+
+      - The Falcon does not allow 6.125 KHz DMA sound
+
+      - The Falcon's screen base address has to be a multiple of 4
+
+      - The Falcon does not have the so-called "Shadow"registers of the YM2149
+
+To also make sure that the timing of the CPU is (almost) correct, switch the 
+processor caches off and the CPU and the Blitter down to 8 MHz. Now, the only 
+obstacle is the DMA-sound matrix of the Falcon which might be setup wrongly.
+
+  ? I migrated from a 1040 STE to a Falcon030. But how can I connect my 
+external Floppy disk drive or connect my good old ACSI-harddisk drive ?
+
+  ! You cannot. The Falcon does not have any kind of interface for an external 
+disk drive - even though the TOS 4.0x still checks for Drive B: on boot-up. 
+Additionally, the Falcon does not have an ACSI port. You cannot connect any 
+ACSI- devices such as harddisks or Laser printers.
+
+9. Epilogue
+
+Without a doubt, the 1040 STE and the Mega STE are nice pieces of hardware. In 
+1989, the 1040 STE offered quite a lot a home computer could offer and you got 
+a computer with excellent sound capabilities for the price of a sound-card for 
+your PC alone. In 1991, the professional STE was released with the introduction 
+of the Mega STE. 16 MHz clockspeed, 16 KB cache, VMU interface and internal 
+harddisk at a price for which othercompanies gave you an update of their 
+operating system and a new harddisk.
+
+But the STE didn't make it. The 1040 STE's features stayed widely unused until 
+the release of games such as Obsession or Stardust, of Demos such as Brain 
+Damage by Aggression or Omega's Grotesque or of tools such as the ProTracker 
+STE.
+
+The Mega STE did not increase the sales of STE computers a lot either, being 
+limited to STE graphics and sound. This documentation is for people that, like 
+me, like the STEfor what it is: A fun machine with quite impressive specs. I 
+assembled this documentation in case you want to program the STE's features 
+such as the Blitter, the hardware scroll or DMA sound and would like to avoid 
+stumbling over the little traps in the STE design. So i hope you find this 
+documentation useful and keep on programming the STE to push this little 
+machine to the maximum.
+
+Best wishes,
+
+                                           The Paranoid
+
+                                  Paranoia -- Lunatic Asylum
+
+                                  Think you can handle it ?!
+
+  
+
+10. Final words
+
+  This FAQ has been collected and assembled using various sources:
+
+    - Atari ST/STE/TT Profibuch,
+
+        Jankowski, Rabich, Reschke, Sybex Verlag 1991
+
+    - Das TOS 1.4 Update Buch,
+
+        Pauly, Data Becker 1989
+
+    - Chips'n Chips 6.0
+
+        Ruge, AG Computertechnik 1998
+
+  and many many experiments on a 1040 STE using TOS 2.06, a Mega STE using TOS 
+2.06 and a Falcon030.  
+
+  This documentation is far from complete and is not given with any warranties 
+about correctness. Any kind of damage done to yourself, your hard- or software 
+after, while or before reading this documentation is not being covered in any 
+way by the author. If you copy this documentation, please do not alter, add or 
+subtract any content. This documentation is free to copy as long as it is 
+copied completely and without additionals. If you spot mistakes or have 
+proposals on what to add, feel free to mail the author at paranoid@atari.org .
+
+
+Last update 12.07.06

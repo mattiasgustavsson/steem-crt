@@ -1,0 +1,335 @@
+Steem SSE documentation
+Here's a transcript of Motorola MC68000 microcodes MOVE
+routines, based on the description in the patent.
+The <EA> part is in EA Microcodes.txt.
+The patent is hard to read so there could be typos.
+The comment on the right is by Steven Seagal and isn't authoritative.
+===============================================================================
+
+In microcodes:
+R stands for Register
+M stands for Memory
+
+For MOVE between registers, a single microword takes care of the MOVE:
+
+
+b876	bBA9         Mode           .B, .W             .L
+
+000	R            Dn              RRGW1            RRGL1         
+001	R            An              RRGM1            RRGL1
+
+MOVE.B,.W Rn,Dn: RRGW1->RRGW2
+
+RRGW1
+au->db->aob,au,pc       update PC
+(ry)->ab->alu,at        copy value of source register (16bit max)
+-1->alu
++2->au
+
+RRGW2
+alu->ab->rxl            copy in destination register
+edb->dbin,irc           prefetch
+(ir)->ird               prefetch step 2
+(pc)->db->au
++2->au
+
+
+MOVE.W Rn,An: RRGM1->RRGL2
+
+RRGM1
+au->db->aob,au,pc
+(ryl)->ab*->at
++2->au
+
+RRGL2
+(at)->db->rx
+edb->dbin,irc
+(ir)->ird
+(ryh)->ab->alu
+-1->alu
+
+
+MOVE.L Rn,Rn: RRGL1->RRGL2
+
+RRGL1
+au->db->aob,au,pc
+(ry)->ab->alu,at
+-1->alu
++2->au
+
+RRGL2
+(at)->db->rx
+edb->dbin,irc
+(ir)->ird
+(ryh)->ab->alu
+-1->alu
+
+
+
+
+MOVE from register uses specific microcodes
+
+
+
+
+-------------------------------------------------------------------------------
+For MOVE from memory, MOVE uses <EA> to get the source, and those starting 
+microwords for the destination:
+b876	bBA9         Mode           .B, .W             .L
+
+000	R            Dn              MRGW1            MRGL1
+001	R            An              MRGM1            MRGL1
+010	R            (An)            MMRW1            MMRL1
+011	R            (An)+           MMIW1            MMIL1
+100	R            –(An)           MMMW1            MMML1
+101	R            (d16, An)       MMDW1            MMDL1
+110	R            (d8, An, Xn)    MMXW0            MMXL0
+111	000          (xxx).W         MAWW1            MAWL1
+111	001          (xxx).L         MALW1            MALL1
+111	010          (d16, PC)       MMDW1            MMDL1
+111	011          (d8, PC, Xn)    MMXW0            MMXL0
+111	100          #<data>           -                -
+
+
+MOVE.W <EA>,Dn: MRGW1->MMRW3
+
+MRGW1
+au->db->aob,au,pc
+(dbin)->ab->alu,rxl
+-1->alu
++2->au
+
+MMRW3
+edb->dbin,irc
+(ir)->ird
+
+
+MOVE.W <EA>,An: MRGM1->MMRW3
+
+MRGM1
+au->db->aob,au,pc
+(dbin)->ab*->rx
++2->au
+
+MMRW3
+edb->dbin,irc
+(ir)->ird
+
+
+MOVE.L <EA>,Rn: MRGL1->MRGL2
+
+MRGL1
+au->db->aob,au,pc
+(dbin)->ab->alu,rxl
+-1->alu
++2->au
+
+MRGL2
+(alub)->alu
+(alue)->db->rxh
+adb->dbin,irc
+(ir)->ird
+-1->alu
+
+-------------------------------------------------------------------------------
+010
+
+MOVE.W <EA>,(An): MMRW1->MMRW2->MMRW3
+
+MMRW1
+au->pc
+(dbin)->ab*->alu,dob
+(rxa)->db->aob,au
+-1->alu
++1,+2->au
+
+MMRW2
+(pc)->db->aob,au
++2->au
+
+MMRW3
+edb->dbin,irc           prefetch1
+(ir)->ird               prefetch2
+
+
+MOVE.L <EA>,(An): MMRL1->MMRL2->MMRW2->MMRW3
+
+MMRL1
+(alue)->dbd->dob
+au->pc                  
+(dbin)->ab*->alu
+(rxa)->db->aob,au
+-1->alu
++2->au
+
+MMRL2
+alu->dob
+(alub)->alu
+au->db->aob,au
+-1->alu
++2->au
+
+MMRW2
+(pc)->db->aob,au
++2->au
+
+MMRW3
+edb->dbin,irc           prefetch1
+(ir)->ird               prefetch2
+
+
+-------------------------------------------------------------------------------
+011               
+
+
+MOVE.W <EA>,(An)+: MMIW1->MMIW2
+
+MMIW1
+au->pc                  
+(dbin)->ab*->alu,dob
+(rxa)->db->aob,au
+-1->alu
++1,+2->au
+
+MMIW2
+au->ab->rxa             update An after write
+edb->dbin,irc           prefetch
+(ir)->ird
+(pc)->db->aob,au
++2->au
+
+
+MOVE.L <EA>,(An)+: MMIL1
+
+
+-------------------------------------------------------------------------------
+100
+
+MOVE.W <EA>,-(An): MMMW1->MMMW2
+
+MMMW1
+au->aob,pc
+(dbin)->ab*->alu
+edb->dbin,irc
+(rxa)->db->au
+-1->alu
+-1,-2->au
+
+MMMW2
+alu->dob
+au->ab->aob,rxa         update An after write (!)
+(ir)->ird
+(pc)->db->au
++2->au
+
+MMML1
+
+
+
+- -(An) must be treated like (An)+: the decrement/increment must be applied
+after the bus access!
+
+-------------------------------------------------------------------------------
+101
+
+
+MOVE.W <EA>,(d16, An):  MMDW1->MAWW2
+
+MMDW1  
+alu->dbe->au
+au->aob,pc
+(dbin)->abd->alu
+edb->irc
+(rxa)->ab->au
+1-->alu
+
+MAWW2
+alu->dob
+au->aob
+(ir)->ird
+(pc->db->au
++2->au
+
+
+MMDL1
+
+-------------------------------------------------------------------------------
+110
+
+
+MOVE.W <EA>,(d8, An, Xn): MMXW0->MMXW1->MMXW2->MAWW2 (irc[11]=0)
+                                        MMXW3        (irc[11]=1)
+
+
+MMXW0
+alu->ab*->alu
+0->alu
+
+MMXW1
+alu->*e->au
+au->aob,pc
+(rxa)->*->au
+
+MMXW2
+au->ab->au
+(dbin)->abd->alu
+edb->irc
+(rxl)->dbe->au
+-1->alu
+
+MMXW3
+au->ab->au
+(dbin)->abd->alu
+edb->irc
+(rx)->db->au
+-1->alu
+
+MAWW2
+alu->dob
+au->aob
+(ir)->ird
+(pc->db->au
++2->au
+
+
+
+MMXL0
+-------------------------------------------------------------------------------
+111	000
+
+
+MOVE.W <EA>,(XXX).W: MAWW1->MAWW2
+
+MAWW1
+alu->dbe->au
+au->aob,pc
+(dbin)->ab*->alu
+edb->irc
+-1->alu
+0->au
+
+MAWW2
+alu->dob
+au->aob
+(ir)->ird
+(pc->db->au
++2->au
+
+
+
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+
+MOVEM to memory
+
+The microcodes are more complex.
+Apparently, PC is updated right at the start (pointing on the word after
+the current operand), and then again before memory is copied (already at
+PC+2 of next instruction).
+The instruction uses AU to copy memory (of course), so it needs to save
+PC to update AU later: it makes sense.
+Prefetch definitely occurs at the end.

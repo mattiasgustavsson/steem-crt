@@ -1,0 +1,21 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unrar", "Unrar.csproj", "{2F343733-20A0-4AD0-88B2-762977614D67}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{2F343733-20A0-4AD0-88B2-762977614D67}.Debug.ActiveCfg = Debug|.NET
+		{2F343733-20A0-4AD0-88B2-762977614D67}.Debug.Build.0 = Debug|.NET
+		{2F343733-20A0-4AD0-88B2-762977614D67}.Release.ActiveCfg = Release|.NET
+		{2F343733-20A0-4AD0-88B2-762977614D67}.Release.Build.0 = Release|.NET
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

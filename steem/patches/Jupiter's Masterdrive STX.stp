@@ -1,0 +1,9 @@
+[Text]
+Description=For the bad images circulating
+ApplyWhen=At boot screen
+Version=Tested on 3.6.1, STF, TOS1.02
+
+PatchAuthor=Steven Seagal
+
+[Patch]
+00EED4 = $4e71

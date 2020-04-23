@@ -1,0 +1,11 @@
+[Text]
+
+Description=Pass protection
+ApplyWhen=Password screen, before typing anything
+Version=STF, TOS 1.02, 1MB
+PatchAuthor=STeven
+
+[Patch]
+
+007D5A = $601C
+000FF4 = $FD14 $E1C9

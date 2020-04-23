@@ -1,0 +1,10 @@
+div68kCycleAccurate is used by Steem's CPU emulation
+
+
+Pasti = Protected Atari ST Interface
+
+The pasti.dll here was downloaded from atari-forum.
+It seems not to be available at http://pasti.fxatari.com/
+It is version 03a2.
+
+pasti.h has been modified to handle a 64bit of pasti.dll, but this doesn't exist yet

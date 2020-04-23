@@ -1,0 +1,16 @@
+[Text]
+
+Description=Fix the frustrating bug of cursor resetting after boss
+ApplyWhen=When the game is loaded and ready
+Version=STX, STF T102 1MB
+PatchAuthor=Steven Seagal
+
+[Patch]
+
+151f4= $4eb9 $000b $f2c0
+bf2c0= $23f9 $0001 $841a $000b $f3c0
+bf2ca= $1228 $0004 $3001
+bf2d0= $4e75
+152a8= $4ef9 $000b $f2e6
+bf2e6= $23f9 $000b $f3c0 $0001 $841a
+bf2f0= $003c $0001 $4e75

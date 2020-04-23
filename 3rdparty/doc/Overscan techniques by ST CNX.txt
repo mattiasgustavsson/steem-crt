@@ -1,0 +1,1241 @@
+From:
+http://alive.atari.org/alive9/ovrscn1.php
+http://alive.atari.org/alive11/oscan2a.php
+http://alive.atari.org/alive11/oscan2b.php
+http://alive.atari.org/alive11/oscan2c.php
+http://alive.atari.org/alive11/oscan2d.php
+http://alive.atari.org/alive11/oscan2e.php
+
+
+Alive 9 
+Overscan Techniques 
+
+This is  part one  of a  three part  article. This version has been   translated
+by Frost/Sector One and has also passed the eyes of STS to smoothen it a bit. It
+was originaly published in the French "ST  Magazine", issue  51 and  52   (april
+-may-june  1991). The  article is written by Alien of ST Connexion (also   known
+as Sengan Short / Dr Sengan  Baring  -Gould).  13 years and  one PhD later,   We
+managed to  get into   contact with  him ...  in  Western  China (!). Now   that
+he's back home in  Colorado,   he's revised our   translation.  The   article's
+original  title  was   "Les  techniques  de l'Overscan", "Overscan Techniques".
+
+Please note that this article was written  mainly about the ST, not the STE.  I,
+Alien, had  very little  access to  STEs: I  borrowed one  for an evening, and I
+tried a few things out at  the local electronics supermarket before they  kicked
+me off to demonstrate it to a customer.
+
+
+
+Part One 
+
+In this article, we  will try to explain  to you everything about  the technique
+known as "Overscan". We decided to publish this article because many people  use
+Overscan without  understanding how  it works:  indeed it  is necessary  to have
+discovered its mechanism to know how it works. This article is the result of one
+year of painstaking research, and is explained at the hardware level. 
+
+First, what is Overscan ? Also  known as "No Border Screen" or  "FullScreen", it
+is a screen from which one  has removed the borders.  Before explaining  how one
+performs such magic, it is useful to recall how a colour picture is displayed on
+a monitor.
+
+
+
+Picture Display Format 
+
+A picture is displayed 50 times a second in 50Hz mode (or 60 times in 60Hz). The
+ST generates 313 lines per picture at  50Hz (263 at 60Hz). In theory, it  should
+generate 312.5 lines, (obtained by  successively displaying 312 and 313  lines).
+It therefore assumes  the monitor can  tolerate displaying a  picture at 49,92Hz
+instead of 50Hz. This also explains why the ST cannot have a real interlace mode
+such as that of  the Amiga. Each line  takes a constant time  to be transmitted:
+otherwise the  picture would  be distorted.  This time  is calculated  using the
+following formula:
+
+               1
+-------------------------------------------------------------
+(Number of pictures per second * number of lines per picture)
+
+For "Number of pictures per second"=50 and "Number of lines per  picture"=312.5,
+we get 64 microseconds. But some will wonder how come there are 313 lines, if  I
+only see 200  on the screen?  The other lines  are used by  the upper and  lower
+borders, and  by the  vertical synchronization  signal which  tells the  monitor
+where the top of  the screen starts. Overscan  is the process of  converting the
+lines used to make  up the borders into  lines able to display  a picture loaded
+from memory. I will call "useable  screen" that part of the screen  not occupied
+by borders.
+
+A monochrome picture  is displayed in  the same way,  where the refresh  rate is
+approximately 70Hz and each line takes 28 microseconds to be transmitted. It  is
+composed of approximately 500 lines, of which 400 form the useable screen.
+
+
+
+Video Components 
+
+Before getting into the subject, let us recall the role of each component of the
+ST responsible of the display.
+
+- The MMU: This component reads memory and sends it to the SHIFTER every 500 ns.
+
+  Registers:
+  * Address of the picture to display on next VBL:
+$FFFF8201: upper byte
+$FFFF8203: middle byte
+$FFFF820D: lower byte (STE only)
+
+  * Video counter, indicates the address being decoded at this instant:
+$FFFF8205: upper byte
+$FFFF8207: middle byte
+$FFFF8209: lower byte
+    Please note that you can only read from these on a plain ST, the STE however
+    also allows to write to them,  which will immediately  change the  displayed
+    screenarea.
+
+- The GLUE: Produces the vertical and  horizontal synchronization signals.  It
+   also produces signals telling the SHIFTER  when it should display the useable
+   screen,  and  when it should show the background  colour 0  (corresponding to
+   the border). It also tells the MMU when to send data to the SHIFTER.
+
+  Registers:
+  * $FFFF820A: Synchronization mode
+    Bit 1 corresponds to the monitor refresh rate (0 for 60Hz, 1 for 50 Hz)
+
+  * Resolution:
+$FFFF8260  (Both the GLUE and the SHIFTER have a copy of this register)
+    This byte can have  one of 3 values:  0 for low-,  1 for middle- and  2 for
+    high-resolution.  The GLUE needs this register,  because in high-resolution
+    the picture is displayed at ~70 Hz which requires different synchronization
+    signals (see second part)
+
+- The SHIFTER:  Decodes the data  sent by the MMU into  colour or  monochrome
+   signals, corresponding to the picture in memory.
+
+  Registers:
+  * Resolution:
+$FFFF8260  (Both the GLUE and the SHIFTER have a copy of this register)
+    The SHIFTER needs this register because  it needs to know  how to decode the
+    picture data (as 4, 2 or 1 bitplanes) and whether to send the picture out to
+    the RGB pins or the monochrome pin. Indeed, if one of these pins are active,
+    the other is low.  The "hardware"  proof is  that the SHIFTER  receives  the
+    address bus signals A1 to A5 (no need for A0 because every address is even).
+    However only A1 to A4 would be sufficient to access the palette.
+
+
+
+Video Signals 
+
+Now we'll discuss which signals the display components use to work together.
+Before diving in, a word of warning: everything said here was deduced logically
+but never verified with an oscilloscope. Thus, while I'm sure of my conclusions,
+I don't take any responsibility if some hardware hacker damages his ST by
+trusting this article.
+
+The MMU reads picture data from memory  and passes it on the SHIFTER, using  the
+Load/Dcyc signal to  tell the SHIFTER  the data on  its data bus  comes from the
+screen buffer. When this happens, the  68000 can't access the data bus.  Because
+the  data  bus  is also  used  to  program the  SHIFTER  registers,  you may  be
+wondering,  how  can the  68000  change resolution  or  the palette?  After  all
+programs such as Spectrum 512 change the palette while the picture is displayed!
+Isn't there a conflict between the 68000 and the MMU?  To help us to understand,
+we notice that the 68000 has access to the address and data buses every 4 cycles
+(which explains why  all instruction cycle  times are multiples  of four: a  NOP
+takes 4 cycles as specified in the 68000 manual, but EXG takes 8 cycles  instead
+of the 6 specified in the manual). Thus, the MMU steals the other cycles to read
+the video memory and to  transfer it to the SHIFTER,  and also to deal with  DMA
+Sound on the STE. On the other  hand, the MMU interrupts the 68000 for  disk-DMA
+(floppy and HD)  and Blitter transfers.  Thus, if these  devices are not  turned
+off, every programs  that relies on  constant execution time  (such as Overscan)
+will not work correctly.
+
+
+
+ 
+The GLUE generates the DE, Vsync, Hsync and Blank signals:
+
+- The DE (Display Enable) signal  tells the  SHIFTER when to display the  border
+  and when it has to display the  usable screen.  It also tells the MMU  when to
+  send data to the SHIFTER:  It is unnecessary  to send  data and  increment the
+  video counter  while the  border is  displayed.  If you cut the track  of this
+  signal you will obtain a  "hardware" overscan (thanks to Aragorn who confirmed
+  this by doing it). However, due to stability issues, this is  not recommended.
+  The Autoswitch Overscan board (see ST Magazine 50) works in a very similar way
+  by controlling this signal.
+
+- The Blank signal forces the  RGB colour outputs to zero  just before,  during,
+  and just after the Hsync and Vsync synchronization signals.  Indeed,  monitors
+  require the video signal  to be 0 volts  (black colour) before  every synchro-
+  nization pulse (implemented as a negative voltage): Even the border colour has
+  to be eliminated to prevent overlaying the border colour over the screen while
+  the electron beam returns to the beginning of the next line (from the screen's
+  right to its left)  and to the next picture  (from the screen's bottom  to its
+  top).  Note that the Blank signal isn't used if the screen is displaying high-
+  resolution.
+
+The Vsync and Hsync sync signals are added to the video signal:
+
+- Vsync is the  vertical synchronization signal which specifies where the top of
+  the picture is located  in the video stream.  The VBL interrupt corresponds to
+  an edge of this signal.
+
+- Hsync is the horizontal synchronization signal. It generates the HBL interrupt
+  (vector $68).  The HBL interrupt  should not  to be confused  with the Timer B
+  interrupt (vector $120)  which is generated  when the DE signal goes low on an
+  input of the MFP:  The Timer B interrupt is triggered  only,  when the useable
+  screen is displayed, because DE is inactive during upper and lower border.
+
+The MMU uses the  Vsync signal to  reset the video counter  with the contents of
+$FFFF8201 and $FFFF8203 (you may also add $FFFF820D on STE).
+
+Knowing that  the GLUE  handles this  signals,  it  seems logical  that it would
+control the process of displaying the  screen. To do this, it would  require two
+counters:
+
+- a vertical counter:   the number of currenly displayed line
+
+- a horizontal counter: the position within the line currently being output
+
+We will first study the vertical counter.
+
+
+
+Top and Bottom 
+
+Overscan 
+
+Line Counter and GLUE 
+
+The vertical counter is  incremented every line, i.e.  at every edge of  the HBL
+signal. It will be reset on each edge of the VBL.
+
+At the top of the screen, a border will be displayed, and once a given value  of
+the vertical  counter is  reached, an  internal signal  will be  set to show the
+useable  screen;  let us  call  this signal  V.  V masks  the  DE signal,  which
+specifies the location of the right and  left border. The V signal will also  be
+deactivated when the vertical counter reaches a further value, corresponding  to
+the end of the useable screen. Finally, once the counter reaches a third  value,
+a VBL interrupt and the beginning of a new frame is triggered.
+
+Based on  this, nothing  seems to  allow us  to get  rid of  the upper and lower
+border. But we  must recall that  there are only  263 lines for  a 60 Hz picture
+whereas there are 313 lines for a  50 Hz picture. If the upper and  lower border
+had the same  height at 50Hz,  each one would  be 56 lines  high. If the useable
+screen at 60Hz started  at line 56, as  it does at 50Hz,  there would only be  7
+lines left for the  lower border: the useable  screen wouldn't be centered  ! On
+some monitors, the bottom of the picture wouldn't even be visible...
+Therefore the useable screen must start higher at 60 Hz.
+
+At 60 Hz, the picture starts at line 34 and ends at line 234.
+At 50Hz, the picture starts at line X and ends at line X+200.
+
+Beware: the value X depends on the genation of the GLUE:
+For older STs: X = 63-16 = 47 # (frost: beware also that the diagram says 49
+lines).
+For "newer" STs (every STs except those of ST Connexion!): X = 63.
+In other words, on older STs, the picture is shifted upwards by 16 lines at 50Hz:
+this explains why some obtains only 249 lines whereas others get 271 lines for a
+simple Low-Border Overscan (thanks to Marlon of ST Connexion for telling me about this).
+
+The following pseudo-code describes the work of the GLUE in a simplified fashion:
+
+Line_Number=0
+REPEAT
+IF Line_Number ==  34   AND display_freq=60 THEN Activate signal V
+IF Line_Number == X     AND display_freq=50 THEN Activate signal V
+IF Line_Number == 234   AND display_freq=60 THEN de-activate signal V
+IF Line_Number == 200+X AND display_freq=50 THEN de-activate signal V
+IF Line_Number == 263   AND display_freq=60 THEN start a new VBL
+IF Line_Number == 313   AND display_freq=50 THEN start a new VBL
+Line_Number = Line_Number+1
+END_REPEAT
+
+Note that the frequency test happens more  than once when a new VBL is  started.
+Thus, it  is not  possible to  use the  second example  program (see part #2) to
+check the starting line of a 60  Hz VBL: just as well because line  263 triggers
+the Low-Border Overscan on newer STs. If you want to check, make the VBL  adjust
+the frequency to 50 Hz and the HBL to 60Hz at line 263.
+
+The pseudo-code  is only  presented as  an example  to help  you understand  the
+problem: the  GLUE is  not programmed  (that would  be too  slow for a component
+which must  react in  500 nanoseconds).  Everything is  implemented as  hardware
+logic, which explains the use of  equalities which are easier to implement  than
+inequalities.
+
+
+
+Horizontal Overscan 
+
+Since the ST only checks whether the vertical counter is equal to a given  value
+to activate or deactivate the signal V,  one can obtain a variety of effects  by
+setting the refresh rate at the appropriate line.
+
+Thus, in order to produce a Low  Border Overscan, it is sufficient to switch  to
+60 Hz at the right time at the end of line 199 of the useable screen. This  will
+prevent the GLUE from  deactivating the V signal:  at the value of  the vertical
+counter corresponding to the  199th line of the  useable screen at 50Hz,  V will
+only  be deactivated  if the  current frequency  is 50Hz.  Because the  vertical
+counter is now  greater than any  of the values  that cause an  event at a  60Hz
+refresh rate, there are  no other effects to  worry about. Once the  time of the
+test has elapsed (the test occurs at the beginning of the line, even before  the
+left border is displayed),  it is necessary to  switch back to 50  Hz, otherwise
+the screen will be distorted (refer back to the pseudo-code).
+
+It is also  possible to shrink  the screen by  switching to  60  Hz at line 234:
+this  corresponds  to  the point  when the  signal V  is deactivated  at 60 Hz.
+Switching back to 50 Hz,  the screen will not be  affected by the subsequent de-
+activation of signal V at line X+200.
+
+Finally, it is useful to know that  one can produce a low border Overscan  at 60
+Hz: at the end of  line 199 of the useable  screen, we switch to 50  Hz and then
+back to  60 Hz,  avoiding the  test  at  line 234.  We can  use the same Timer B
+interrupt routine whether the  program is running at  a refresh rate of  50Hz or
+60Hzin, by using the following instruction:  eor.b   #2,$ffff820a.w.  The only
+commercial program that  I know that  uses this technique  is the game  "Leavin'
+Teramis" by Thalion Software: during  level loading, a 22000 colours  picture is
+displayed, at either 50  hz or 60 Hz  (to reduce flickering). The  green message
+under the picture is displayed in the lower border in both cases.
+
+As  the lower  overscan happens  at the  bottom of  the useable  screen, we  can
+synchronize the 68000 code versus the video counter ($ffff8205 to  $ffff8209),
+resulting in better stability (see next  the part for example code). It  is even
+possible to use the  floppy disk DMA with  a bottom overscan. This  kind of code
+trades off the  amount of time  spent at the  alternate refresh rate  versus the
+amount of distortion caused on the screen.  Note that there do not appear to  be
+any methods other than toggling the refresh rate to remove the lower border.
+
+To remove the  upper border, we  simply switch to  60 Hz at  the end of  line 33
+(just before line 34,  where the test happens). As the top border overscan comes
+before the useable picture,  we  cannot synchronize our program using  the video
+counter. Various solutions have been used:
+
+- A stupid wait loop  from the  beginning  of the VBL  interrupt handler,  which
+  wastes cpu cycles but is easy to implement. This method makes two bets:
+
+   * First bet, the VBL interrupt will always happen immediately, which requires
+     that the 68000 is not executing an instruction which takes many cycles such
+     as  movem  or divu,  since the 68000 will complete its current  instruction
+     before servicing the interrupt handler.
+
+   * The Second bet belongs  to the time taken by the  GLUE before treating line
+     34. It has to be a constant whichever ST is used. So far this has proven to
+     be true.
+
+- The use of a MFP timer: This method allows the more than 17000 cpu cycles
+  before line 34 to be used. However this method makes the following additional
+  bets:
+
+   * Third bet, the latency to service the MFP interrupt will always be the same.
+     This is true for the ST/STF series,  but some STEs that I was able to  test
+     (thanks to Laurent) triggered  the interrupt 60 cycles later than on a STF!
+     The bottom overscan of Leavin' Teramis doesn't' work on those STEs, even if
+     the program  detects the STE:  This  shows that this delay varies according
+     to your model of STE.
+
+   * Fourth bet, unless we leave some dead time during line 34, we may encounter
+     the same problem for the MFP interrupt as described in the first bet!
+
+- The use of the HBL interrupt: this interrupt is nearly never used on the ST,
+  and is even forbidden by the ROM (its interrupt handler, pointed to by vector
+  $68 has as only function to mask this interrupt). As this interrupt is
+  triggered by the Hsync signal, it occurs on every line (including borders and
+  the useable screen), which makes it perfect for counting lines up to the 34th
+  line after the VBL. But it has a drawback, which explains why this method is
+  rarely used:  The HBL  interrupt occurs at the  beginning of the line, and the
+  68000  takes at least  44 cycles  to enter the  interrupt handler, so that the
+  interrupt  handling routine  is executed  in the middle of the  left border...
+  Which is ugly if one uses it to change the palette!
+  To remove  the upper  border,  each  HBL interrupt  will check  whether it has
+  reached line 33. If so, it will wait (with a DBF and some NOPs)  until the end
+  of the line to toggle the refresh rate. This way, we lose lose less cpu time
+  than the first method, and we don't depend on the MFP.
+
+  This method takes 2 bets:
+
+  * First bet, the number of HBL lines to count will not change, whatever the ST
+    we use:  This has never happened, and if it ever would,  none of other means
+    of  removing  the upper border,  described above,  would work.  However this
+    method will survive when the previous methods will not: The time between the
+    VBL and line 34 may vary by up to a quarter of a line without  affecting the
+    number of HBLs that must be counted...
+
+  * Second bet, the time taken to service  the HBL interrupt will be a constant.
+    Again,  I have never  seen this not to be true,  and it is hard  to see why
+    Atari  would add  extra  circuitry to  this signal:  Some  chips  were added
+    between the MFP and the 68000 on the STE,  but the MFP is fully used by this
+    computer. Atari's disdain for the HBL should preserve its reliability.
+
+It is  impossible to trigger a top  overscan in 60 Hz using a 50/60 Hz frequency
+switch.
+
+There is another method of removing the upper border: one switches to monochrome
+output at the beginning of the VBL. This technique allows us to use most of  the
+34 lines  above the  top border  overscan described  above. Unfortunately,  this
+method only works on some STs, but not on STEs... This method relies on the fact
+that a monochrome screen has an  even shorter top border since the  refresh rate
+is 70Hz.  By switching  back to  50 or  60 Hz,  after the  video counter  starts
+incrementing, one obtains a top border overscan. However, I've noticed that  one
+does not remove  the upper border  if one switches  back to 50/60Hz  immediately
+after the video  counter starts. Instead  one is able  to synchronize the  68000
+with the  video counter  allowing one  to change  the colour  of the border at a
+precise location, like BMT seems to do in the third screen of the Skid Row  demo
+(see ST Mag 47, page 14). As  this technique is not reliable, I don't  recommend
+it, to prevent  certain people from  complaining... (This is  an allusion to  an
+article  previously  published  in  ST  Magazine,  written  by  Belzebub  of  ST
+-Connexion, complaining that most overscans do not work on his ancient ST).
+
+Now that we have learnt how to remove the upper and lower borders, it should  be
+easy to  remove both  in the  same screen.  But a  subtlety is often forgotten !
+Without top border overscan, we can use Timer B interrupt to trigger the  bottom
+overscan, so the border is removed whatever value of X, the number of the  first
+line of the useable screen. We  cannot use the same technique when  removing the
+upper border: to remove the lower border, we must toggle the refresh rate twice,
+with an interval of  16 lines. This will  guarantee compatability with the  most
+recent STs as well as antiquities.
+
+This is the end of the first  part of the article about Overscan. The  next part
+is about creating left and right border overscan and about the internals of  the
+SHIFTER.  We'll learn  about shifting  the useable  screen around,  the need  to
+stabilise left/right overscan and  how to reset the  SHIFTER. The third part  is
+about fullscreen overcan, hardscroll and extended palettes.
+
+We hope that this series of articles prejudice anyone. Its purpose is to correct
+the imbalance between those that have contacts, access to source code, or access
+to cracked  demos, and  those that  do not.  It will  demystify Overscan,  often
+considered a magic recipe, and a landmark of programming progress. In this way I
+hope we'll  see fewer  boring copycat demos, like mega-scrollers.  Overscan  and
+Hardscroll  deserve  more  respect,  as  those  that  discovered  them  know how
+difficult it is to find them.  I therefore hope to see more Fullscreens that are
+worth keeping.
+
+Sengan SHORT (Alien of ST Connexion)
+
+Rough translation by frost of Sector One (http://deunstg.free.fr/sct1/)
+Translation revised by Alien of ST Connexion 2005. (www.electronincantation.org)
+
+Believe it  or not,  ST Magazine  still kind  of exists  (http://stmagazine.org)
+which  is  pretty  cool,  since  at the  time  it  beat  all  other European  ST
+publications, and was probably critical in  the rise of French Demo Groups  from
+1991 onwards (http://wwwbrauer.in.tum.de/~brandtf/ataridemos.html). You may also
+know the archive that contains most of the scanned issues of the old ST Magazine
+at (http://www.microstalgia.fr.st/).
+
+
+
+
+Alive 11 
+Overscan Techniques 
+Part II 
+        Welcome back to our study of the Atari ST's video circuits, as
+        illustrated by Overscan. Last episode described the interactions
+        between the three chips that are involved in displaying the
+        screen (The MMU, the GLUE and the SHIFTER). It also described
+        the methods used to remove the top and bottom borders. We
+        continue in this article with...
+
+        Left and Right overscan
+
+        The horizontal counter is incremented every 500ns (aka every
+        0.5us). It is reset every HBL. Thus the MMU sends a word to the
+        SHIFTER every 0.5us . Notice that at 50Hz a line will last 64us
+        while at 60Hz it will last 63.5us. Also note that the SECAM
+        specification requires that the horizontal synchronisation pulse
+        should last 0.47us. However because the GLUE only has a
+        resolution of 0.5us, the ST relies on the tolerance of the
+        monitor and emits an Hsync signal of 0.5us.
+
+        The GLUE goes through a similar process to display each line as
+        it does to display the whole picture: first a border. This is
+        achieved using a signal H (as in Horizontal) which is active
+        during the portion of the line to be displayed. H and V are
+        combined using an AND gate to give the signal DE (Display
+        Enable). Thus only when H and V are active, is a useable screen
+        displayed.
+
+        H is activated once the horizontal counter reaches a first value
+        at the end of the border. H is deactivated once the horizontal
+        counter reaches a second value at the end of the useable screen,
+        40us later. Finally once the horizontal counter reaches a third
+        value, the Hsync signal is activated for 500ns and a new line is
+        started. Notice that while these three values depend on the
+        display frequency, the length of a standard useable line is
+        always 40us (that is to say 160 bytes output every 0.5us as
+        words).
+
+ 
+        The following pseudo-code describes the GLUE's work. Note that I
+        did not determine the exact moment the HBL interrupt takes
+        place, and therefore a constant should be added to the following
+        numbers. Similarly, there is little value in determining Y.
+
+Position=0
+REPEAT
+ IF Position == 13  AND display_freq=60  THEN Activate    signal H
+ IF Position == 14  AND display_freq=50  THEN Activate    signal H
+ IF Position == 93  AND display_freq=60  THEN Disactivate signal H
+ IF Position == 94  AND display_freq=50  THEN Disactivate signal H
+ IF Position == Y   AND display_freq=60  THEN Activate    signal Hsync
+ IF Position == Y+1 AND display_freq=60  THEN Disactivate signal Hsync
+                                              and start a new line
+ IF Position == Y+1 AND display_freq=50  THEN Activate    signal Hsync
+ IF Position == Y+2 AND display_freq=50  THEN Disactivate signal Hsync
+                                              and start a new line
+ Position = Position+1
+END_REPEAT
+
+        Based on this we can obtain different overscan effects, as was
+        done in the previous article:
+
+     * Right Overscan by switching to 60Hz at position 94, overiding
+        the 50Hz end-of-useable-line detection, and then returning to
+        50Hz. Each line is now 160 + 44 = 204 bytes long. At 50Hz this
+        mode is stable on all ST's. Notice that 204 bytes is not a
+        multiple of 8, and therefore 2 bitplanes on the extreme right of
+        the picture are not displayed.
+
+        It is important to return immediately to 50Hz, otherwise STE's
+        react bizzarely and distort the screen.
+
+        At 60Hz, right overscan is also possible by playing the same
+        trick at position 93. The length of each line is still 204, but
+        the line must be stabilised (the principle of stabilisation is
+        described below). Furthermore I have not checked whether this
+        kind of line can be stabilised on all STs.
+
+     * 158 byte line at 50Hz by switching to 60Hz at position 93,
+        enabling the 60Hz end of line detection. The line is shorter by
+        a word, corresponding to the difference of 0.5us between the two
+        times to display a line (63.5us versus 64us).
+
+     * 0 Byte line by switching to 60Hz at position 14 (detection of
+        the beginning of a line at 50Hz). This method is not recomended,
+        because it doesn't work once out of every twenty times the ST is
+        powered on. This happens when the timing of the GLUE and the MMU
+        are offset in such a manner that the 68000 cannot access the bus
+        on the precise cycle required to change the frequency. Recall
+        that it is the MMU that decides which of every four cycles will
+        be allocated to the 68000, and that at on power on circuits can
+        receive parasitic noise on the clock signal that could
+        potentially cause this offset.
+
+
+        Thus we have obtained a right overscan, but have no clue as to
+        how to remove the left border. It is obvious that the GLUE
+        pseudo-code given so far cannot help us in any way. Therefore we
+        need to look at the other available register settings. As we
+        discouraged any use of external synchronisation, all that is
+        left is switching to high resolution mode. The structure of the
+        screen is very different in hires than that we have looked at so
+        far: each line contains only 80 bytes instead of 160, and each
+        line only takes 28us (20us for the useable screen, and 8us for
+        the border and Hsync) instead of 64us. Thus each monochrome line
+        will have a smaller left border so that the useable line will
+        start earlier, and as it only contains 80 bytes it will also
+        finish earlier. Thus we need to add the following lines to our
+        GLUE pseudo-code:
+
+ IF Position == 0   AND display_freq=70  THEN Activate    signal H
+ IF Position == 40  AND display_freq=70  THEN Disactivate signal H
+ IF Position == Z   AND display_freq=70  THEN Activate    signal Hsync
+ IF Position == Z+1 AND display_freq=70  THEN Disactivate signal Hsync
+                                              and start a new line
+
+ (Determining Z is of no value)
+
+        It is therefore sufficient to switch to monochrome to activate H
+        and DE, and therefore force the MMU and the SHIFTER to start
+        decoding the useable screen. One returns to low or medium
+        resolution to actually see the useable screen on the RGB pins.
+        Thus one obtains at 50Hz lines of 160+26 = 186 bytes. At 60Hz
+        one obtains lines of 184 bytes. The difference of 2 bytes
+        corresponds to the difference of 0.5us between the two line
+        lengths (63.5us at 60Hz and 64us at 50Hz).
+
+ 
+        Furthermore if one switches to monochrome at position 40, one
+        obtains line lenght of 80 bytes (if the left border has been
+        removed) or of 80-26 = 54 bytes (not removing the left border)
+        corresponding to the 80 bytes of each high resolution line. Note
+        that one has to quickly return to low or medium resolution to
+        avoid causing an Hsync and a new line.
+
+        Note that one can obtain remove the right border by switching to
+        monochrome at position 94 at 50Hz (overiding the end-of-useable-
+        line detection) but that this method causes a black line to be
+        displayed between the normal screen and the right overscan (see
+        explanation below). A 0 byte line can also be obtained. This
+        method is stable but because it occurs at the time Hsync is
+        being processed, it can distort the screen.
+
+
+Alive 11 
+Overscan Techniques 
+Part II 
+        The internal structure of the SHIFTER:
+
+        As the GLUE controls the DE signal, one would expect the
+        beginning of the useable screen to always occur at the same
+        location on the screen. However, if one removes the right
+        border, one will see that the useable screen starts slightly
+        further to the left than it does in the normal non-overscan
+        mode. The SHIFTER is responsable for this effect. Unlike the
+        GLUE, it is a complex circuit. Providing a full explanation of
+        its function is beyond the scope of this article. Instead I
+        present here a simplified explanation, which may describe
+        certain aspects poorly, but suffices for this study.
+
+ 
+        The SHIFTER contains 4 16-bit registers RR1 to RR4, where RR
+        denotes Rotating Register. Each of these registers undergoes a
+        continuous rotation, shifting out their most significant bit on
+        each rotation. The most significant bits thus output are used to
+        address colours in the palette which is directly linked to the
+        RGB pins. For instance in low resolution, the four RR registers
+        are shifted so 4 bits are output at a time, corresponding to the
+        4 bitplanes. Thus, after 16 rotations, RR1 to RR4 are "empty".
+
+        The four RR registers are updated simultaneously and at the same
+        time, whatever the resolution. Consider medium resolution. It
+        only uses 2 bitplanes, so only two registers RR1 and RR2 are
+        being shifted. It doubles the horizontal resolution (640
+        pixels), so both registers are rotating twice as fast as in low
+        resolution. Each time the RR registers are shifted, their least
+        significant bit is cleared. Once RR1 and RR2 have been
+        "emptied", they are updated with the contents of RR3 and RR4,
+        which are themselves emptied.
+
+        High resolution is processed slightly differently: only RR1
+        rotates, but at four times the speed it does in low resolution.
+        The exiting bit addresses bit 0 of colour 0 in the palette to
+        determine whether the picture should be shown in inversed video.
+        It is also reinserted as the entering bit of RR1, so RR1 is
+        rotated rather than shifted. When RR1 has been emptied, it is
+        updated with the value of RR2; RR2 is updated with the value of
+        RR3 and RR4 with that of RR3. RR4 is then empty, and is filled
+        with $0000 or $FFFF depending on the value of bit 0 of colour 0.
+
+        The SHIFTER also contains four temporary bitplane registers: IR1
+        to IR4, where IR denotes Internal Register. Their behaviour is
+        given by the following pseudo-code:
+
+Number_of_read_bitplanes = 0
+REPEAT
+ IF Load is active THEN IR[Number_of_read_bitplanes] = Data sent from MMU
+                        Number_of_read_bitplanes = Number_of_read_bitplanes + 1
+ IF Number_of_read_bitplanes == 4 AND IF DE is active
+    THEN RR1 = IR1; RR2 = IR2; RR3 = IR3; RR4 = IR4
+ IF Number_of_read_bitplanes == 4 THEN Number_of_read_bitplanes = 0
+END_REPEAT
+
+        This process is continuous, and depends in no way on the
+        synchronisation signals sent by the GLUE. Thus the RR registers
+        are only reset when four bitplanes were received. As the RR
+        registers are permanently rotated, they are emptied when the MMU
+        sends no data or when DE (Display Enable) is off. In low and
+        medium resolutions, each shift fills the least significant bit
+        with a zero, which explains why the border colour is determined
+        by colour zero in the palette. In high resolution they are
+        filled by the value of bit 0 of colour 0 (signal BE)
+        guaranteeing that the border is always black. This avoids the
+        use of the Blank signal when the monitor's electron gun returns
+        to the next line. This can be verified by causing the SHIFTER to
+        display something during this time: it is displayed as a
+        diagonal trace on the screen (it is extended and grey rather
+        than white as the electron beam is moving quickly).
+
+        Note that every change of resolution immediately changes the
+        SHIFTER's behaviour: RR1 to RR4 will be treated differently, and
+        any momentary switch to high resolution will appear as a black
+        line on a colour monitor and a horizontal line on the monochrome
+        monitor. This corresponds to a temporary disactivation of the
+        RGB pins and the activation of the Mono pin. If transition
+        occurs during the useable screen, the effect obtained differs on
+        STF's and STE's, and differs according to the exact position on
+        the screen in which it occured. For instance, there is a
+        position from which a black line will extend all the way to the
+        extreme right of the screen. This corresponds to the activation
+        of the BLANK signal by the GLUE. These effects do not change the
+        way in which the screen is decoded, or the synchronisation
+        signals are generated.
+
+
+Overscan Techniques 
+Part II 
+        Shifts of the Useable Screen
+
+        In the usual non-overscan scenario, DE is activated and
+        disactivated 16 pixels before and after each line of the useable
+        screen. The SHIFTER will only display the four IR values once it
+        has received all of them. But if some of the IR registers were
+        already filled, it won't need to wait to load all of them before
+        loading the RR registers. Since the RR registers are loaded
+        earlier, the useable screen will be shifted left. This shift
+        will correspond directly to the number of words less that it did
+        not need to wait for. As we saw, the MMU sends a new word to the
+        SHIFTER every 500ns. Thus if only IR1 were filled, the image
+        would be shifted 500ns left (corresponding to 4 pixels in low
+        resolution). IR1 and IR2 correspond to 8 pixels, and so on.
+
+        Note that this effect is perpetuated from VBL to VBL: if at the
+        end of a VBL, the IR registers are not all empty, the next
+        useable screen will be shifted left. If one changes resolution
+        during the useable screen, depending on the location of the
+        change, it is possible to affect the normal functioning of the
+        IR registers. Such changes of resolution can result in the
+        bitplanes being shifted. Finally this description is incomplete,
+        because it does not account for screens where one observes
+        alternating bands of useable screen and border.
+
+ 
+        Consider now a line with the left border removed: it contains
+        186 bytes, or 92+1 words. 92 is a multiple of 4, so there is a
+        word too many per line. As we know, the beginning of the right
+        border is due to DE being disactivated, so its position will not
+        vary: if there is one word too many per line it will be loaded
+        on the left of the screen. As the SHIFTER displays border unless
+        all IR registers have been loaded, the first line displayed will
+        stop 500ns before a normal line would, i.e. 4 pixels left in low
+        resolution. At the end of the first line IR1 is already loaded,
+        so the second line should start 0.5us earlier. Similarly at the
+        end of the second line both IR1 and IR2 are already loaded, so
+        the third line should start 1us earlier. Thus in low resolution
+        one would expect the following sequence of left shifts: 4-8-12-0
+        pixels. This actually occurs rarely (one time out of 20),
+        depending on power up conditions causing the the GLUE, MMU and
+        SHIFTER to be slightly out of synch. Instead one usually obtains
+        the truncation of line four pixels early corresponding to the
+        disactivation of DE. Is IR1 ignored? Indeed at the beginning of
+        each left overscan line there is a transition to high resolution
+        for a few cycles to activate DE. The change to high resolution
+        occurs before DE is activated. Then there are 500ns before the
+        Load/Dcyc signal of the MMU is activated (because there are 94
+        positions between the switch to monochrome and the switch to
+        60Hz to remove the right border: that is to say when DE is
+        usually disactivated, for 93 (92+1) words read by the MMU). The
+        fact that DE is activated, but Load/Dcyc isn't has as effect to
+        clear the last IR register loaded, and to decrement the
+        Number_of_read_bitplanes register. Thus if the MMU responds
+        earlier, which can happen if it is out of synch with the
+        SHIFTER, one will obtain the expected sequence of 4-8-12-0 pixel
+        shifts in low resolution. To conclude, left overscan alone is
+        potentially unstable and it is unadvisable to use it alone.
+
+ 
+        So why is right overscan stable? Each line is two words too
+        long! In fact, right overscan is only relatively stable in 50Hz
+        low resolution: in medium resolution, two words too many
+        correspond to 16 pixels. As all the IR registers must be loaded
+        before their contents is transfered to the RR register, every
+        second line is shifted left 16 pixels. Similarly, at 60Hz in low
+        resolution the same thing occurs with an 8 pixel left shift
+        every second line: only IR3 and IR4 need to be loaded. The fact
+        this does not occur at 50Hz means that Number_of_read_bitplanes
+        must be reset to zero. The same effect occurs for 158 byte
+        lines: they should be shifted by 12-8-4-0 pixels every 4 lines
+        in low resolution, since they have 3 words too many. These
+        anomalies are due to rare combinations of the DE and Load/Dcyc
+        signals as in the case of the left border: Load/Dcyc is active
+        when DE is disactivated, or DE is active while Load/Dcyc have
+        not been activated in the last 500ns.
+
+
+Alive 11 
+Overscan Techniques 
+Part II 
+        Stabiliser
+
+        So now we know how to remove the left border, and we know how to
+        remove the right border, shouldn't removing both lead to
+        overscan? This is where my research was stuck for 3 months...
+        The problem is that one obtains an unstable overscan. This was
+        predictable as we learnt above that lines in left overscan start
+        500ns earlier, and the example of right overscan at 60Hz taught
+        us that right overscan is unstable if it starts 500ns earlier.
+        The instable right overscan displayed the useable screen 8
+        pixels early every second line, which is exactly what one
+        observes if one removes both borders! The only difference is
+        that the lines have lengths of 226 or 234 bytes, i.e. 230 +/- 4
+        bytes. One recognises the word too many that is swallowed by the
+        opening of the left border: 226 = 224 + 2, where 224 is a
+        multiple of 8; and 234 = 232 + 2 where 232 is a multiple of 8.
+        In fact the MMU reads 230 bytes each line, but the SHIFTER
+        displays 226 (less the 2 it ignores) or 234 (-2). This shift
+        doesn't seem all that bothersome at first glance since one could
+        shift the contents of every second line by 8 pixels. However if
+        one wants a partial overscan (removing the borders only on some
+        lines), the remainder of the normal useable screen will also be
+        shifted left if it starts on a shifted line. Furthermore, the
+        shift is perpetuated from VBL to VBL, so that at each new VBL
+        two words are introduced. Thus the useable screen trembles, each
+        line being shifted differently every VBL.
+
+        Some STs have a combination of MMU, GLUE and SHIFTER chips that
+        allow them to tollerate such an overscan if an even number of
+        lines have their borders removed. Others don't because the DE
+        signal is sometimes activated, sometimes disactivated at the end
+        of each line, the GLUE and the SHIFTER being out of synch. One
+        remedies this situation by using a stabiliser, of which there
+        are different kinds. Stabilisers exploit the internal state of
+        the SHIFTER to make it believe that it is dealing with a
+        multiple of 4 words length line. To do this one changes
+        resolution during the useable screen. We saw that changing
+        resolution immediately changed the way the SHIFTER decodes
+        bitplanes. In fact it also changes the way it manages its IR
+        registers. Thus a stabiliser could be implemented by a
+        transition to medium resolution. But since each stabiliser
+        functions differently, we will only study one: transitioning to
+        high resolution at position 108. This is the stablest
+        stabiliser. In fact this transition could occur at any position
+        that is a multiple of 4 because at these positions the internal
+        state of the RR and IR regiters is the same. The position 108 is
+        chosen because it is on the extreme right of the picture, hiding
+        the effect of the stabiliser. Indeed this stabiliser causes 12
+        black pixels followed by 16 pixels with displaced bitplanes to
+        be displayed. The 12 pixels correspond to the 12 cycle
+        transition to high resolution.
+
+ 
+        At position 108, a secondary effect occurs: the Blank signal is
+        activated 2us later on an STF, causing 16 pixels to be displayed
+        further right that is usually possible.
+
+        The stabiliser thus consists of transitioning to high resolution
+        for 12 cycles, followed by a return to low or medium resolution.
+        The transition occurs just before the RR registers are loaded
+        with the contents of the IR registers (Recall that the 68000 and
+        the SHIFTER are out of sync so that the MMU can send image data
+        to the SHIFTER while the 68000 changes the palette). During the
+        first 12 cycles the RR registers act as they would in high
+        resolution. The switch back to low or medium resolution occurs
+        just before RR1 is loaded with the contents of RR2, RR2 with
+        that of RR3 (and so on). Thus RR3 and RR4 contain after these 12
+        cycles $0000 or $FFFF according to the value of bit 0 of colour
+        0 (BE). RR2 contains what was in RR4, and RR1 contains what what
+        was in RR3.
+
+        There are then 4 pixels to show that will be shown in the wrong
+        colours: colours 0-3 or 12-15 depending on whether RR3 and RR4
+        contain $0000 or $FFFF (RR1 corresponds to the least significant
+        bit of the colour, while RR4 corresponds to the most significant
+        bit of the colour: see "La Bible ST" chapter 3.4).
+
+        Now consider the IR registers: when the switch to low or medium
+        resolution occurs, IR4 has yet to be loaded, but the switch at
+        this position has as effect to force Number_of_read_bitplanes to
+        4. Since the RR registers are not yet empty, the SHIFTER does
+        not reinitialise them, but starts to reload the IR registers.
+        There are now still four words to read until the end of the
+        line, so the next line will not be shifted. Notice that for 4
+        cycles after the return to low or medium resolution, the SHIFTER
+        continues to rotate the RR registers as if it were still in high
+        resolution. Thus at that time, RR2 to RR4 contain $0000 or
+        $FFFF, while only RR1 comes from screen memory: RR1 contains
+        what was in RR2 four cycles before, and therefore what should
+        have been displayed in RR4. Its colours correspond to the colour
+        0-1 or 14-15 of the palette, respectively. A stabiliser
+        consisting of a switch to medium instead of high resolution at
+        this position also works, but the screen is sometimes shifted by
+        a pixel horizontally. This occurs seemingly randomly.
+
+        Resetting the Shifter
+
+        Exiting certain overscans often causes the bitplanes of the
+        following normal screen to be displaced. This occurs because the
+        last line of the overscan was missing its stabiliser. While in
+        overscan, one doesn't observe the displacement of bitplanes
+        because the stabiliser of the first line of the next VBL clears
+        the effect. Sometimes they hide the effect further by setting
+        the colours to zero during that first line. To restore the
+        picture at the end of one of these programs. one must reset the
+        SHIFTER. This is done by using a sequence of switches of
+        resolution at the begining of each VBL during the border, while
+        DE is disactivated. It has the effect of clearing out the
+        registers of the SHIFTER. I recommend that you use the timings
+        indicated in my example programs so that your demos work on
+        every ST. Finally do not "optimize" your code by removing the
+        stabiliser, which MUST ALSO BE PRECISELY PLACED. This would
+        returning to the state of the art 3 years ago!
+
+        In our next episode, a full overscan program will be given
+        including its possible variations. Hardscroll on the STF will
+        also be explained, illustrated with source code. Finally another
+        SHIFTER effect will be described: how to extend the palette to
+        24389 colours...
+
+
+
+
+Alive 11 
+Overscan Techniques 
+Part II 
+;                  _____________     __________________________
+;                 _\____  ;\    |____\   ;|    \   ;|______  ;/\
+;=============== |    ,    |    \   ;|____|    |    |    /____| \ ==============
+;                |_________|_________|____|_________/_________|\|
+;                \         \         \    \         \         \ |
+;                 \_al!ve___\_________\____\_________\_____ltk_\|
+;
+;================= [m]   [a]   [g]   [a]   [z]   [i]   [n]   [e] ===============
+
+; Overscan Techniques - Part II - Listing 1 by Alien / ST CNX
+
+; Comment: these routines are translated from the original. I have 
+; not had time to test them again on a ST.
+
+; Listing 1
+
+; Program demonstrating that the GLUE
+; controls the synchronisation signals
+; in high and low resolutions. Uses
+; the HBL interrupt (which is connected
+; to the HBL signal of the GLUE)
+
+            clr.l       -(a7)
+            move.w      #$20, -(a7)     ; Super
+            trap        #1
+            addq.w      #6,a7
+
+            clr.l       $FFFFFA06.w       ; Stop all MFP activity
+            move.l      #HBL, $68.w
+            move.l      #VBL, $70.w
+            stop        #$2100
+
+me:                                    ; This Program won't exit
+            bra.s       me             ; So better save before you try it
+
+HBL:
+            lea         $FFFF8240.w, a0
+            moveq       #7,d0
+            move.l      d0,(a0)
+            move.w      d0,(a0)
+VBL:
+            rte
+
+            END
+
+;                  _____________     __________________________
+;                 _\____  ;\    |____\   ;|    \   ;|______  ;/\
+;=============== |    ,    |    \   ;|____|    |    |    /____| \ ==============
+;                |_________|_________|____|_________/_________|\|
+;                \         \         \    \         \         \ |
+;                 \_al!ve___\_________\____\_________\_____ltk_\|
+;
+;================= [m]   [a]   [g]   [a]   [z]   [i]   [n]   [e] ===============
+
+; Overscan Techniques - Part II - Listing 2 by Alien / ST CNX
+
+; Comment: these routines are translated from the original. I have
+; not had time to test them again on a ST.
+
+* Program demonstrating the Pseudo-Program
+* horizontal of the Glue written by S.Short
+* 1990/ST Mag. Written with the Turbo
+* Assembler 1.6 (C) 1991 the author
+* & Pressimage. All use for commercial or
+* promotional purposes, direct or derived
+* is forbidden without the written authorisation
+* of the author. To use this in a public domain
+* program specify the name of the author
+* (S.Short or Alien of ST Connexion)
+
+* HARDWARE ADDRESSES
+
+Hbl             EQU $68                 ; HBL interrupt vector
+Vbl             EQU $70                 ; VBL interrupt vector
+Mfp_Port        EQU $FFFFFA01           ; I/O port of the MFP
+Mfp_IER         EQU $FFFFFA06           ; MPF interrupt acknowledgement
+Mfp_IMR         EQU $FFFFFA12           ; MPF interrupt mask
+Glue_HZ         EQU $FFFF820A           ; Screen display frequency
+Rez             EQU $FFFF8260           ; Screen resolution
+Low_vid_count   EQU $FFFF8209           ; Video Counter LSB
+Keyboard        EQU $FFFFFC02           ; Keyboard data
+
+* RESOLUTION OF THE PROGRAM
+
+Fifty_HZ        EQU 2
+Sixty_HZ        EQU 0
+Low             EQU 0
+Mid             EQU 1
+High            EQU 2
+Chosen_R        EQU Low                 ; Chosen Resolution
+
+                IFEQ (Chosen_R-High)&2
+                FAIL
+                ENDC
+
+* INTERESTING POSITIONS
+
+; A list of positions follows: the first number
+; corresponds to Mono_1, the second to Mono_2 and so on.
+; The added fourth and fifth timings correspond to the time taken
+; by the routines that change the resolution of the display frequency.
+; Changing the display frequency takes 4*4 cycles, or 4 nops.
+; Changing the display resolution takes 5*4 cycles, or 5 nops.
+; Note that the 0 byte line obtained by changing display frequency
+; does not occur on some power-ups; and that the 0 byte line obtained
+; by switching to high resolution distorts the picture on some monitors:
+; change the height of line 6 to see this effect.
+; Complete Overscan: 1,0,0,1,1,89,13,9,230,2
+; Left Overscan:     1,0,0,0,0,89+13+9+5+4,0,0,186,0
+; Right Overscan:    0,0,0,1,0,89+5,13+9+5,204,0
+; 80 byte line:      1,1,0,0,0,35,89+13+9+4-35,80,0
+; 54 byte line:      0,1,0,0,0,35+5,89+13+9+4-35,54,0
+; Right Overscan2:   0,1,0,0,0,89+5,13+9+4,0,204,0  (Switching to monochrome)
+; 0 byte overscan:   0,0,0,1,0,14,75+5+13+9+5+5,0,0,0 (Changing frequency)
+; 0 byte overscan:   0,1,0,0,0,6,89+13+9+5+4-6,0,0,0 (Switching to monochrome)
+
+Mono_1          EQU 1
+Mono_2          EQU 0
+Freq_1          EQU 0
+Freq_2          EQU 1
+Stabiliser      EQU 1
+Position_1      EQU 89
+Position_2      EQU 13
+Position_3      EQU 9
+Line_Length     EQU 230
+Offset          EQU 2
+Height          EQU 100-1
+
+******************************
+
+                TEXT
+
+s:
+                lea     s(PC),A6
+                bsr     Super
+                bsr     Save_State
+                bsr     Test_STE
+                bsr     Reset_Shifter
+                move.w  #Chosen_R,D0
+                bsr     Set_Resolution
+                bsr     Init_Screen
+                bsr.s   TEST_GLUE
+                bsr     Reset_Shifter
+                bsr     Restore_State
+                bsr     Super
+                clr.w   -(SP)              ; exit program
+                trap    #1
+
+* ROUTINE TESTING THE GLUE LINE BY LINE
+
+TEST_GLUE:
+                bsr.s   Init_IRQs
+                moveq   #$39,D2
+                bsr.s   Test_Keyboard
+                rts
+
+Test_Keyboard:
+                moveq   #0,D1
+Loop1:
+                move.b  Keyboard.w,D0
+                eor.b   D0,D1
+                and.w   #$7F,D0
+                cmp.b   D2,D0
+                bne.s   Test_Keyboard
+                tst.b   D1
+                bne.s   Loop1
+                rts
+
+Init_IRQs:
+                move.l  #Vbl_routine1,Vbl.w ; Wait one interrupt
+                stop    #$2300
+                move.l  #Vbl_routine2,Vbl.w ; The real routine
+                rts
+Vbl_routine1:
+                rte
+
+* MAIN TASK
+
+Vbl_routine2:
+                movem.l D0-D5/A0-A2,-(SP)
+                lea     Rez.w,A0
+                lea     Glue_HZ.w,A1
+                lea     Low_vid_count.w,A2
+                moveq   #High,D0
+                moveq   #Chosen_R,D1
+                moveq   #Fifty_HZ,D1
+                moveq   #Sixty_HZ,D3
+                move.w  #Height,D4
+                move.w  #$0777,$FFFF8240.w
+                clr.w   $FFFF8246.w
+                clr.w   $FFFF825E.w
+
+                OPT O-
+Sync:
+                move.b  (A2),D5            ; Wait until the video counter starts
+                beq.s   Sync
+                neg.w   D5                 ; Compensate for the elapsed time
+                lsl.l   D5,D5              ; Wait the remaining time
+                moveq   #22,D5
+Wait:
+                dbra    D5,Wait
+                nop
+                nop
+
+; d0= value corresponding to high resolution
+; d1= value corresponding to low resolution
+; d2= value corresponding to 50 Hz
+; d3= value corresponding to 60 Hz
+; a0= Address of the hardware resolution register
+; a1= Address of the hardware frequency register
+
+Overscan:
+                IFNE Mono_1
+                move.b  D0,(A0)            ; Change resolution
+                nop
+                move.b  D1,(A0)
+                ENDC
+                IFNE Freq_1             ; OR Change frequency
+                move.b  D3,(A1)
+                move.b  D2,(A1)
+                ENDC
+
+                IFNE Position_1
+                REPT Position_1
+                nop                        ; Wait for position 2
+                ENDR
+                ENDC
+
+                IFNE Mono_2
+                move.b  D0,(A0)            ; Change resolution
+                nop
+                move.b  D1,(A0)
+                ENDC
+                IFNE Freq_2             ; OR Change frequency
+                move.b  D3,(A1)
+                move.b  D2,(A1)
+                ENDC
+
+                IFNE Position_2
+                REPT Position_2
+                nop                        ; Wait for position 3
+                ENDR
+                ENDC
+                IFNE Stabiliser
+                move.b  D0,(A0)
+                nop                        ; Stabiliser
+                move.b  D1,(A0)
+                ENDC
+
+                IFNE Position_3
+                REPT Position_3
+                nop                        ; Wait for the end of the line
+                ENDR
+                ENDC
+
+                dbra    D4,Overscan
+
+                OPT O+
+
+                movem.l (SP)+,D0-D5/A0-A2
+                rte
+
+
+* INITIALISE THE SCREEN
+
+Init_Screen:
+                move.l  $FFFF8200.w,D0     ; Draws a line on the screen,
+                lsl.w   #8,D0              ; the background allows one to
+                movea.l D0,A0              ; see the image shifts.
+                lea     22+Offset(A0),A1
+                move.l  #$55550000,D0
+                move.l  #$55550000*Chosen_R,D1
+                move.l  #$FF00FF00,D3
+                move.w  #32000/8-1,D2
+Isloop1:
+                cmpa.l  A0,A1
+                bgt.s   Isloop2
+                movea.l A1,A0
+                move.l  D3,(A0)+
+                move.l  D3,(A0)+
+                lea     Line_Length(A1),A1
+                bra.s   Isloop3
+Isloop2:
+                move.l  D0,(A0)+
+                move.l  D1,(A0)+
+Isloop3:
+                dbra    D2,Isloop1
+                rts
+
+* TOGGLE USER/SUPERVISOR
+
+Super:
+                movea.l SP,A5              ; It's a subroutine, so we have to
+                move.l  Stack-s(A6),-(SP)  ; return to the program...
+;                                            I.e. restore the stack
+                move.w  #$20,-(SP)
+                trap    #1
+                move.l  D0,Stack-s(A6)
+                movea.l A5,SP
+                rts
+
+* SAVE AND RESTORE THE MFP REGISTERS AND VECTORS WE WILL CHANGE
+
+Save_State:
+                movea.l (SP)+,A5
+                move    SR,-(SP)
+                move.l  Mfp_IER.w,-(SP)    ; .L access 2 MFP registers at once
+                move.l  Mfp_IMR.w,-(SP)
+                move.l  Hbl.w,-(SP)
+                move.l  Vbl.w,-(SP)
+                move.b  Rez.w,-(SP)
+                clr.l   Mfp_IER.w
+                clr.l   Mfp_IMR.w
+                move    #$2300,SR
+                jmp     (A5)
+
+Restore_State:
+                movea.l (SP)+,A5
+                move.b  (SP)+,D0
+                bsr.s   Restore_Rez
+                move.l  (SP)+,Vbl.w
+                move.l  (SP)+,Hbl.w
+                move.l  (SP)+,Mfp_IMR.w    ; Same comment !
+                move.l  (SP)+,Mfp_IER.w
+                move    (SP)+,SR
+                jmp     (A5)
+
+Restore_Rez:
+                and.w   #3,D0             ; This routine tests whether the user has
+;                                            reconnected his monochrome monitor
+                btst    #1,D0              ; Wait to avoid resetting the
+                beq.s   Not_Mono1          ; computer when leaving the program
+Wait1:
+                btst    #7,Mfp_Port.w
+                bne.s   Wait1
+Not_Mono1:
+
+Set_Resolution:
+                move.l  #Vbl_routine1,Vbl.w
+                stop    #$2300
+                move.b  D0,Rez.w
+                rts
+
+* RESET SHIFTER
+
+Reset_Shifter:
+                move.l  #Vbl_routine1,Vbl.w
+                moveq   #5,D0
+Reset2:
+                move.b  #1,Rez.w
+                stop    #$2300
+                clr.b   Rez.w
+                stop    #$2300
+                dbra    D0,Reset2
+                rts
+
+* TEST STE
+
+; The least significant byte of the screen base address must be set to zero for
+; the program to be able to synchronise itself to the least significant byte of
+; the video counter.
+
+Test_STE:
+                move.l  $FFFF8200.w,D0
+                move.l  D0,$FFFF8200.w
+                clr.b   $FFFF820D.w
+                rts
+
+Counter:
+                DS.W 1
+Stack:
+                END

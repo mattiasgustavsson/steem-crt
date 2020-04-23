@@ -1,0 +1,14 @@
+LIBRARY "unrar.dll"
+EXPORTS
+RARCloseArchive@4
+RARGetDllVersion@0
+RAROpenArchive@4
+RAROpenArchiveEx@4
+RARProcessFile@16
+RARProcessFileW@16
+RARReadHeader@8
+RARReadHeaderEx@8
+RARSetCallback@12
+RARSetChangeVolProc@8
+RARSetPassword@8
+RARSetProcessDataProc@8

@@ -1,0 +1,12 @@
+For Steem
+
+Download unrarlib from http://www.unrarlib.org/download.html and extract to 3rdparty.
+Rename folder unrarlib040 to unrarlib
+
+Run:
+build_user.bat
+
+
+NOTE (SS): this library seems rather useless, unable to open current
+RAR files, so it's dropped, Steem SSE uses unrar.dll instead.
+

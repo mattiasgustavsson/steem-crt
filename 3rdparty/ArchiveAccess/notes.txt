@@ -1,0 +1,14 @@
+7z support in Steem using ArchiveAccess
+
+1) Little config edit to have projects (DLL, ArchiveAccessTest) compiling 
+   in VS2008 
+2) Minimal mod to have ArchiveAccessTest compiling in BCC
+3) Base interface for Steem on ArchiveAccessTest, we call this
+   ArchiveAccessSSE, it stays in '3rd party'
+4) We can compile the DLL itself in VS2008.
+   It has been fixed so that it also works with BZ2 files.
+   (ArchiveAccessClass.cpp line 645)
+   So we'll include the DLL in the main download. It's rather elusive
+   anyway.
+5) Support for ArchiveAccess.dll compiles OK with VC6, VC9, BCC
+

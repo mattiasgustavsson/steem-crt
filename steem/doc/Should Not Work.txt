@@ -1,0 +1,213 @@
+----------------------------------------
+Introduction
+----------------------------------------
+This is a list of disks that don't work on a real STE or are corrupt. It is not complete or totally accurate, there may be some versions of the disks mentioned that work differently than this list may suggest. It is intended as a guide to users who want to help us find Steem bugs by allowing them to avoid debugging programs that shouldn't actually work.
+
+Most of the disk's names are followed by a full stop, this means they have been tested on a real STE.
+
+Cheers,
+Russell Hayward
+
+----------------------------------------
+Corrupt or Not Imageable
+----------------------------------------
+Auto 376 Menu
+A_069_1 (there are working versions)
+A_367 (changed, works on PaCifiST)
+BAT II Disk 1 (Elite 376). - asks for disks and when inserted asks again.
+BAT II Disk 2 (Elite 377).
+BAT II Disk 3 (Elite 378).
+BAT II Disk 4 (Elite 379).
+BAT II Disk 5 (Elite 380).
+Cadaver Disk 2 (Auto 415b) (there are working versions)
+D-Bug 87 (working version at dbug.atari.org)
+D-Bug Menu Disk 010 (TOSEC). (working version at dbug.atari.org).
+LCD Demo
+Magic Pockets (STT from original)
+Rogue (corrupt)
+Shadow Warriors Disk 2 (Auto 355b)
+SPACK (protected)
+STAC (original, corrupt)
+Stardust Boot (Elite)
+Stardust Disk 1 (Elite)
+Stardust Disk 2 (Elite)
+Stardust Disk 3 (Elite)
+Venus - The Flytrap (FOF 32). - space on title screen then SATYRID
+
+----------------------------------------
+Don't Work On Menu Disk
+----------------------------------------
+Chip's Challenge (Superior 58c).
+GoldRush Disk 1+2 (Auto 295a).
+Goldrush Disk 3+4 (Auto 295b).
+Police Quest 2 (Auto 314a) - drive home, can't detect disk 2
+Police Quest 2 (Auto 314b)
+
+----------------------------------------
+Not Working on STE
+----------------------------------------
+3rd Reich (D-Bug 141a). (working version at dbug.atari.org)
+A Grumbler in the Rutting Season Demo. - title screen top and bottom line wobble.
+Advanced Ski Simulator (Auto 410). - level 5 corrupt.
+African Raiders (Auto 201). crash on quit
+Airball (written by Procopy).
+Ambition Demo. - Why Not (TFS). - flickering decompact info only
+Arkanoid III (Auto 77). - can't move bat.
+Armistice Demo Rendez-vous (eye).
+Auto 242 Menu.
+Auto 501 Menu.
+Autodeul (Auto 189). - freezes up randomly
+BAT II Disk 1 (Elite). - creation.
+Battlezone. - corrupted graphics.
+Beast Busters (Fuz 98).
+Breach (Auto 188).
+Calimero Demo (protected). - 4 bombs on load.
+Campaign (Section 1). - bad directory listing, shows files as folders.
+Carl Lewis Challenge (Superior 142a).
+Carl Lewis Challenge (Superior 142b).
+Castle Warrior (Auto 124). - crashes with TOS 1.06, corrupt side graphics with other TOSs.
+Coding So Far Disk A. - over the shop (space next to pacman) - can't move bird, quit when move joystick.
+Crazy Cars (Auto 175). - saving scores corrupts disk.
+Cricket Captain (Auto 360). crashes after playing loads of games
+Cuddly Demo (Spreadpoint).
+D-Bug 164a (TOS 2.06).
+Darius (Auto 166).
+Dark Century (Superior 77). sound
+Defender of the Crown (BOSS). - hold joust, corrupted graphics.
+Defender of the Crown (BOSS). - skip intro, selection screen goes funny colours and freezes.
+Degas Elite.
+Digi Composer (D-Bug 52). - can't load off different floppy.
+Digi Composer (D-Bug 52). - sounds terrible.
+Dragonnels Demo. - happy islands, wobbles and top line dodgy.
+Dragonnels Demo. - menu wobbles.
+Dynablasters + (Superior 132c) .(crash on quit)
+Elvira Disk 1 (Auto 455a). - asks for disk 4 endlessly.
+Elvira Disk 2 (Auto 455b).
+Elvira Disk 3 (Auto 455c).
+Elvira Disk 4 (Auto 455d).
+Elvira Disk 5 (Auto 455e).
+Emlyn Hughes (Auto 301). - asks for original disk endlessly.
+Extract Demo. - shade bobs.
+F29 Retailiator (Empire).
+Fighting Soccer (Auto 301). - can't move arrow.
+Fire Mission (Auto 493). ; - game almost impossible.
+Fire Zone (Med 1). - can't move pointer.
+Flipo Demo. - cog screen.
+Formula 1 Grand Prix (Auto 217).
+Fuggler. - can't get past protection screen.
+Galtan 6 Demo (POV 118). - megadeth, scroller left border removal doesn't work.
+Galtan 6 Demo (POV 118). - title screen disappears quickly.
+Gone Fishing (Auto 217). - corrupt graphics on lake screen, crash when click on live well.
+Hawkeye (Med 19). - flickering icons, easy to get endless keyclick, dodgy line when box is moving up or down.
+Heavy Metal (Auto 286). hit key when loading
+High Speed Pascal (D-Bug 166). can't open file.
+Hollywood Hustler Disk 1 (D-Bug 165a). - stops on notices screen, no disk works.
+Hollywood Hustler Disk 2 (D-Bug 165b).
+Hollywood Hustler Disk 3 (D-Bug 165c).
+Hyperforce (FOF 23).
+Hypnotic Lands (Auto 486). - level 3 corrupt.
+Indy Heat (D-Bug 59a).
+Insecticide [2] (Supremecy 16b). - insect won't move, can fire.
+International 3D Tennis (Auto 373).
+International Ninja Rabbit (Fuz 135).
+International Sports Challenge (D-Bug 71a).
+International Sports Challenge Disk 2 (D-Bug 71b).
+Iron Maiden Demo.
+Killing Cloud Disk 1 [F1] (Superior 165a). - insert disk 2 screen black.
+Knight Force (Killersoft).
+Legends of Valour (Superior 146a)
+Legends of Valour (Superior 146b)
+Legends of Valour (Superior 146c)
+Licence to Kill (Med 13b).
+Lightning Demo. - 3D designer, can't set points.
+Lightning Demo. - pendragons bouncing ball, screen wobbles and scroller border removal is duff.
+Live and Let Die (Auto 27) STFM only.
+Lure of the Temptress (Superior 144a). 2Mb+.
+Lure of the Temptress (Superior 144b).
+Lure of the Temptress (Superior 144c).
+Macadam Bumper (Med 38) 1MB-.
+Manchester United (FOF 12). - dodgy fire button on menus.
+Med 1 Menu. - 4Mb no display.
+Med 13b Menu (black scroller).
+MED_101 Menu.
+Mickey's Runaway Zoo (Auto 494).
+Mindbomb Demo (2 disk version).
+Missile Command (Auto 4).
+Monkey Island Disk 1 (Auto 483a). - can't save game to any disk.
+Ninja Mission (black title screen).
+Ninja Warriors Disk 1 (Auto 319a). - just stops on init.
+Ninja Warriors Disk 2 (Auto 319b).
+Ninja Warriors Disk 3  (Auto 319c).
+Nostalgia Demo. - press space while loading, intro black.
+Notator 1.01 (MCA).
+Notator 3.21 (needs dongle).
+Onslaught (Auto 154).
+Operation Wolf (Auto 37).
+Oriental Games (FOF 35).
+Ork Disk 1 (D-Bug 113a). - no in-game sound.
+Ork Disk 2 (D-Bug 113c). - no in-game sound.
+Overdrive Demo (dragon). - no left border for bottom section.
+Overdrive Demo. - intro  disappears quickly, goes straight to reset, then menu (reset demo works).
+Overlander (Union).
+OXYD (2). - 4 bombs on boot, crash on run, may be mono only.
+Oxyd. - 4 bombs on boot, crash on run, may be mono only.
+Paladin (Med 24).
+Pool (Med 6) [F5].
+Prison (later levels) (Auto 343).
+Qin.
+Railroad Tycoon (Fuz 85).
+Red Heat (Med 11).
+Rolling Ronnie (Superior 86).
+Skate Wars (Auto 380).
+Skulldig (Med 6) [F4].
+Songs of the Unexpected (unprotected). - play hurricane.
+SoWatt Demo. - nocrew crash on quit.
+SoWatt Demo. - warm reset causes mess.
+Space 1889 Disk 1 (D-Bug 46a).
+Space 1889 Disk 2 (D-Bug 46c).
+Space Racer [2] (Auto 41). - goes black at end of race 1 or after quit restart.
+Stormball (Auto 488). - freezes up on loading cash game.
+Summer Games (D-Bug 72b) (all events, 100m dash).
+Super Soccer (Superior 106a).
+Supremacy (BBC 27a).
+Supremacy (BBC 27b).
+Swiftar (Auto 500 LA).
+TCB Tracker (Lem 36c). - can't load file.
+TCB Tracker Stereo (Auto 329). - crash on quit.
+Team New Season Edition  (load team) (D-Bug 171).
+TEX ST Soccer Intro [6] (Hackbear 2). - left border not removed on scroller.
+The Empire Strikes Back (Auto 1).
+Thundercats (Med 17).
+TNT (Auto 77). - loading screen disappears, then freeze.
+Tonic Tile (Auto 208).
+Tracksuit Manager (Med 1). - corrupted graphics.
+Traders (Auto 500 F).
+Transarctica (D-Bug 143).
+Ultimate Arkanoid (Med 8).
+Ultimate Golf (Med 069). - course looks weird, map crashes.
+Ultimate Music Collection. - TOS 2.06, boot freeze.
+Vodka Demo Disk 1 (2 disk version). - freezes up after loading some screens (address).
+Vodka Demo Disk 2 (2 disk version).
+Warzone (D-Bug 21). (working version at dbug.atari.org)
+Zak McKracken (turn on TV) (Auto 193).
+
+----------------------------------------
+Not Working on STE in a Different Way
+----------------------------------------
+Ambition Demo IQ PQ. - can't select, doesn't detect STE.
+Auto 154 Menu. - borders should flicker.
+Carmen Sandiego (Fuz 78) - should crash with white screen on load.
+Commons Demo. - C3D should crash with 2 bombs.
+D-Bug 165a. - skips intro, straight to menu.
+Dog Fight (D-Bug 169a). - won't start loading when you press key at cracker text.
+Dog Fight Disk 2 (D-Bug 169b).
+Drakkhen Disk 1. - freezes up randomly when walking. The mouse appears and can be moved.
+Drakkhen Disk 2.
+Drakkhen Disk 3
+Galtan 6 Demo. - intro screen right border should be there.
+Overdrive Demo (2 disk version). - stops loading before freezing up.
+Overdrive Demo Disk 2
+Sky Strike Plus (Auto 500 LB). - should have keyclick on black loading screen, then freeze up on white screen.
+SoWatt Demo.  -  sync, left border removal shouldn't work, right border shouldn't work all the time.
+Xenomorph (PP). (2 disks). - formats track 0 side 0 with 0s but gets to disk swap without crashing.
+

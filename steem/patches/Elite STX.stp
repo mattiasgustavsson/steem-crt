@@ -1,0 +1,10 @@
+[Text]
+
+Description=Pass protection
+ApplyWhen=After loading
+Version=STF, TOS 1.02, 1MB
+PatchAuthor=Seagal
+
+[Patch]
+
+01C72C = $6000 $FF3E

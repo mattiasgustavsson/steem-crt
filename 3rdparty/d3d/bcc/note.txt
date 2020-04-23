@@ -1,0 +1,15 @@
+[path to BCC bin]>implib -c name "path to DLL"
+
+for:
+
+d3d9
+d3dx9_43
+
+>implib -c d3d9 "C:\Windows\System32\d3d9.dll"
+
+
+There have been changes in the d3d9 DLL between Vista/Win 7 and Win8
+
+
+>implib -c -f d3d9 "C:\Windows\System32\d3d9.dll"
+force by name?

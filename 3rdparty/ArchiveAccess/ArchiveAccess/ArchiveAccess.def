@@ -1,0 +1,15 @@
+EXPORTS
+  aaDetermineArchiveType
+  aaOpenArchive
+  aaOpenArchiveFile
+  aaSetOwner
+  aaGetOwner
+  aaGetFileCount
+  aaGetFileInfo
+  aaExtract
+  aaExtractMultiple
+  aaExtractAll
+  aaCreateArchiveFile
+  aaAddFile
+  aaCloseArchive
+  

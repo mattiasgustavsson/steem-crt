@@ -1,0 +1,21 @@
+SPS DECODER LIBRARY (SPStudio_Dev) v5.1 release package
+
+This distribution contains x86/x64 binary code v5.1 for the SPS DECODER LIBRARY for Windows(tm). This is not free software, please read the licence.
+
+Installation:
+
+Copy CAPSImg.dll (64bit version for 64bit versions of Windows included in x64 folder) to your application folder. If you want the library to be available to all applications, copy it to SYS:\Windows\system32 (32bit).
+
+Important! On 64bit systems, copy the 64bit DLL to SYS:\Windows\system32, the 32bit DLL to SYS:\Windows\SysWOW64. Yes, that's weird - but just browse the web if you want explanations. :)
+
+
+If you encounter any problems, please let us know by posting here:
+
+http://forum.kryoflux.com
+
+
+Please use the forums for bug reports, do not submit tickets for this.
+
+
+Thank you for your support,
+The Software Preservation Society

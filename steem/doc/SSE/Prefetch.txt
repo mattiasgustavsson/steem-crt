@@ -1,0 +1,283 @@
+Prefetch
+==========
+
+Sources
+
+- http://pasti.fxatari.com/68kdocs/68kPrefetch.html 
+- US patent 4,325,121 assigned to Motorola
+- International Patent PCT/US83/01624 applied by Motorola
+- yacht.txt (Yet Another Cycle Hunting Table), uploaded by 'danorf':
+  http://www.atari-forum.com/viewtopic.php?f=68&t=24710#p227267
+- And of course development of Steem SSE: for this reason, Steem specifics are
+discussed.
+
+
+Prefetch for a microprocessor means loading the next instruction (or more) 
+while an instruction is being executed.
+
+
+Registers
+===========
+
+Three 16 bit registers of the M68000 are used to store instructions
+in a pipelined manner:
+
+IRC   stores the next macroinstruction (or operand) 
+IR    macro-instruction currently being decoded
+IRD   macro-instruction currently being executed
+
+The sequence of instruction & operand fetching is:
+
+data bus -> IRC -> IR -> IRD
+
+The names IRC, IR, IRD are never spelled out in the M68000 doc but they are
+in another patent application (I really looked it up!):
+
+IRC Instruction Register Capture
+IR  Instruction Register
+IRD Instruction Register Decoder
+
+In Steem, those registers are mapped to those variables:
+
+IRC   prefetch_buf[1]
+IR    prefetch_buf[0]
+IRD   ir
+
+In Steem SEE, macros allow to use 'IRC', 'IR' and 'IRD'.
+
+IRC and IR form the prefetch queue, very modest with only two words, it is
+already effective and can be tricky.
+None of those registers are directly visible to the programmer. 
+
+The program counter (PC) is visible to the programmer. It holds the address of
+next macro-instruction.
+
+As is explained in another text ("Program counter and exception.txt"), there
+are also other registers beside PC that hold the address of current instruction.
+PC is regularly updated but those other registers do the actual work.
+This doesn't matter here, but when we say 'PC' you must understand "PC or the
+register used as 'PC' at prefetch time", like AU typically).
+
+Exception
+===========
+
+When an error exception occurs, the content of IRD is pushed on the stack, and
+IRC and IR are flushed before being filled again (like each time the PC is set).
+
+Emulation
+===========
+
+Before the article by ijor, very little was known in the emulation world about 
+prefetch on the M68000, the concept was still mysterious.
+Not just in Steem but also in other ST (and Amiga) emulators prefetch was
+poorly emulated.
+
+Steem authors had to try things out and see if they worked with games and demos.
+
+They did an amazing work, so many demos already work in Steem 3.2 because the 
+timings globally are very good, but unfortunately the prefetch timings weren't 
+well placed in general. They came at the start of an instruction, even before 
+operands of the current instruction were gathered. It doesn't make sense if you 
+know that operands and instructions follow the "PC" (program counter) and the 
+next instruction is fetched while the current one is being executed (all 
+directly commanded by microcode), but there was much confusion about prefetch 
+really (and about "extra prefetch"). 
+
+Fetching order:
+
++-----------------------------------------------------------------+
+|     PC       ->   PC    ->    PC   ->   PC        ->   PC    -> |
+| Instruction 1  Operand 1  Operand 2  Instruction 2  Operand 1   |
++-----------------------------------------------------------------+
+
+In the table above (imaginary instruction sequence), it's clear that 
+instruction 2 can be fetched only after operands 1 & 2 of instruction 1 
+have been fetched. PC doesn't hop back & forth in an usual sequence.
+
+Premature prefetch in Steem
+-----------------------------
+
+Here is an example from cpu.cpp that illustrates the issue:
+
+void                              m68k_tst_b(){
+#if !(defined(STEVEN_SEAGAL) && defined(SS_CPU_LINE_4_TIMINGS))
+  FETCH_TIMING;
+#endif
+  BYTE x=m68k_read_dest_b();
+#if defined(STEVEN_SEAGAL) && defined(SS_CPU_LINE_4_TIMINGS)
+  FETCH_TIMING;
+#endif
+  PREFETCH_IRC;
+  SR_CLEAR(SR_N+SR_Z+SR_V+SR_C);
+  if(!x)SR_SET(SR_Z);
+  if(x&MSB_B)SR_SET(SR_N);
+}
+
+In Steem, macro FETCH_TIMING signals prefetch. It counts 4 cycles, rounded.
+In most cases, it is placed right at the start, like it was in fact fetching 
+the current instruction (and I think this was the confusing point).
+The #if defined and macro PREFETCH_IRC were added in Steem SSE.
+In the example, we see that prefetch would happen before the destination is
+read, which is just impossible if operands still must be fetched to get the
+'destination'.
+
+Fix
+-----
+
+In Steem SSE, FETCH_TIMING does nothing (except when we're debugging, which is
+the purpose of SS_CPU_LINE_x_TIMINGS macros).
+PREFETCH_IRC counts the cycles, and it performs the prefetch:
+(PC)->IRC
+
+You notice that in the SSE version, prefetch is counted after the read, not
+before. This is conform to ijor's article.
+
+Shifter counter
+=================
+
+A consequence of premature fetch timing is that memory was read too late 
+in emulation. In particular when reading the shifter counter, Steem was 4 
+cycles backward. To make up for that, so that programs work, the value returned 
+is different from what a real ST would return at the same cycle. In other 
+words, it's a hack compensating wrong timings of almost all instructions! Steem 
+authors weren't aware of that, they just returned the value that worked, and
+that was correct for the instruction, not for the timing (scanline cycle).
+Note that it took me some time to finally understand this, and that other
+emulators are plagued by the same problem.
+
+Move it!
+----------
+
+Steem authors suspected that something was wrong, as indicated by a comment in 
+MOVE.B, next to a INSTRUCTION_TIME(4) counting 4 cycles right at the start of
+the instruction that didn't make much sense.
+
+Here's MOVE.B from cpu.cpp, with no SSE fix as we only want to illustrate one
+problem, and there are other, distinct issues in MOVE:
+
+void m68k_0001(){  //move.b
+  INSTRUCTION_TIME(4); // I don't think this should be here, does move read on cycle 0?
+  m68k_GET_SOURCE_B;
+  if((ir&BITS_876)==BITS_876_000){
+    SR_CLEAR(SR_V+SR_C+SR_N+SR_Z);
+    m68k_dest=&(r[PARAM_N]);
+    m68k_DEST_B=m68k_src_b;
+    SR_CHECK_Z_AND_N_B;
+  }else if((ir&BITS_876)==BITS_876_001){
+    m68k_unrecognised();
+  }else{   //to memory
+    bool refetch=0;
+    switch(ir&BITS_876){
+    case BITS_876_010:
+//      INSTRUCTION_TIME(8-4-4);
+      abus=areg[PARAM_N];
+      break;
+    case BITS_876_011:
+//      INSTRUCTION_TIME(8-4-4);
+      abus=areg[PARAM_N];
+      areg[PARAM_N]++;
+      if(PARAM_N==7)areg[7]++;
+      break;
+    case BITS_876_100:
+//      INSTRUCTION_TIME(8-4-4);
+      areg[PARAM_N]--;
+      if(PARAM_N==7)areg[7]--;
+      abus=areg[PARAM_N];
+      break;
+    case BITS_876_101:
+      INSTRUCTION_TIME(12-4-4);
+      abus=areg[PARAM_N]+(signed short)m68k_fetchW();
+      pc+=2;
+      break;
+    case BITS_876_110:
+      INSTRUCTION_TIME(14-4-4);
+      m68k_iriwo=m68k_fetchW();pc+=2;
+      if(m68k_iriwo&BIT_b){  //.l
+        abus=areg[PARAM_N]+(signed char)LOBYTE(m68k_iriwo)+(int)r[m68k_iriwo>>12];
+      }else{         //.w
+        abus=areg[PARAM_N]+(signed char)LOBYTE(m68k_iriwo)+(signed short)r[m68k_iriwo>>12];
+      }
+      break;
+    case BITS_876_111:
+      if (SOURCE_IS_REGISTER_OR_IMMEDIATE==0) refetch=true;
+      switch (ir & BITS_ba9){
+        case BITS_ba9_000:
+          INSTRUCTION_TIME(12-4-4);
+          abus=0xffffff & (unsigned long)((signed long)((signed short)m68k_fetchW()));
+          pc+=2;
+          break;
+        case BITS_ba9_001:
+          INSTRUCTION_TIME(16-4-4);
+          abus=m68k_fetchL() & 0xffffff;
+          pc+=4;
+          break;
+        default:
+          m68k_unrecognised();
+      }
+    }
+    SR_CLEAR(SR_Z+SR_N+SR_C+SR_V);
+    if(!m68k_src_b){
+      SR_SET(SR_Z);
+    }
+    if(m68k_src_b&MSB_B){
+      SR_SET(SR_N);
+    }
+
+    m68k_poke_abus(m68k_src_b);
+    FETCH_TIMING;  // move fetches after instruction
+    if (refetch) prefetch_buf[0]=*(lpfetch-MEM_DIR);
+  }
+}
+
+If you think it's complicated, don't worry, me too. All the macros with 'SR'
+concern the status register and I've never checked them.
+The most interesting part is the first comment:
+"I don't think this should be here, does move read on cycle 0?"
+The question is pertinent, the answer is "yes".
+MOVE has no other business than moving things and prefetching next opcode.
+Why would it "idle" for 4 cycles before doing anything meaningful? Every cycle 
+is precious. As soon as it can MOVE reads, then it writes, with the prefetch 
+generally coming at the end (as found by ijor, there are various prefetch ways
+ for MOVE according to addressing mode).
+
+In this case it was visible, but the timing needed to be there at the start 
+because "read shifter counter", used by a lot of other instructions (CMP, 
+TST...), depended on a false value that makes up for premature FETCH_TIMING in
+those instructions.
+
+This couldn't be called FETCH_TIMING in MOVE because Steem authors were aware 
+that this instruction generally fetches at the end, and some programs depend on
+that. On the example above, you see that FETCH_TIMING is right at the end (and
+that there's no FETCH_TIMING when moving to register, by the way).
+
+Wrong but working
+-------------------
+
+This all held up together remarkably well, so that you wondered if there really 
+was a problem after all. 
+Trying to correct prefetch in an instruction or even many instructions just 
+broke many sensitive demos (overscan mostly).
+To fix prefetch in Steem, you must really fix all instructions, and you must 
+fix "read shifter counter" at the same time.
+In practice, this has been done progressively thanks to macros and temporary 
+hacks.
+
+
+AFAIK, the only program fixed by those important timing corrections is 
+'4Pixel Rasters'.
+
+
+Prefetch tricks
+=================
+
+Beside the timing, placement of prefetch macros also influences the content of
+IRC register at some point of the program.
+Steem originally was fine-tuned to have some programs run.
+For example demo 'Anomaly' passed thanks to an EXTRA_PREFETCH macro.
+In fact, "extra prefetch" was needed for all instructions. 
+As stated in ijor's article, the basic prefetch rule is: 
+"Just before the start of any instruction two words (no more and no less) are 
+already fetched. One word will be in IRD and another one in IRC."
+Placement of PREFETCH_IRC macros and modification of 'SetPC' in Steem SSE see 
+to it.
+

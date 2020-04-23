@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="xsteem" InternalType="Console">
+  <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
+    </Plugin>
+    <Plugin Name="CMakePlugin">
+      <![CDATA[[{
+  "name": "Debug",
+  "enabled": false,
+  "buildDirectory": "build",
+  "sourceDirectory": "$(ProjectPath)",
+  "generator": "",
+  "buildType": "",
+  "arguments": [],
+  "parentProject": ""
+ }, {
+  "name": "Release",
+  "enabled": false,
+  "buildDirectory": "build",
+  "sourceDirectory": "$(ProjectPath)",
+  "generator": "",
+  "buildType": "",
+  "arguments": [],
+  "parentProject": ""
+ }]]]>
+    </Plugin>
+  </Plugins>
+  <Description/>
+  <Dependencies/>
+  <VirtualDirectory Name="steem">
+    <File Name="../steem/acia.cpp"/>
+    <File Name="../steem/acc.cpp"/>
+    <File Name="../steem/archive.cpp"/>
+    <File Name="../steem/associate.cpp"/>
+    <File Name="../steem/blitter.cpp"/>
+    <File Name="../steem/computer.cpp"/>
+    <File Name="../steem/cpu.cpp"/>
+    <File Name="../steem/cpu_ea.cpp"/>
+    <File Name="../steem/cpuinit.cpp"/>
+    <File Name="../steem/cpu_op.cpp"/>
+    <File Name="../steem/d2.cpp"/>
+    <File Name="../steem/dataloadsave.cpp"/>
+    <File Name="../steem/debug.cpp"/>
+    <File Name="../steem/debug_emu.cpp"/>
+    <File Name="../steem/debug_framereport.cpp"/>
+    <File Name="../steem/debugger.cpp"/>
+    <File Name="../steem/debugger_trace.cpp"/>
+    <File Name="../steem/dir_id.cpp"/>
+    <File Name="../steem/disk_dma.cpp"/>
+    <File Name="../steem/disk_ghost.cpp"/>
+    <File Name="../steem/disk_hfe.cpp"/>
+    <File Name="../steem/diskman.cpp"/>
+    <File Name="../steem/disk_scp.cpp"/>
+    <File Name="../steem/disk_stw.cpp"/>
+    <File Name="../steem/display.cpp"/>
+    <File Name="../steem/draw.cpp"/>
+    <File Name="../steem/dwin_edit.cpp"/>
+    <File Name="../steem/emulator.cpp"/>
+    <File Name="../steem/fdc.cpp"/>
+    <File Name="../steem/floppy_disk.cpp"/>
+    <File Name="../steem/floppy_drive.cpp"/>
+    <File Name="../steem/glue.cpp"/>
+    <File Name="../steem/gui.cpp"/>
+    <File Name="../steem/gui_controls.cpp"/>
+    <File Name="../steem/harddiskman.cpp"/>
+    <File Name="../steem/hd_acsi.cpp"/>
+    <File Name="../steem/hd_gemdos.cpp"/>
+    <File Name="../steem/historylist.cpp"/>
+    <File Name="../steem/ikbd.cpp"/>
+    <File Name="../steem/infobox.cpp"/>
+    <File Name="../steem/interface_caps.cpp"/>
+    <File Name="../steem/interface_stvl.cpp"/>
+    <File Name="../steem/iolist.cpp"/>
+    <File Name="../steem/ior.cpp"/>
+    <File Name="../steem/iow.cpp"/>
+    <File Name="../steem/key_table.cpp"/>
+    <File Name="../steem/loadsave.cpp"/>
+    <File Name="../steem/loadsave_emu.cpp"/>
+    <File Name="../steem/macros.cpp"/>
+    <File Name="../steem/main.cpp"/>
+    <File Name="../steem/mem_browser.cpp"/>
+    <File Name="../steem/mfp.cpp"/>
+    <File Name="../steem/midi.cpp"/>
+    <File Name="../steem/mmu.cpp"/>
+    <File Name="../steem/mr_static.cpp"/>
+    <File Name="../steem/notifyinit.cpp"/>
+    <File Name="../steem/options.cpp"/>
+    <File Name="../steem/options_create.cpp"/>
+    <File Name="../steem/osd.cpp"/>
+    <File Name="../steem/palette.cpp"/>
+    <File Name="../steem/patchesbox.cpp"/>
+    <File Name="../steem/pch.h"/>
+    <File Name="../steem/psg.cpp"/>
+    <File Name="../steem/reset.cpp"/>
+    <File Name="../steem/rs232.cpp"/>
+    <File Name="../steem/run.cpp"/>
+    <File Name="../steem/screen_saver.cpp"/>
+    <File Name="../steem/shifter.cpp"/>
+    <File Name="../steem/shortcutbox.cpp"/>
+    <File Name="../steem/sound.cpp"/>
+    <File Name="../steem/Steem.cpp"/>
+    <File Name="../steem/steemintro.cpp"/>
+    <File Name="../steem/stemdialogs.cpp"/>
+    <File Name="../steem/stemwin.cpp"/>
+    <File Name="../steem/stjoy.cpp"/>
+    <File Name="../steem/stports.cpp"/>
+    <File Name="../steem/translate.cpp"/>
+    <File Name="../steem/diskman_diags.cpp"/>
+    <File Name="../steem/interface_pa.cpp"/>
+    <File Name="../steem/interface_rta.cpp"/>
+    <File Name="../steem/tos.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="headers">
+    <File Name="../steem/headers/acc.h"/>
+    <File Name="../steem/headers/acia.h"/>
+    <File Name="../steem/headers/archive.h"/>
+    <File Name="../steem/headers/blitter.h"/>
+    <File Name="../steem/headers/computer.h"/>
+    <File Name="../steem/headers/conditions.h"/>
+    <File Name="../steem/headers/cpu.h"/>
+    <File Name="../steem/headers/cpu_op.h"/>
+    <File Name="../steem/headers/d2.h"/>
+    <File Name="../steem/headers/dataloadsave.h"/>
+    <File Name="../steem/headers/debug.h"/>
+    <File Name="../steem/headers/debug_emu.h"/>
+    <File Name="../steem/headers/debug_framereport.h"/>
+    <File Name="../steem/headers/debugger.h"/>
+    <File Name="../steem/headers/debugger_trace.h"/>
+    <File Name="../steem/headers/device_map.h"/>
+    <File Name="../steem/headers/dir_id.h"/>
+    <File Name="../steem/headers/disk_dma.h"/>
+    <File Name="../steem/headers/disk_ghost.h"/>
+    <File Name="../steem/headers/disk_hfe.h"/>
+    <File Name="../steem/headers/diskman.h"/>
+    <File Name="../steem/headers/disk_scp.h"/>
+    <File Name="../steem/headers/disk_stw.h"/>
+    <File Name="../steem/headers/display.h"/>
+    <File Name="../steem/headers/draw.h"/>
+    <File Name="../steem/headers/dwin_edit.h"/>
+    <File Name="../steem/headers/emulator.h"/>
+    <File Name="../steem/headers/fdc.h"/>
+    <File Name="../steem/headers/floppy_disk.h"/>
+    <File Name="../steem/headers/floppy_drive.h"/>
+    <File Name="../steem/headers/glue.h"/>
+    <File Name="../steem/headers/gui.h"/>
+    <File Name="../steem/headers/harddiskman.h"/>
+    <File Name="../steem/headers/hd_acsi.h"/>
+    <File Name="../steem/headers/hd_gemdos.h"/>
+    <File Name="../steem/headers/hdimg.h"/>
+    <File Name="../steem/headers/historylist.h"/>
+    <File Name="../steem/headers/ikbd.h"/>
+    <File Name="../steem/headers/infobox.h"/>
+    <File Name="../steem/headers/input_prompt.h"/>
+    <File Name="../steem/headers/interface_caps.h"/>
+    <File Name="../steem/headers/interface_stvl.h"/>
+    <File Name="../steem/headers/iolist.h"/>
+    <File Name="../steem/headers/key_table.h"/>
+    <File Name="../steem/headers/loadsave.h"/>
+    <File Name="../steem/headers/macros.h"/>
+    <File Name="../steem/headers/mem_browser.h"/>
+    <File Name="../steem/headers/mfp.h"/>
+    <File Name="../steem/headers/midi.h"/>
+    <File Name="../steem/headers/mmu.h"/>
+    <File Name="../steem/headers/mr_static.h"/>
+    <File Name="../steem/headers/notifyinit.h"/>
+    <File Name="../steem/headers/notwindows.h"/>
+    <File Name="../steem/headers/onegame.h"/>
+    <File Name="../steem/headers/options.h"/>
+    <File Name="../steem/headers/osd.h"/>
+    <File Name="../steem/headers/palette.h"/>
+    <File Name="../steem/headers/parameters.h"/>
+    <File Name="../steem/headers/patchesbox.h"/>
+    <File Name="../steem/headers/psg.h"/>
+    <File Name="../steem/headers/reset.h"/>
+    <File Name="../steem/headers/resnum.h"/>
+    <File Name="../steem/headers/rs232.h"/>
+    <File Name="../steem/headers/run.h"/>
+    <File Name="../steem/headers/screen_saver.h"/>
+    <File Name="../steem/headers/shifter.h"/>
+    <File Name="../steem/headers/shortcutbox.h"/>
+    <File Name="../steem/headers/sound.h"/>
+    <File Name="../steem/headers/SSE.h"/>
+    <File Name="../steem/headers/SteemFreeImage.h"/>
+    <File Name="../steem/headers/steemh.h"/>
+    <File Name="../steem/headers/stemdialogs.h"/>
+    <File Name="../steem/headers/stjoy.h"/>
+    <File Name="../steem/headers/stports.h"/>
+    <File Name="../steem/headers/translate.h"/>
+    <File Name="../steem/headers/unzip_win32.h"/>
+    <VirtualDirectory Name="x">
+      <File Name="../steem/headers/x/x_controls.h"/>
+    </VirtualDirectory>
+    <File Name="../steem/headers/tos.h"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="3rdparty">
+    <VirtualDirectory Name="6301">
+      <File Name="../3rdparty/6301/6301.c"/>
+      <File Name="../3rdparty/6301/6301.h"/>
+      <File Name="../3rdparty/6301/alu.c" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../3rdparty/6301/alu.h" ExcludeProjConfig="Debug"/>
+      <File Name="../3rdparty/6301/callstac.c" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../3rdparty/6301/callstac.h" ExcludeProjConfig="Debug"/>
+      <File Name="../3rdparty/6301/chip.h" ExcludeProjConfig="Debug"/>
+      <File Name="../3rdparty/6301/cpu.c" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../3rdparty/6301/cpu.h" ExcludeProjConfig="Debug"/>
+      <File Name="../3rdparty/6301/defs.h" ExcludeProjConfig="Debug"/>
+      <File Name="../3rdparty/6301/fprinthe.c" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../3rdparty/6301/fprinthe.h" ExcludeProjConfig="Debug"/>
+      <File Name="../3rdparty/6301/HD6301V1ST.img" ExcludeProjConfig="Debug"/>
+      <File Name="../3rdparty/6301/instr.c" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../3rdparty/6301/instr.h" ExcludeProjConfig="Debug"/>
+      <File Name="../3rdparty/6301/ireg.c" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../3rdparty/6301/ireg.h" ExcludeProjConfig="Debug"/>
+      <File Name="../3rdparty/6301/memory.c" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../3rdparty/6301/memory.h" ExcludeProjConfig="Debug"/>
+      <File Name="../3rdparty/6301/memsetl.c" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../3rdparty/6301/opfunc.c" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../3rdparty/6301/opfunc.h" ExcludeProjConfig="Debug"/>
+      <File Name="../3rdparty/6301/optab.c" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../3rdparty/6301/optab.h" ExcludeProjConfig="Debug"/>
+      <File Name="../3rdparty/6301/reg.c" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../3rdparty/6301/reg.h" ExcludeProjConfig="Debug"/>
+      <File Name="../3rdparty/6301/sci.c" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../3rdparty/6301/sci.h" ExcludeProjConfig="Debug"/>
+      <File Name="../3rdparty/6301/symtab.c" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../3rdparty/6301/symtab.h" ExcludeProjConfig="Debug"/>
+      <File Name="../3rdparty/6301/timer.c" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../3rdparty/6301/timer.h" ExcludeProjConfig="Debug"/>
+      <File Name="../3rdparty/6301/tty.c" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../3rdparty/6301/tty.h" ExcludeProjConfig="Debug"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="ijor">
+      <File Name="../3rdparty/pasti/div68kCycleAccurate.c"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="dsp">
+      <File Name="../3rdparty/dsp/dsp.cpp"/>
+      <File Name="../3rdparty/dsp/dsp.h"/>
+      <File Name="../3rdparty/dsp/FIR-filter-class/filt.cpp"/>
+      <File Name="../3rdparty/dsp/FIR-filter-class/filt.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="rtaudio">
+      <File Name="../3rdparty/rtaudio/RtAudio.cpp"/>
+      <File Name="../3rdparty/rtaudio/RtAudio.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="zlib">
+      <File Name="../3rdparty/zlib/adler32.c"/>
+      <File Name="../3rdparty/zlib/compress.c"/>
+      <File Name="../3rdparty/zlib/crc32.c"/>
+      <File Name="../3rdparty/zlib/deflate.c"/>
+      <File Name="../3rdparty/zlib/inffast.c"/>
+      <File Name="../3rdparty/zlib/inflate.c"/>
+      <File Name="../3rdparty/zlib/inftrees.c"/>
+      <File Name="../3rdparty/zlib/zutil.c"/>
+      <File Name="../3rdparty/zlib/contrib/minizip/ioapi.c"/>
+      <File Name="../3rdparty/zlib/contrib/minizip/unzip.c"/>
+      <File Name="../3rdparty/zlib/trees.c"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="caps">
+      <File Name="../3rdparty/caps/CapsPlug.cpp"/>
+      <File Name="../3rdparty/caps/CapsPlug.h"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <VirtualDirectory Name="assembly">
+    <File Name="../steem/asm/asm_draw.asm"/>
+    <File Name="../steem/asm/asm_osd_draw.asm"/>
+    <File Name="../steem/rc/resource.asm"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="include">
+    <File Name="../include/binary.h"/>
+    <File Name="../include/circularbuffer.cpp"/>
+    <File Name="../include/circularbuffer.h"/>
+    <File Name="../include/clarity.h"/>
+    <File Name="../include/colcombo.h"/>
+    <File Name="../include/configstorefile.cpp"/>
+    <File Name="../include/configstorefile.h"/>
+    <File Name="../include/data_union.h"/>
+    <File Name="../include/dderr_strings.h"/>
+    <File Name="../include/dderr_strings.rc"/>
+    <File Name="../include/di_get_contents.cpp"/>
+    <File Name="../include/di_get_contents.h"/>
+    <File Name="../include/dynamicarray.cpp"/>
+    <File Name="../include/dynamicarray.h"/>
+    <File Name="../include/easycompress.cpp"/>
+    <File Name="../include/easycompress.h"/>
+    <File Name="../include/easystr.cpp"/>
+    <File Name="../include/easystr.h"/>
+    <File Name="../include/easystringlist.cpp"/>
+    <File Name="../include/easystringlist.h"/>
+    <File Name="../include/fixed.h"/>
+    <File Name="../include/mymisc.cpp"/>
+    <File Name="../include/mymisc.h"/>
+    <File Name="../include/notwin_mymisc.cpp"/>
+    <File Name="../include/notwin_mymisc.h"/>
+    <File Name="../include/portio.cpp"/>
+    <File Name="../include/portio.h"/>
+    <File Name="../include/wordwrapper.cpp"/>
+    <File Name="../include/wordwrapper.h"/>
+    <VirtualDirectory Name="x">
+      <File Name="../include/x/convert.h"/>
+      <File Name="../include/x/hxc.cpp"/>
+      <File Name="../include/x/hxc.h"/>
+      <File Name="../include/x/hxc_alert.cpp"/>
+      <File Name="../include/x/hxc_alert.h"/>
+      <File Name="../include/x/hxc_button.cpp" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../include/x/hxc_dir_lv.cpp"/>
+      <File Name="../include/x/hxc_dir_lv.h"/>
+      <File Name="../include/x/hxc_dropdown.cpp" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../include/x/hxc_edit.cpp" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../include/x/hxc_fileselect.cpp"/>
+      <File Name="../include/x/hxc_fileselect.h"/>
+      <File Name="../include/x/hxc_listview.cpp" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../include/x/hxc_popup.cpp"/>
+      <File Name="../include/x/hxc_popup.h"/>
+      <File Name="../include/x/hxc_popuphints.cpp"/>
+      <File Name="../include/x/hxc_popuphints.h"/>
+      <File Name="../include/x/hxc_prompt.cpp"/>
+      <File Name="../include/x/hxc_prompt.h"/>
+      <File Name="../include/x/hxc_scrollarea.cpp" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../include/x/hxc_scrollbar.cpp" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../include/x/hxc_textdisplay.cpp" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../include/x/icongroup.cpp" ExcludeProjConfig="Debug;Release"/>
+      <File Name="../include/x/icongroup.h"/>
+      <File Name="../include/x/x_mymisc.cpp"/>
+      <File Name="../include/x/x_mymisc.h"/>
+      <File Name="../include/x/x_portio.cpp"/>
+    </VirtualDirectory>
+    <File Name="../include/dirsearch.cpp"/>
+    <File Name="../include/dirsearch.h"/>
+  </VirtualDirectory>
+  <Settings Type="Executable">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="" Assembler="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="Debug" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g;-O0;-Wall;-Wno-unknown-pragmas" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+        <IncludePath Value="../steem/headers"/>
+        <IncludePath Value="../steem/code"/>
+        <IncludePath Value="../steem/code/x"/>
+        <IncludePath Value="../include"/>
+        <IncludePath Value="../3rdparty"/>
+        <IncludePath Value="../3rdparty/zlib/contrib/minizip"/>
+        <IncludePath Value="../3rdparty/zlib"/>
+        <IncludePath Value="/home/user/Documents/ST/steem/asm/"/>
+        <IncludePath Value="/home/user/Documents/ST/steem/"/>
+        <Preprocessor Value="UNIX"/>
+        <Preprocessor Value="LINUX"/>
+        <Preprocessor Value="SSE_DEBUG"/>
+      </Compiler>
+      <Linker Options="" Required="yes">
+        <LibraryPath Value="usr/local/lib"/>
+        <LibraryPath Value="usr/lib/i386-linux-gnu"/>
+        <Library Value="X11"/>
+        <Library Value="Xext"/>
+        <Library Value="pthread"/>
+        <Library Value="Xxf86vm"/>
+        <Library Value="libasound"/>
+        <Library Value="portaudio"/>
+        <Library Value="capsimage"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="yes" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-O;-O2;-W;-Wall;-Wno-unknown-pragmas;-Wno-write-strings;-Wno-unused-result;-Wno-pointer-arith" C_Options="-O2;-Wall;-Wno-implicit-int;-Wno-return-type" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+        <IncludePath Value="../steem/headers"/>
+        <IncludePath Value="../steem/code"/>
+        <IncludePath Value="../steem/code/x"/>
+        <IncludePath Value="../include"/>
+        <IncludePath Value="../3rdparty"/>
+        <IncludePath Value="../3rdparty/zlib/contrib/minizip"/>
+        <IncludePath Value="../3rdparty/zlib"/>
+        <IncludePath Value="/home/user/Documents/ST/steem/asm/"/>
+        <IncludePath Value="/home/user/Documents/ST/steem/"/>
+        <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="UNIX"/>
+        <Preprocessor Value="LINUX"/>
+      </Compiler>
+      <Linker Options="" Required="yes">
+        <LibraryPath Value="usr/lib/i386-linux-gnu"/>
+        <Library Value="X11"/>
+        <Library Value="Xext"/>
+        <Library Value="pthread"/>
+        <Library Value="Xxf86vm"/>
+        <Library Value="libasound"/>
+        <Library Value="portaudio"/>
+        <Library Value="capsimage"/>
+      </Linker>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="yes" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild>
+        <Command Enabled="yes">cp $(OutDir)/xsteem ./output/</Command>
+      </PostBuild>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName>None</ThirdPartyToolName>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+</CodeLite_Project>

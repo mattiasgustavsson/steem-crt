@@ -1,0 +1,1103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Object Include="..\..\steem\asm\asm_draw_VC.obj">
+      <Filter>obj</Filter>
+    </Object>
+    <Object Include="..\..\steem\asm\asm_osd_VC.obj">
+      <Filter>obj</Filter>
+    </Object>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\3rdparty\6301\6301.c">
+      <Filter>3rdParty\6301</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\6301\alu.c">
+      <Filter>3rdParty\6301</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\ArchiveAccess\ArchiveAccess\ArchiveAccessSSE.cpp">
+      <Filter>3rdParty\archive</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\avi\AviFile.cpp">
+      <Filter>3rdParty\video</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\caps\CapsPlug.cpp">
+      <Filter>3rdParty\caps-sps</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\6301\callstac.c">
+      <Filter>3rdParty\6301</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\6301\cpu.c">
+      <Filter>3rdParty\6301</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\pasti\div68kCycleAccurate.c">
+      <Filter>3rdParty\ijor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\dsp\dsp.cpp">
+      <Filter>3rdParty\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\dsp\FIR-filter-class\filt.cpp">
+      <Filter>3rdParty\sound</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\6301\fprinthe.c">
+      <Filter>3rdParty\6301</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\6301\instr.c">
+      <Filter>3rdParty\6301</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\6301\ireg.c">
+      <Filter>3rdParty\6301</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\6301\memory.c">
+      <Filter>3rdParty\6301</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\6301\memsetl.c">
+      <Filter>3rdParty\6301</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\6301\opfunc.c">
+      <Filter>3rdParty\6301</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\6301\optab.c">
+      <Filter>3rdParty\6301</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\6301\reg.c">
+      <Filter>3rdParty\6301</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\6301\timer.c">
+      <Filter>3rdParty\6301</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\6301\tty.c">
+      <Filter>3rdParty\6301</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\notwin_mymisc.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\6301\sci.c">
+      <Filter>3rdParty\6301</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\6301\symtab.c">
+      <Filter>3rdParty\6301</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Steem\computer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Steem\debug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\disk_dma.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\disk_ghost.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Steem\disk_hfe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\disk_scp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\disk_stw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\display.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\fdc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Steem\hd_acsi.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Steem\glue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\interface_caps.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\interface_stvl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\ikbd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\mmu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\options.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\shifter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\psg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\acia.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\mfp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\cpu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\rs232.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\Steem.cpp">
+      <Filter>code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\hd_gemdos.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\emulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\reset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\run.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\sound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\loadsave.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\draw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\stports.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\midi.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\loadsave_emu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\acc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\archive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\dataloadsave.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\floppy_disk.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\floppy_drive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\gui_controls.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\cpu_ea.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\cpu_op.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\cpuinit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\associate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\dir_id.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\diskman.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\diskman_diags.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\diskman_drag.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\gui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\stemwin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\harddiskman.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\d2.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\debug_emu.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\debug_framereport.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\blitter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\debugger.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\debugger_trace.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\mem_browser.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\mr_static.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\iolist.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\key_table.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\infobox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\osd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\patchesbox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\shortcutbox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\stjoy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\dwin_edit.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\macros.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\notifyinit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\options_create.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\palette.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\screen_saver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\steemintro.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\stemdialogs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\stjoy_directinput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\historylist.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\code\draw_c\draw_c.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\choosefolder.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\scrollingcontrolswin.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\circularbuffer.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\configstorefile.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\di_get_contents.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\directory_tree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\directory_tree.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\dirsearch.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\easystr.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\easycompress.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\easystringlist.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\input_prompt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\mymisc.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\portio.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\include\wordwrapper.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\translate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\ior.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\iow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\3rdparty\CpuUsage\CpuUsage.cpp">
+      <Filter>3rdParty\CpuUsage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\steem\tos.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\3rdparty\6301\6301.h">
+      <Filter>3rdParty\6301</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\6301\alu.h">
+      <Filter>3rdParty\6301</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\ArchiveAccess\ArchiveAccess\ArchiveAccessSSE.h">
+      <Filter>3rdParty\archive</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\avi\AviFile.h">
+      <Filter>3rdParty\video</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\caps\CapsAPI.h">
+      <Filter>3rdParty\caps-sps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\caps\CapsFDC.h">
+      <Filter>3rdParty\caps-sps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\caps\CapsPlug.h">
+      <Filter>3rdParty\caps-sps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\6301\callstac.h">
+      <Filter>3rdParty\6301</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\6301\chip.h">
+      <Filter>3rdParty\6301</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\caps\CommonTypes.h">
+      <Filter>3rdParty\caps-sps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\6301\defs.h">
+      <Filter>3rdParty\6301</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\dsp\dsp.h">
+      <Filter>3rdParty\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\dsp\FIR-filter-class\filt.h">
+      <Filter>3rdParty\sound</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\FreeImage\FreeImage.h">
+      <Filter>3rdParty</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\6301\instr.h">
+      <Filter>3rdParty\6301</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\6301\ireg.h">
+      <Filter>3rdParty\6301</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\6301\memory.h">
+      <Filter>3rdParty\6301</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\6301\opfunc.h">
+      <Filter>3rdParty\6301</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\6301\optab.h">
+      <Filter>3rdParty\6301</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\6301\reg.h">
+      <Filter>3rdParty\6301</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\6301\timer.h">
+      <Filter>3rdParty\6301</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\various\neochrome.h">
+      <Filter>3rdParty</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\pasti\pasti.h">
+      <Filter>3rdParty\ijor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\6301\sci.h">
+      <Filter>3rdParty\6301</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\6301\symtab.h">
+      <Filter>3rdParty\6301</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\various\sound.h">
+      <Filter>3rdParty</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\6301\cpu.h">
+      <Filter>3rdParty\6301</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\data_union.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Steem\headers\computer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Steem\headers\debug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\disk_dma.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\disk_ghost.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Steem\headers\disk_hfe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\disk_scp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\disk_stw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\fdc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Steem\headers\glue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Steem\headers\hd_acsi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\ikbd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\interface_caps.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\interface_stvl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\mmu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\parameters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\psg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\shifter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\SSE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\acc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\acia.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\archive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\blitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\conditions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\cpu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\dataloadsave.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\dir_id.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\diskman.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\draw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\emulator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\gui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\harddiskman.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\infobox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\key_table.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\loadsave.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\macros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\mfp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\midi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\notifyinit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\notwindows.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\osd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\palette.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\patchesbox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\reset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\resnum.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\rs232.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\run.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\screen_saver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\shortcutbox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\sound.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\steemh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\SteemFreeImage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\stemdialogs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\stjoy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\stports.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\hd_gemdos.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\floppy_disk.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\floppy_drive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\cpu_op.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\display.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\dderr_meaning.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\d2.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\debug_emu.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\debugger_trace.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\debugger.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\debug_framereport.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\historylist.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\iolist.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\mem_browser.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\mr_static.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\dwin_edit.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\directory_tree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\translate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\input_prompt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\device_map.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\options.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\internal_speaker.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\stvl\stvl.h">
+      <Filter>3rdParty\STVL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\various\unzip_win32.h">
+      <Filter>3rdParty</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3rdparty\CpuUsage\CpuUsage.h">
+      <Filter>3rdParty\CpuUsage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\steem\headers\tos.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\..\3rdparty\caps\CAPSImg.lib">
+      <Filter>3rdParty\caps-sps</Filter>
+    </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\include\internal_speaker.cpp">
+      <Filter>include</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\di_get_contents.h">
+      <Filter>include</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\dirsearch.h">
+      <Filter>include</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\easycompress.h">
+      <Filter>include</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\dynamicarray.h">
+      <Filter>include</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\easystr.h">
+      <Filter>include</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\easystringlist.h">
+      <Filter>include</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\clarity.h">
+      <Filter>include</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\configstorefile.h">
+      <Filter>include</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\dderr_strings.h">
+      <Filter>include</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\mymisc.h">
+      <Filter>include</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\notwin_mymisc.h">
+      <Filter>include</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\portio.h">
+      <Filter>include</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\scrollingcontrolswin.h">
+      <Filter>include</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\wordwrapper.h">
+      <Filter>include</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\circularbuffer.h">
+      <Filter>include</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\choosefolder.h">
+      <Filter>include</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\include\binary.h">
+      <Filter>include</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\steem\rc\config.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\debug_close.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\Steem\rc\debug_icons.bmp">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\debug_trash.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_display.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_fullscreen.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_general.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_hacks.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_icons.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_ll.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_machine.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_macros.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_midi.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_osd.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_ports.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_profiles.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_sound.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\Steem\rc\options_sse.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_startup.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_tos.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_accurate_fdc.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_back.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_disk.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_disk_history_menu.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_disk_link.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_disk_link_broken.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_disk_readonly.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_disk_zip_readonly.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_disk_zip_readwrite.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_drive_a.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_drive_b.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_drive_b_disabled.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_folder.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_folder_link.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_folder_link_broken.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_folder_parent.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_forward.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_hard_drives.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_hard_drives_acsi.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_hard_drives_francais.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\Steem\rc\dm_hard_drives_gemdos.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_home.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_menu.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_set_home.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\dm_tools_menu.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\disk_manager.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\fast_forward.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\Steem\rc\flags.bmp">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\fullscreen_quit.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\hard_drive.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\info.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\info_cart_howto.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\info_disk_howto.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\info_drawspeed.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\info_faq.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\info_links.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\info_text.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\joy.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\macro_play.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\Keyboard_and_Mouse.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\memory_snapshot.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\memory_snapshot_file_icon.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_associations.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_brightcon.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_C1.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_C2.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\options_C3.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\paste.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\patch.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\patch_new.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\pc_folder.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\program_file_icon.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\record.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\reset_need.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\shortcut.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\shortcut_off.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\shortcut_on.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\steem.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\steem_256_file_icon.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\reset.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\run.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\Steem\rc\st_chars_mono.bmp">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\status_speed.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\windowed_mode.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\take_screenshot.ico">
+      <Filter>rc</Filter>
+    </Image>
+    <Image Include="..\..\steem\rc\update.ico">
+      <Filter>rc</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Steem\rc\charset.blk">
+      <Filter>rc</Filter>
+    </None>
+    <None Include="..\..\steem\rc\HD6301V1ST.img">
+      <Filter>rc</Filter>
+    </None>
+    <None Include="..\..\steem\rc\HFE_boot.bin">
+      <Filter>rc</Filter>
+    </None>
+    <None Include="..\..\steem\rc\point.cur">
+      <Filter>rc</Filter>
+    </None>
+    <None Include="..\..\steem\rc\ym2149_fixed_vol.bin">
+      <Filter>rc</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="3rdParty">
+      <UniqueIdentifier>{067e5962-40bc-4ee0-846f-ab02cb8cbabb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdParty\6301">
+      <UniqueIdentifier>{b1dae832-7a46-4eea-bddc-7a3bbd4a56ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdParty\ijor">
+      <UniqueIdentifier>{d3c7ed4a-e7f2-493b-adb7-5d5d230d0746}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdParty\caps-sps">
+      <UniqueIdentifier>{60db4d41-3775-4f38-9ae9-a4465e289e6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdParty\video">
+      <UniqueIdentifier>{0261acb3-39f0-4a57-a964-c7ff55c6fd28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdParty\sound">
+      <UniqueIdentifier>{aec0f6d3-9ea9-41cd-b57b-d5ee80f92a15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdParty\archive">
+      <UniqueIdentifier>{90f39cc6-ad86-4e9e-9002-9b47b02566e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Debugger">
+      <UniqueIdentifier>{da8709f8-8395-4edd-9e71-2221619da1c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="code">
+      <UniqueIdentifier>{30906bd8-abfc-4cf2-8f06-a76adbda7666}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rc">
+      <UniqueIdentifier>{771a7b22-d293-45a5-aa2e-860b2192be12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="obj">
+      <UniqueIdentifier>{7806344d-f167-4aa2-98c2-a741382e93b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{7325320e-0103-4f84-b937-469a587ec16f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{bcb2e86c-11cf-4808-91df-c4e8f03146f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{80ceed6b-3dc2-4fde-be25-491af936556a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdParty\STVL">
+      <UniqueIdentifier>{2ff8e7fc-ed6b-44bf-ae63-b6a09d8b7cb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdParty\CpuUsage">
+      <UniqueIdentifier>{d980e80b-0bf8-409a-b9aa-a5062f6e7c78}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\steem\rc\resource.rc">
+      <Filter>rc</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\steem\rc\steem_new.txt">
+      <Filter>rc</Filter>
+    </Text>
+  </ItemGroup>
+</Project>

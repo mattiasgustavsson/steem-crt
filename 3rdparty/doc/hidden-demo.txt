@@ -1,0 +1,218 @@
+Hidden Screen Key List
+
+This useful article full of tips for the less obvious bits of many famous
+demos was first seen in Undercover Mag.. As Undercover is primarily a
+German language production with little exposure in the general scene, we
+thought it would be a good idea to share this information with the readers
+of Maggie..We hope the Undercover Team don't mind us doing this, this
+article is credited to them obviously.. (If they want to get in touch with
+us for any reason, then please write!)
+
+Anyway, many of the tips are more or less well known to most people, but
+there are also some that we've never seen before.. How about the spinning
+cube trick for the Synergy Megademo?? Time to get those ST demos out once
+more! - CiH.. Jan '96..
+
+UNDERCOVER HIDDENSCREEN AND KEYS LIST
+
+In this list we'll collect all cheats and tips to get the hidden screens
+etc of demos,mags etc.
+
+A Grumbler in the Rutting Season (Electricity)
+
+Alternative menu.. Press HELP
+
+Hidden screen..
+
+Copy the file "Loadthis.Not" to an extra disc and rename it in
+"Loadthis.Prg". Start.... Or with our loader/patch on the stuff-disc of
+UCM1. (Undercover Mag 1)
+
+Coding so far (The Megabusters)
+
+Hidden screen..
+
+Go right in the mainmenu. Near the mushroom at the sign with the
+inscription "Data Disc" go left and press SPACE before the second little
+flower.
+
+Dark Side of the Spoon (Unlimited Matricks)
+
+Hidden screen..
+
+In the doors-field,the last door in the second row above
+
+Delirious Demo 2 (Overlanders)
+
+Hidden screen..
+
+Click on the O of OVR in the title-screen.
+
+Eternal Sounddemo 2 (Eternal)
+
+Hidden screen.. Press H in the last screen.
+
+Gateway to Hexenland (The Avengers)
+
+Hidden screen..
+
+After the big AVG is nearly below a little box. Fly on top of this box and
+press SPACE.
+
+Gen 4 Demo (Hemoroids)
+
+Hidden screen..
+
+Type in HMD in the loader-screen.
+
+Hemo Sound 2 (Hemoroids)
+
+Hidden screen..
+
+Press UNDO in the first screen.
+
+Hoby One Demo (The Voyager)
+
+Hidden screen..
+
+Type in TV in the mainmenu.
+
+Just Buggin' (Alien Cracking Formation)
+
+Hidden screen..
+
+Type in ACF in the mainmenu.
+
+Hidden picture..
+
+Press in the "Just Feel It"-screen CONTROL.
+
+Mathematica (Aura)
+
+Hidden text..
+
+Type in NONSENS in the endpart.
+
+O-Demo (Oxygene)
+
+Hidden screen..
+
+Go right of the first teleporter and press SPACE. It's a loader for the
+OXG-screens of the Genius Demo,also by OXG.
+
+Ooh Crickey wot a Scorcher (The Lost Boys)
+
+Hidden screen..
+
+You can't get the hidden-screen from the demo. You must use a loader-
+program. U find it on the stuff-disc of UC-mag 1.
+
+Alternative menu..
+
+Type in MANCHESTER in the mainmenu.
+
+Phaleon Giga Demo (Next)
+
+Hidden screen..
+
+Press RESET in the intro.
+
+Poltergeist Demo (Poltergeist)
+
+Hidden screen..
+
+Press HELP in the "Shoglo Screen". Type now one of the following codes to
+get the hidden screen: 27182, 12345, 98765, 31415.
+
+Hidden musix..
+
+Press in the "Wings of Death Screen" F1 to F10 for the muzax of the game.
+
+Punish Your Machine (Delta Force)
+
+Hidden screen..
+
+Type in HIDDENSCREENMAESIG in the mainmenu.
+
+Hidden picture..
+
+Press in the "When Colors Going Bang"-screen the key * .
+
+Rip Dis (Lem & Nic)
+
+Hidden screen..
+
+Type in NIC in the "Colorshock"-screen. If you now loading another screen
+then you get automatically the hidden screen.
+
+Swedish New Year Demo 2 (Omega)
+
+Hidden screen..
+
+Press SHIFT left when you load the demo.
+
+Synergy Megademo (Synergy)
+
+Hidden keyz..
+
+Press F10 in the mainmenu and you get the the big cube rotating very fast.
+
+Syntax Terror (Delta Force)
+
+Hidden screen..
+
+1. Type in "Gesichtkondom" in the intro (press shift at the G). 2. Type in
+HEMMELHERRGOTTSJESASWILLA in the mainmenu in the empty field above the
+creditz.
+
+The Definitve Demo (The Lost Boys)
+
+Hidden keyz..
+
+Go to the musix-screen and press HELP or UNDO. Now go back to the mainmenu
+and load fast the bigscroll. You can now switch off the disc- control-routs
+by pressing HELP or UNDO.
+
+The Year After Demo (The Alliance)
+
+Hidden screen..
+
+Type in GIBS MIR in the "Hidden Screen".
+
+Ultimate GFA Demo (The Overlanders)
+
+Hidden screen..
+
+Type in OVR in the mainmenu.
+
+Undercover Magazin Issue 1 (The Naughty Bytes)
+
+Hidden text..
+
+Press "š" in the intro.
+
+Union Demo (The Union)
+
+----------------------
+
+Hidden screen..
+
+Go below of the TEX-logo and press fire.
+
+Vodka Demo (Equinox)
+
+Hidden screen..
+
+Fly with the little fighter in the corner left above and shot above the NOT
+ES
+
+Yo Demo (The Black Cats)
+
+Cheat.. Cheat for the mainmenu: In the pause-modus type in TMR for
+invulnerability.
+
+Hidden screen..
+
+At the end of the level (?) shot up all groundstations > the credits arise
+Press RETURN on a defined place (try out to find this place) and you get
+the lamer-test.

@@ -1,0 +1,13 @@
+[Text]
+Description=In Steem SSE 3.3 a regression messed with the buggy STE detection of this demo.
+ApplyWhen=For example at the fake desktop.
+Version=3.3
+PatchAuthor=Steven Seagal
+
+[Patch]
+8 = $0
+000b28 = $0002 $0000 $0012 $0001 $0013
+000b32 = $0004 $0001 $000a $0002 $0059
+000b5a = $0002 $0000 $004a $0002 $0024
+000b82 = $0004 $0000 $0024 $0003 $00f8
+000b8c = $0004 $0001 $001e $0001 $003d

@@ -1,0 +1,10 @@
+[Text]
+
+Description=Infinite lives
+ApplyWhen=When the game is loaded and ready
+Version=STX, STF T102 1MB
+PatchAuthor=Steven Seagal
+
+[Patch]
+
+16548=$0000

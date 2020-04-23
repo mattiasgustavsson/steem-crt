@@ -1,0 +1,22 @@
+[Text]
+Description=This cool demo is too hasty in writing to the video counter, which may cause flicker. This patch should stop the flicker.
+ApplyWhen=If there's flicker in the version of Steem you're using
+Version=3.2...
+PatchAuthor=Steven Seagal
+
+[Patch]
+
+012E34 = $46B9 $0001 $2FB0 
+012E3A = $46B9 $0001 $2FB0 
+012E44 = $46B9 $0001 $2FB0 
+012E4A = $46B9 $0001 $2FB0 
+
+012FC4 = $46B9 $0001 $2FB0 
+012FCA = $46B9 $0001 $2FB0 
+012FD4 = $46B9 $0001 $2FB0 
+012FDA = $46B9 $0001 $2FB0 
+
+013074 = $46B9 $0001 $2FB0 
+01307A = $46B9 $0001 $2FB0 
+013084 = $46B9 $0001 $2FB0 
+01308A = $46B9 $0001 $2FB0 

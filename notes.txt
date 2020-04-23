@@ -1,0 +1,31 @@
+Steem SSE project
+
+Folders steem, 3rdparty, include, windows-build & X-build are part of Steem
+source.
+3rd party and include could be used by other projects.
+
+steem/Steem.new.bak was the original Steem.new file. Its modified content
+is now part of compiled resources (steem/rc/steem_new.txt).
+
+A steem/code/SSE folder has been created for some extra code of Steem SSE 
+since v3.4. In v4.0, files were moved to the /steem root and merged 
+with other files of /code. 
+cpp files in /steem and /include are translation units.
+/steem/code/draw_c/draw_c.cpp is a translation unit, other files of this folder
+are included.
+For instance, /steem/cpu.cpp regroups the former steem/code/cpu_sse.cpp
+and steem/code/SSE/SSECpu.cpp. cpu.cpp includes steem/code/cpu_ea.cpp and
+steem/code/cpuinit.cpp.
+The files in steem/code and steem/code/SSE are now empty.
+A steem/headers/ folder was created to regroup all header files that were
+before in steem/code and steem/code/SSE.
+/3rdparty and /include still contain other headers.
+
+In /3rdparty/6301, only 6301.c is a translation unit, other files are included.
+In /3rdparty/ArchiveAccess/ArchiveAccess, only ArchiveAccessSSE is compiled for Steem SSE.
+/3rdparty/avi/AviFile.cpp is compiled only in the DirectDraw builds.
+In /3rdparty/caps, only CapsPlug.cpp is compiled for Steem SSE.
+Both cpp files in /3rdparty/dsp are compiled.
+/3rdparty/pasti/div68kCycleAccurate.c is compiled.
+
+A steem/doc/SSE folder has been created for some extra documentation. There's no guarantee that it's up-to-date.
