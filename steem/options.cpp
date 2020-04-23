@@ -129,7 +129,11 @@ void TOption::Restore(bool all) {
     WinSizeForRes[1]=1; // double height med
     WinSizeForRes[2]=0; // normal high
 #ifdef WIN32
-    draw_win_mode[0]=draw_win_mode[1]=1;
+    #ifdef STEEM_CRT
+        draw_win_mode[0]=draw_win_mode[1]=0;
+    #else
+        draw_win_mode[0]=draw_win_mode[1]=1;
+    #endif
 #endif
     StemWinResize();
 #if USE_PASTI
@@ -1608,7 +1612,11 @@ LRESULT CALLBACK TOptionBox::WndProc(HWND Win,UINT Mess,WPARAM wPar,
         {
           if(draw_win_mode[Res]!=HIWORD(dat)) 
           {
-            draw_win_mode[Res]=HIWORD(dat);
+            #ifdef STEEM_CRT
+              draw_win_mode[Res]=0;
+            #else
+              draw_win_mode[Res]=HIWORD(dat);
+            #endif
             redraw=true;
           }
         }

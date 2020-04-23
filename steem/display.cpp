@@ -1,3 +1,11 @@
+#ifdef STEEM_CRT
+    #define CRTEMU_IMPLEMENTATION
+    #include "..\..\crtemu.h"
+
+    #define CRT_FRAME_IMPLEMENTATION
+    #include "..\..\crt_frame.h"
+#endif
+
 /*---------------------------------------------------------------------------
 PROJECT: Steem SSE
 Atari ST emulator
@@ -405,6 +413,10 @@ TSteemDisplay::TSteemDisplay() {
 #endif
   GDIBmp=NULL;
   GDIBmpMem=NULL;
+#ifdef STEEM_CRT 
+  CRTBmp=NULL;
+  CRTBmpMem=NULL;
+#endif
 #if !defined(SSE_VID_NO_FREEIMAGE)
   hFreeImage=NULL;
   ScreenShotFormatOpts=0;
@@ -514,6 +526,14 @@ HRESULT TSteemDisplay::Init() {
         return (Method=UseMethod[nUseMethod++]);
     }
 #endif
+#ifdef STEEM_CRT
+    if(UseMethod[nUseMethod]==DISPMETHOD_CRT) 
+    {
+      TRACE2("CRT\n");
+      if(InitCRT())
+        return (Method=UseMethod[nUseMethod++]);
+    }
+#endif
 #ifdef UNIX
     if(UseMethod[nUseMethod]==DISPMETHOD_X) {
       if(InitX()) return (Method=UseMethod[nUseMethod++]);
@@ -611,6 +631,13 @@ HRESULT TSteemDisplay::Lock() {// SS called by draw_begin()
     derr=DD_OK;;
     break;
 #endif
+#ifdef STEEM_CRT
+  case DISPMETHOD_CRT:
+    draw_line_length=CRTBmpLineLength;
+    draw_mem=CRTBmpMem;
+    derr=DD_OK;;
+    break;
+#endif
 #ifdef UNIX
   case DISPMETHOD_X:
   case DISPMETHOD_XSHM:
@@ -702,6 +729,11 @@ void TSteemDisplay::Unlock() {
 #ifdef WIN32
   case DISPMETHOD_GDI:
     SetBitmapBits(GDIBmp,GDIBmpSize,GDIBmpMem);
+    break;
+#endif
+#ifdef STEEM_CRT
+  case DISPMETHOD_CRT:
+    //SetBitmapBits(CRTBmp,CRTBmpSize,CRTBmpMem);
     break;
 #endif
 #ifdef UNIX
@@ -879,6 +911,69 @@ bool TSteemDisplay::Blit() {
       draw_blit_source_rect.right-draw_blit_source_rect.left,
       draw_blit_source_rect.bottom-draw_blit_source_rect.top,SRCCOPY)!=0);
     ReleaseDC(StemWin,dc);
+    break;
+  }
+#endif
+#ifdef STEEM_CRT
+  case DISPMETHOD_CRT:
+  {
+/*
+    RECT dest;
+    GetClientRect(StemWin,&dest);
+    HDC dc=GetDC(StemWin);
+    SetStretchBltMode(dc,COLORONCOLOR);
+    success=(StretchBlt(dc,2,MENUHEIGHT+2,dest.right-4,dest.bottom-(MENUHEIGHT+4),
+      CRTBmpDC,draw_blit_source_rect.left,draw_blit_source_rect.top,
+      draw_blit_source_rect.right-draw_blit_source_rect.left,
+      draw_blit_source_rect.bottom-draw_blit_source_rect.top,SRCCOPY)!=0);
+    ReleaseDC(StemWin,dc);
+*/
+  
+    RECT dest;
+    GetClientRect(StemWin,&dest);
+
+    MoveWindow( CRThwnd, 0, MENUHEIGHT+2, dest.right - dest.left, dest.bottom - dest.top - ( MENUHEIGHT+4 ), FALSE );
+	crtemu->Viewport( 0, 0, dest.right - dest.left, dest.bottom - dest.top - ( MENUHEIGHT+4 ) );    
+
+	//printf( "RECT: %d, %d, %d, %d\n", draw_blit_source_rect.left, draw_blit_source_rect.top, draw_blit_source_rect.right, draw_blit_source_rect.bottom );
+	int blit_width = draw_blit_source_rect.right-draw_blit_source_rect.left;
+	int blit_height =draw_blit_source_rect.bottom-draw_blit_source_rect.top;
+	CRTEMU_U32* srcpixels = (CRTEMU_U32*) CRTBmpMem;
+	//srcpixels += draw_blit_source_rect.left + draw_blit_source_rect.top * (CRTBmpLineLength / 4 );
+	static CRTEMU_U32 pixels[1280 * 1024];//[768 * 576];
+	if( blit_width / blit_height < 2 ) {
+		for( int y = 0; y < blit_height; ++y ) {
+			for( int x = 0; x < blit_width; ++x ) {
+				CRTEMU_U32 c = srcpixels[ x + y * (CRTBmpLineLength / 4 ) ];
+				if( y == 0 || x == 0 || y == blit_height - 1 || x == blit_width -1 ) c = 0;
+				CRTEMU_U32 r = c & 0xff;
+				CRTEMU_U32 g = ( c >> 8 ) & 0xff;
+				CRTEMU_U32 b = ( c >> 16 ) & 0xff;
+				pixels[ x + y * blit_width ] = ( r << 16 ) | ( g << 8 ) | b;
+			}
+		}
+	} else {
+		for( int y = 0; y < blit_height; ++y ) {
+			for( int x = 0; x < blit_width; ++x ) {
+				CRTEMU_U32 c = srcpixels[ x + y * (CRTBmpLineLength / 4 ) ];
+				if( y == 0 || x == 0 || y == blit_height - 1 || x == blit_width -1 ) c = 0;
+				CRTEMU_U32 r = c & 0xff;
+				CRTEMU_U32 g = ( c >> 8 ) & 0xff;
+				CRTEMU_U32 b = ( c >> 16 ) & 0xff;
+				pixels[ x + ( 2*y + 0 )* blit_width ] = ( r << 16 ) | ( g << 8 ) | b;
+				pixels[ x + ( 2*y + 1 )* blit_width ] = ( r << 16 ) | ( g << 8 ) | b;
+			}
+		}
+		blit_height *= 2;
+	}
+    
+	CRTEMU_U64 time = 0;
+	
+	crtemu_present( crtemu, time, pixels, blit_width, blit_height, 0xffffffff, 0xff000000 );
+    HDC dc=GetDC(CRThwnd);
+	SwapBuffers( dc );
+	ReleaseDC(CRThwnd,dc);
+    
     break;
   }
 #endif
@@ -1369,6 +1464,14 @@ void TSteemDisplay::ScreenChange() {
       Init();
     else
       Method=DISPMETHOD_GDI;
+    break;
+#endif
+#ifdef STEEM_CRT
+  case DISPMETHOD_CRT:
+    if(InitCRT()==0)
+      Init();
+    else
+      Method=DISPMETHOD_CRT;
     break;
 #endif
 #ifdef UNIX
@@ -2114,6 +2217,10 @@ void TSteemDisplay::DrawWaveform()
     if (DDBackSur->GetDC(&dc)!=DD_OK) return;
   }else if (Method==DISPMETHOD_GDI){
     dc=GDIBmpDC;
+  #ifdef STEEM_CRT
+  }else if (Method==DISPMETHOD_GDI){
+    dc=CRTBmpDC;
+  #endif
   }else{
     return;
   }
@@ -2623,6 +2730,125 @@ bool TSteemDisplay::InitGDI() { // SS generally Direct X is used instead
   return true;
 }
 
+#ifdef STEEM_CRT 
+
+bool TSteemDisplay::InitCRT() { // SS generally Direct X is used instead
+  Release(); // note this will kill D3D
+  WORD w=640,h=480;
+  if(extended_monitor) 
+  {
+    w=(WORD)GetScreenWidth();
+    h=(WORD)GetScreenHeight();
+  }
+  else if(GuiSM.cx_screen()>640+4*SideBorderSizeWin
+    // testing also vertical pixels (bugfix 3.4.1) but... CRT? (useless)
+    && GuiSM.cy_screen()>400+2*(BORDER_TOP+BORDER_BOTTOM))
+  {
+    w=640+4*SideBorderSizeWin;
+    h=400+2*(BORDER_TOP+BORDER_BOTTOM);
+  }
+  DBG_LOG(Str("STARTUP: Creating bitmap w=")+w+" h="+h);
+  HDC dc=GetDC(NULL);
+  CRTBmp=CreateCompatibleBitmap(dc,w,h);
+  ReleaseDC(NULL,dc);
+  if(CRTBmp==NULL)
+    return 0;
+  BITMAP BmpInf;
+  GetObject(CRTBmp,sizeof(BITMAP),&BmpInf);
+#if defined(SSE_VID_32BIT_ONLY)
+  ASSERT(((BmpInf.bmBitsPixel+7)/8)==4);
+#else
+  BytesPerPixel=(BYTE)(BmpInf.bmBitsPixel+7)/8;
+#endif
+  CRTBmpLineLength=BmpInf.bmWidthBytes;
+  CRTBmpSize=CRTBmpLineLength*BmpInf.bmHeight;
+  DBG_LOG(Str("STARTUP: BytesPerPixel=")+BytesPerPixel+" CRTBmpLineLength="+CRTBmpLineLength+" CRTBmpSize="+CRTBmpSize);
+  CRTBmpDC=CreateCompatibleDC(NULL);
+  SelectObject(CRTBmpDC,CRTBmp);
+  SelectObject(CRTBmpDC,fnt);
+  DBG_LOG("STARTUP: Creating bitmap memory");
+  try{
+    CRTBmpMem=new BYTE[CRTBmpSize+1];
+  }catch (...){
+    CRTBmpMem=NULL;
+    Release();
+    return 0;
+  }
+  if(BytesPerPixel>1) 
+  {
+    SetPixel(CRTBmpDC,0,0,RGB(255,0,0));
+    GetBitmapBits(CRTBmp,CRTBmpSize,CRTBmpMem);
+    DWORD RedBitMask=0;
+    for(int i=BytesPerPixel-1;i>=0;i--)
+    {
+      RedBitMask<<=8;
+      RedBitMask|=CRTBmpMem[i];
+    }
+    rgb555=(RedBitMask==(hib01111100 | b00000000));
+    rgb32_bluestart_bit=int((RedBitMask==0xff000000) ? 8:0);
+  }
+  SurfaceWidth=w;
+  SurfaceHeight=h;
+  DBG_LOG(Str("STARTUP: rgb555=")+rgb555+" rgb32_bluestart_bit="+rgb32_bluestart_bit+
+        " SurfaceWidth="+SurfaceWidth+" SurfaceHeight="+SurfaceHeight);
+  palette_prepare(
+#if !defined(SSE_VID_32BIT_ONLY)
+    true
+#endif
+    );
+  draw_init_resdependent();
+
+  WNDCLASSEX wc = { sizeof( WNDCLASSEX ), CS_DBLCLKS | CS_OWNDC ,  
+      (WNDPROC) DefWindowProc, 0, 0, 0, 0, 0, 0, 0, TEXT( "steem_crt_wc" ), 0 };
+  wc.hInstance = GetModuleHandle( NULL ); wc.hbrBackground = (HBRUSH) GetStockObject( BLACK_BRUSH ); 
+  RegisterClassEx( &wc );
+  CRThwnd = CreateWindowEx( WS_EX_TOOLWINDOW, wc.lpszClassName, 0, WS_CHILD | WS_VISIBLE, 0, MENUHEIGHT+2, w, h - (MENUHEIGHT+2), StemWin, (HMENU) 0, GetModuleHandle( NULL ), 0 );
+  	
+  HMODULE dll;
+  HGLRC context; 
+  PROC (CRTEMU_GLCALLTYPE* wglGetProcAddress) (LPCSTR);
+  HGLRC (CRTEMU_GLCALLTYPE* wglCreateContext) (HDC);
+  BOOL (CRTEMU_GLCALLTYPE* wglDeleteContext) (HGLRC);
+  BOOL (CRTEMU_GLCALLTYPE* wglMakeCurrent) (HDC, HGLRC);
+  BOOL (CRTEMU_GLCALLTYPE* wglSwapIntervalEXT) (int);
+  dll = LoadLibraryA( "opengl32.dll" );
+  wglGetProcAddress = (PROC(CRTEMU_GLCALLTYPE*)(LPCSTR)) (uintptr_t) GetProcAddress( dll, "wglGetProcAddress" );
+  wglCreateContext = (HGLRC(CRTEMU_GLCALLTYPE*)(HDC)) (uintptr_t) GetProcAddress( dll, "wglCreateContext" );
+  wglDeleteContext = (BOOL(CRTEMU_GLCALLTYPE*)(HGLRC)) (uintptr_t) GetProcAddress( dll, "wglDeleteContext" );
+  wglMakeCurrent = (BOOL(CRTEMU_GLCALLTYPE*)(HDC, HGLRC)) (uintptr_t) GetProcAddress( dll, "wglMakeCurrent" );
+  PIXELFORMATDESCRIPTOR pfd;
+  memset( &pfd, 0, sizeof( pfd ) );
+  pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+  pfd.nVersion = 1;
+  pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+  pfd.iPixelType = PFD_TYPE_RGBA;
+  pfd.cColorBits = 32;
+  pfd.cDepthBits = 24;
+  pfd.cStencilBits = 8;
+  pfd.iLayerType = PFD_MAIN_PLANE;
+  HDC CRTdc = GetDC( CRThwnd );
+  SetPixelFormat( CRTdc, ChoosePixelFormat( CRTdc, &pfd ), &pfd );
+  	
+  context = wglCreateContext( CRTdc ); 
+  wglMakeCurrent( CRTdc, context );
+  ReleaseDC( CRThwnd, CRTdc );
+  
+  wglSwapIntervalEXT = (BOOL (CRTEMU_GLCALLTYPE*)(int)) (uintptr_t) wglGetProcAddress( "wglSwapIntervalEXT" );
+  
+  
+  crtemu = crtemu_create( NULL );
+  CRT_FRAME_U32* frame = (CRT_FRAME_U32*) malloc( sizeof( CRT_FRAME_U32 ) * CRT_FRAME_WIDTH * CRT_FRAME_HEIGHT );
+  crt_frame( frame );
+  crtemu_frame( crtemu, frame, CRT_FRAME_WIDTH, CRT_FRAME_HEIGHT );
+  free( frame );
+  
+  if( wglSwapIntervalEXT ) wglSwapIntervalEXT( 1 );
+  
+  return true;
+}
+
+
+#endif
 
 #if !defined(SSE_VID_NO_FREEIMAGE)
 
@@ -2970,6 +3196,42 @@ HRESULT TSteemDisplay::SaveScreenShot() {
     break;
   }
 #endif
+#ifdef STEEM_CRT
+  case DISPMETHOD_CRT:
+  {
+    if(CRTBmp==NULL) 
+      return DDERR_GENERIC;
+    BITMAP BmpInf;
+    RECT rcDest;
+    GetClientRect(StemWin,&rcDest);
+    w=rcDest.right-4;h=rcDest.bottom-(4+MENUHEIGHT);
+    HDC dc=GetDC(NULL);
+    SaveBmp=CreateCompatibleBitmap(dc,w,h);
+    ReleaseDC(NULL,dc);
+    HDC SaveBmpDC=CreateCompatibleDC(NULL);
+    SelectObject(SaveBmpDC,SaveBmp);
+    SetStretchBltMode(SaveBmpDC,COLORONCOLOR);
+    StretchBlt(SaveBmpDC,0,0,w,h,GDIBmpDC,draw_blit_source_rect.left,
+      draw_blit_source_rect.top,draw_blit_source_rect.right
+      -draw_blit_source_rect.left,draw_blit_source_rect.bottom
+      -draw_blit_source_rect.top,SRCCOPY);
+    DeleteDC(SaveBmpDC);
+    if(!ToClipboard) 
+    {
+      GetObject(SaveBmp,sizeof(BITMAP),&BmpInf);
+      SurLineLen=BmpInf.bmWidthBytes;
+      try {
+        DWORD BmpBytes=SurLineLen*BmpInf.bmHeight;
+        SurMem=new BYTE[BmpBytes];
+        GetBitmapBits(SaveBmp,BmpBytes,SurMem);
+      } catch(...) {
+        DeleteObject(SaveBmp);
+        return DDERR_GENERIC;
+      }
+    }
+    break;
+  }
+#endif
 #if defined(UNIX)
   // No need to create a new surface here, X can't stretch
   case DISPMETHOD_XSHM:
@@ -3203,6 +3465,11 @@ HRESULT TSteemDisplay::SaveScreenShot() {
 #endif
 #ifdef WIN32
   case DISPMETHOD_GDI:
+    delete[] SurMem;
+#endif
+#ifdef STEEM_CRT
+  case DISPMETHOD_CRT:
+    crtemu_destroy( crtemu );
     delete[] SurMem;
 #endif
   }//sw

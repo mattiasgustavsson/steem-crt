@@ -81,6 +81,9 @@ enum EDisplay {
   NPC_HZ_CHOICES=4,
   DFSFX_NONE=0,DFSFX_GRILLE,DFSFX_BLUR,
   DISPMETHOD_NONE=0,DISPMETHOD_DD,DISPMETHOD_D3D,DISPMETHOD_GDI,
+#ifdef STEEM_CRT
+  DISPMETHOD_CRT,
+#endif
   DISPMETHOD_X,DISPMETHOD_XSHM,DISPMETHOD_BE,NFSRES=40,
 // 501x224 = 112224
 // 8021247/112224 = 71.47532613344739
@@ -149,6 +152,9 @@ private:
   // GDI Only
   bool InitGDI();
 #endif//WIN32
+#ifdef STEEM_CRT
+  bool InitCRT();
+#endif
 #ifdef UNIX
   bool CheckDisplayMode(DWORD,DWORD,DWORD);
   bool InitX();
@@ -208,6 +214,15 @@ public: //temp
   BYTE* VideoMemoryEnd; // =draw_mem+size
   int VideoMemorySize;
   neochrome_file *pNeoFile;
+#ifdef STEEM_CRT
+  HBITMAP CRTBmp;
+  BYTE *CRTBmpMem;
+  HDC CRTBmpDC;
+  int CRTBmpLineLength;
+  DWORD CRTBmpSize;
+  HWND CRThwnd;
+  struct crtemu_t* crtemu;
+#endif
 #ifdef WIN32
   HBITMAP GDIBmp;
   BYTE *GDIBmpMem;

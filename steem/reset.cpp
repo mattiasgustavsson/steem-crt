@@ -330,6 +330,7 @@ void reset_peripherals(bool Cold) {
 
 void reset_st(DWORD flags) {
   // first get out of instruction function if needs be
+#ifndef STEEM_CRT
   if(runstate==RUNSTATE_RUNNING&&!(flags&RESET_STAGE2))
   {
     if(OPTION_EMUTHREAD) // schedule call to longjmp from proper thread
@@ -338,6 +339,7 @@ void reset_st(DWORD flags) {
       exception(0,0,flags);
     return;
   }
+#endif
   TRACE_INIT("reset_st, flags %X\n",flags);
   bool Stop=((flags & RESET_NOSTOP)==0);
   bool Warm=((flags & RESET_WARM)!=0);

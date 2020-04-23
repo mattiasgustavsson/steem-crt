@@ -49,6 +49,14 @@
       <Configuration>Debug-D3D</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="steem-crt|Win32">
+      <Configuration>steem-crt</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="steem-crt|x64">
+      <Configuration>steem-crt</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Steem-DD|Win32">
       <Configuration>Steem-DD</Configuration>
       <Platform>Win32</Platform>
@@ -78,112 +86,124 @@
     <ProjectName>Steem</ProjectName>
     <ProjectGuid>{9975320C-A18B-4425-B093-B11C1F35E3A4}</ProjectGuid>
     <RootNamespace>Steem</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-D3D|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-DD|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug - draw_c|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-D3D|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-DD|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug - draw_c|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debugger-D3D|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debugger-DD|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debugger-D3D|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debugger-DD|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -226,6 +246,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
@@ -235,6 +259,10 @@
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
@@ -301,6 +329,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
@@ -312,6 +343,11 @@
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64; $(LibraryPath);$(DXSDK_DIR)Lib\x64</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64; $(LibraryPath);$(DXSDK_DIR)Lib\x64</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(IncludePath);$(DXSDK_DIR)Include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64; $(LibraryPath);$(DXSDK_DIR)Lib\x64</LibraryPath>
@@ -837,7 +873,64 @@ del $(IntDir)main.obj</Command>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy "Release\Steem.exe" "D:\emu\ST\bin\steem\SteemSSED3D.exe"</Command>
+      <Command>rem copy "Release\Steem.exe" "D:\emu\ST\bin\steem\SteemSSED3D.exe"</Command>
+    </PostBuildEvent>
+    <PreBuildEvent />
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">
+    <Midl>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Release/SteemVS2008.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/GA  %(AdditionalOptions)</AdditionalOptions>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <OmitFramePointers>false</OmitFramePointers>
+      <AdditionalIncludeDirectories>..\..\Steem\headers;..\..\include\;..\..\3rdparty\;C:\Program Files\Microsoft DirectX SDK\Include;..\..\steem\code\;%(AdditionalIncludeDirectories);..\..\Steem\headers</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>STEEM_CRT;SSE_STDCALL;NDEBUG;NO_DEBUG_BUILD;VC_BUILD;WIN32;_WINDOWS;STEVEN_SEAGAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ShowIncludes>false</ShowIncludes>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <CallingConvention>StdCall</CallingConvention>
+    </ClCompile>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>_VC80_UPGRADE=0x0600;%(PreprocessorDefinitions);STEVEN_SEAGAL</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>dinput8.lib;dxguid.lib;winmm.lib;ComCtl32.Lib;odbc32.lib;odbccp32.lib;d3d9.lib;d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>C:\data\Prg\ST\3rdparty\d3d;$(ProjectDir)directx;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <DelayLoadDLLs>
+      </DelayLoadDLLs>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <MinimumRequiredVersion>5.01</MinimumRequiredVersion>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Bscmake>
+    <PostBuildEvent>
+      <Command>rem copy "Release\Steem.exe" "D:\emu\ST\bin\steem\SteemSSED3D.exe"</Command>
     </PostBuildEvent>
     <PreBuildEvent />
   </ItemDefinitionGroup>
@@ -950,6 +1043,65 @@ del $(IntDir)main.obj</Command>
     <PreBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">
+    <Midl>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TypeLibraryName>.\Release/SteemVS2008.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/GA  %(AdditionalOptions)</AdditionalOptions>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <AdditionalIncludeDirectories>..\..\Steem\headers;..\..\include\;..\..\3rdparty\;C:\Program Files\Microsoft DirectX SDK\Include;..\..\Steem\;..\..\steem\code\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;NO_DEBUG_BUILD;VC_BUILD;WIN32;_WINDOWS;STEVEN_SEAGAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <PrecompiledHeaderOutputFile>.\Release/SteemVS2008.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
+      <ObjectFileName>.\Release/</ObjectFileName>
+      <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ShowIncludes>false</ShowIncludes>
+    </ClCompile>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>_VC80_UPGRADE=0x0600;%(PreprocessorDefinitions);STEVEN_SEAGAL</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>dinput8.lib;dxguid.lib;winmm.lib;ComCtl32.Lib;odbc32.lib;odbccp32.lib;d3d9.lib;d3dx9.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>Release\SteemBeta.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>$(ProjectDir)directx;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <DelayLoadDLLs>
+      </DelayLoadDLLs>
+      <ProgramDatabaseFile>.\Release/SteemBeta.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Release/SteemVS2008.bsc</OutputFile>
+    </Bscmake>
+    <PostBuildEvent>
+      <Command>copy "Release\SteemBeta.exe" "D:\emu\ST\bin\SteemSSE64\SteemVS2015.exe"</Command>
+    </PostBuildEvent>
+    <PreBuildEvent />
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TypeLibraryName>.\Release/SteemVS2008.tlb</TypeLibraryName>
@@ -1342,9 +1494,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\3rdparty\6301\callstac.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -1362,9 +1516,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\3rdparty\6301\cpu.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -1382,9 +1538,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\3rdparty\6301\fprinthe.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -1402,9 +1560,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\3rdparty\6301\instr.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -1422,9 +1582,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\3rdparty\6301\ireg.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -1442,9 +1604,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\3rdparty\6301\memory.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -1462,9 +1626,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\3rdparty\6301\memsetl.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -1482,9 +1648,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\3rdparty\6301\opfunc.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -1502,9 +1670,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\3rdparty\6301\optab.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -1522,9 +1692,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\3rdparty\6301\reg.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -1542,9 +1714,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\3rdparty\6301\sci.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -1562,9 +1736,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\3rdparty\6301\symtab.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -1582,9 +1758,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\3rdparty\6301\timer.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -1602,9 +1780,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\3rdparty\6301\tty.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -1622,9 +1802,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\3rdparty\ArchiveAccess\ArchiveAccess\ArchiveAccessSSE.cpp">
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">false</WholeProgramOptimization>
@@ -1655,6 +1837,7 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
@@ -1664,6 +1847,7 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
@@ -1691,9 +1875,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\include\portio.cpp" />
     <ClCompile Include="..\..\include\scrollingcontrolswin.cpp" />
@@ -1717,10 +1903,12 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - draw_c|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-D3D|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-DD|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger-D3D|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger-DD|x64'">false</ExcludedFromBuild>
@@ -1731,6 +1919,7 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-D3D|Win32'">true</ExcludedFromBuild>
@@ -1743,6 +1932,7 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-D3D|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-DD|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger-D3D|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger-DD|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">false</ExcludedFromBuild>
@@ -1840,9 +2030,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\steem\steemintro.cpp" />
     <ClCompile Include="..\..\steem\stemdialogs.cpp" />
@@ -1912,9 +2104,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\include\choosefolder.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -1932,9 +2126,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\include\circularbuffer.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -1952,9 +2148,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\include\clarity.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -1972,9 +2170,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\include\configstorefile.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -1992,9 +2192,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\include\dderr_strings.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -2012,9 +2214,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\include\dirsearch.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -2032,9 +2236,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\include\di_get_contents.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -2052,9 +2258,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\include\dynamicarray.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -2072,9 +2280,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\include\easycompress.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -2092,9 +2302,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\include\easystr.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -2112,9 +2324,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\include\easystringlist.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -2132,9 +2346,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\include\internal_speaker.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -2152,9 +2368,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\include\mymisc.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -2172,9 +2390,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\include\notwin_mymisc.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -2192,9 +2412,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\include\portio.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -2212,9 +2434,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\include\scrollingcontrolswin.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -2232,9 +2456,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="..\..\include\wordwrapper.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger Debug|Win32'">true</ExcludedFromBuild>
@@ -2252,9 +2478,11 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
     </CustomBuild>
     <ClInclude Include="..\..\include\data_union.h" />
     <ClInclude Include="..\..\include\dderr_meaning.h" />
@@ -2439,9 +2667,11 @@ del $(IntDir)main.obj</Command>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|Win32'">\data\Prg\ST\steem\rc;\Downloads\steemsse-code\steemsse\steem\rc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Steem-DD|Win32'">\data\Prg\ST\steem\rc;\Downloads\steemsse-code\steemsse\steem\rc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release-drawc|Win32'">\data\Prg\ST\steem\rc;\Downloads\steemsse-code\steemsse\steem\rc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">\data\Prg\ST\steem\rc;\Downloads\steemsse-code\steemsse\steem\rc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">\data\Prg\ST\steem\rc;\Downloads\steemsse-code\steemsse\steem\rc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">\data\Prg\ST\steem\rc;\Downloads\steemsse-code\steemsse\steem\rc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">\data\Prg\ST\steem\rc;\Downloads\steemsse-code\steemsse\steem\rc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">\data\Prg\ST\steem\rc;\Downloads\steemsse-code\steemsse\steem\rc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug-D3D|Win32'">_VC80_UPGRADE=0x0600;%(PreprocessorDefinitions);STEVEN_SEAGAL</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug-DD|Win32'">_VC80_UPGRADE=0x0600;%(PreprocessorDefinitions);STEVEN_SEAGAL</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug - draw_c|Win32'">_VC80_UPGRADE=0x0600;%(PreprocessorDefinitions);STEVEN_SEAGAL</PreprocessorDefinitions>
@@ -2461,6 +2691,7 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger-D3D|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger-DD|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - draw_c|Win32'">true</ExcludedFromBuild>
@@ -2475,6 +2706,7 @@ del $(IntDir)main.obj</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Steem-DD|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-drawc|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='steem-crt|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger-D3D|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debugger-DD|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - draw_c|Win32'">true</ExcludedFromBuild>

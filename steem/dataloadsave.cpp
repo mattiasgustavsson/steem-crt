@@ -1135,8 +1135,16 @@ bool TOptionBox::LoadData(bool FirstLoad,TConfigStoreFile *pCSF,
       if(draw_fs_fx==DFSFX_GRILLE && sl==DWM_NOSTRETCH)
         sl=sm=DWM_GRILLE;
     }
+
+#ifdef STEEM_CRT
+    draw_win_mode[0]=0;
+    draw_win_mode[1]=0;
+#else
     draw_win_mode[0]=sl;
     draw_win_mode[1]=sm;
+#endif
+
+
 #endif
     // Loading of border is now practically ignored (because it can be set to 0
     // by going to windowed mode). Only used first load of v2.06.

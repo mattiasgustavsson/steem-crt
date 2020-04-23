@@ -1004,6 +1004,10 @@ Options->Startup->Never Use DirectDraw."),T("No DirectDraw?"),MB_ICONQUESTION
 #endif
       TryDX=0;
   }
+
+#if defined( STEEM_CRT ) 
+  Disp.SetMethods(DISPMETHOD_CRT,0);
+#else
   if(TryDX)
 #if defined(SSE_VID_D3D) 
     Disp.SetMethods(DISPMETHOD_D3D,DISPMETHOD_GDI,0);
@@ -1012,7 +1016,10 @@ Options->Startup->Never Use DirectDraw."),T("No DirectDraw?"),MB_ICONQUESTION
 #endif
   else
     Disp.SetMethods(DISPMETHOD_GDI,0);
+ #endif
+  
 #endif
+
 #ifdef UNIX
   if(CSF.GetInt("Options","NoSHM",0)) 
     TrySHM=0;
