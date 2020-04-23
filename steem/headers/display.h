@@ -222,6 +222,8 @@ public: //temp
   DWORD CRTBmpSize;
   HWND CRThwnd;
   struct crtemu_t* crtemu;
+  unsigned int* CRTpixels;
+
 #endif
 #ifdef WIN32
   HBITMAP GDIBmp;

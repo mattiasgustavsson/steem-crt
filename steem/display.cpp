@@ -935,33 +935,30 @@ bool TSteemDisplay::Blit() {
     MoveWindow( CRThwnd, 0, MENUHEIGHT+2, dest.right - dest.left, dest.bottom - dest.top - ( MENUHEIGHT+4 ), FALSE );
 	crtemu->Viewport( 0, 0, dest.right - dest.left, dest.bottom - dest.top - ( MENUHEIGHT+4 ) );    
 
-	//printf( "RECT: %d, %d, %d, %d\n", draw_blit_source_rect.left, draw_blit_source_rect.top, draw_blit_source_rect.right, draw_blit_source_rect.bottom );
 	int blit_width = draw_blit_source_rect.right-draw_blit_source_rect.left;
 	int blit_height =draw_blit_source_rect.bottom-draw_blit_source_rect.top;
 	CRTEMU_U32* srcpixels = (CRTEMU_U32*) CRTBmpMem;
-	//srcpixels += draw_blit_source_rect.left + draw_blit_source_rect.top * (CRTBmpLineLength / 4 );
-	static CRTEMU_U32 pixels[1280 * 1024];//[768 * 576];
+
 	if( blit_width / blit_height < 2 ) {
 		for( int y = 0; y < blit_height; ++y ) {
 			for( int x = 0; x < blit_width; ++x ) {
 				CRTEMU_U32 c = srcpixels[ x + y * (CRTBmpLineLength / 4 ) ];
-				if( y == 0 || x == 0 || y == blit_height - 1 || x == blit_width -1 ) c = 0;
 				CRTEMU_U32 r = c & 0xff;
 				CRTEMU_U32 g = ( c >> 8 ) & 0xff;
 				CRTEMU_U32 b = ( c >> 16 ) & 0xff;
-				pixels[ x + y * blit_width ] = ( r << 16 ) | ( g << 8 ) | b;
+				CRTpixels[ x + y * blit_width ] = ( r << 16 ) | ( g << 8 ) | b;
 			}
 		}
 	} else {
 		for( int y = 0; y < blit_height; ++y ) {
 			for( int x = 0; x < blit_width; ++x ) {
 				CRTEMU_U32 c = srcpixels[ x + y * (CRTBmpLineLength / 4 ) ];
-				if( y == 0 || x == 0 || y == blit_height - 1 || x == blit_width -1 ) c = 0;
 				CRTEMU_U32 r = c & 0xff;
 				CRTEMU_U32 g = ( c >> 8 ) & 0xff;
 				CRTEMU_U32 b = ( c >> 16 ) & 0xff;
-				pixels[ x + ( 2*y + 0 )* blit_width ] = ( r << 16 ) | ( g << 8 ) | b;
-				pixels[ x + ( 2*y + 1 )* blit_width ] = ( r << 16 ) | ( g << 8 ) | b;
+                c = ( r << 16 ) | ( g << 8 ) | b;
+				CRTpixels[ x + ( 2*y + 0 )* blit_width ] = c;
+				CRTpixels[ x + ( 2*y + 1 )* blit_width ] = c;
 			}
 		}
 		blit_height *= 2;
@@ -969,7 +966,7 @@ bool TSteemDisplay::Blit() {
     
 	CRTEMU_U64 time = 0;
 	
-	crtemu_present( crtemu, time, pixels, blit_width, blit_height, 0xffffffff, 0xff000000 );
+	crtemu_present( crtemu, time, (CRTEMU_U32*)CRTpixels, blit_width, blit_height, 0xffffffff, 0xff000000 );
     HDC dc=GetDC(CRThwnd);
 	SwapBuffers( dc );
 	ReleaseDC(CRThwnd,dc);
@@ -2149,6 +2146,16 @@ void TSteemDisplay::Release() {
     delete[] GDIBmpMem;
   }
 #endif
+#ifdef STEEM_CRT
+    if( crtemu != NULL ) {
+        crtemu_destroy( crtemu );
+        crtemu = NULL;
+    }
+    if( CRTpixels != NULL ) {
+        free( CRTpixels );
+        CRTpixels = NULL;
+    }
+#endif
 #if defined(SSE_VID_DD)
   if(DDObj!=NULL) 
   {
@@ -2844,6 +2851,7 @@ bool TSteemDisplay::InitCRT() { // SS generally Direct X is used instead
   
   if( wglSwapIntervalEXT ) wglSwapIntervalEXT( 1 );
   
+  CRTpixels = (CRTEMU_U32*) malloc( sizeof( CRTEMU_U32 ) * 1280 * 1024 );
   return true;
 }
 
@@ -3199,36 +3207,32 @@ HRESULT TSteemDisplay::SaveScreenShot() {
 #ifdef STEEM_CRT
   case DISPMETHOD_CRT:
   {
-    if(CRTBmp==NULL) 
-      return DDERR_GENERIC;
-    BITMAP BmpInf;
-    RECT rcDest;
-    GetClientRect(StemWin,&rcDest);
-    w=rcDest.right-4;h=rcDest.bottom-(4+MENUHEIGHT);
-    HDC dc=GetDC(NULL);
-    SaveBmp=CreateCompatibleBitmap(dc,w,h);
-    ReleaseDC(NULL,dc);
-    HDC SaveBmpDC=CreateCompatibleDC(NULL);
-    SelectObject(SaveBmpDC,SaveBmp);
-    SetStretchBltMode(SaveBmpDC,COLORONCOLOR);
-    StretchBlt(SaveBmpDC,0,0,w,h,GDIBmpDC,draw_blit_source_rect.left,
-      draw_blit_source_rect.top,draw_blit_source_rect.right
-      -draw_blit_source_rect.left,draw_blit_source_rect.bottom
-      -draw_blit_source_rect.top,SRCCOPY);
-    DeleteDC(SaveBmpDC);
-    if(!ToClipboard) 
-    {
-      GetObject(SaveBmp,sizeof(BITMAP),&BmpInf);
-      SurLineLen=BmpInf.bmWidthBytes;
-      try {
-        DWORD BmpBytes=SurLineLen*BmpInf.bmHeight;
-        SurMem=new BYTE[BmpBytes];
-        GetBitmapBits(SaveBmp,BmpBytes,SurMem);
-      } catch(...) {
-        DeleteObject(SaveBmp);
-        return DDERR_GENERIC;
-      }
-    }
+	int blit_width = draw_blit_source_rect.right-draw_blit_source_rect.left;
+	int blit_height =draw_blit_source_rect.bottom-draw_blit_source_rect.top;
+    CRTEMU_U32* pixels = new CRTEMU_U32[ blit_width * blit_height * 2 ];
+	CRTEMU_U32* srcpixels = (CRTEMU_U32*) CRTBmpMem;	
+	if( blit_width / blit_height < 2 ) {
+		for( int y = 0; y < blit_height; ++y ) {
+			for( int x = 0; x < blit_width; ++x ) {
+				CRTEMU_U32 c = srcpixels[ x + y * (CRTBmpLineLength / 4 ) ];
+				pixels[ x + y * blit_width ] = c;
+			}
+		}
+	} else {
+		for( int y = 0; y < blit_height; ++y ) {
+			for( int x = 0; x < blit_width; ++x ) {
+				CRTEMU_U32 c = srcpixels[ x + y * (CRTBmpLineLength / 4 ) ];
+				pixels[ x + ( 2*y + 0 )* blit_width ] = c;
+				pixels[ x + ( 2*y + 1 )* blit_width ] = c;
+			}
+		}
+		blit_height *= 2;
+	}
+
+    w = blit_width;
+	h = blit_height;
+    SurMem = (LPBYTE) pixels;
+    SurLineLen = w * 4;
     break;
   }
 #endif
@@ -3469,7 +3473,6 @@ HRESULT TSteemDisplay::SaveScreenShot() {
 #endif
 #ifdef STEEM_CRT
   case DISPMETHOD_CRT:
-    crtemu_destroy( crtemu );
     delete[] SurMem;
 #endif
   }//sw
