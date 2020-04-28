@@ -331,6 +331,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='steem-crt|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <TargetName>SteemCRT</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Steem-D3D|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -907,6 +908,7 @@ del $(IntDir)main.obj</Command>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <CallingConvention>StdCall</CallingConvention>
+      <Optimization>MaxSpeed</Optimization>
     </ClCompile>
     <ResourceCompile>
       <Culture>0x0409</Culture>
@@ -925,6 +927,7 @@ del $(IntDir)main.obj</Command>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <MinimumRequiredVersion>5.01</MinimumRequiredVersion>
+      <AdditionalOptions>/LTCG %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -1131,6 +1134,7 @@ del $(IntDir)main.obj</Command>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ShowIncludes>false</ShowIncludes>
+      <Optimization>MaxSpeed</Optimization>
     </ClCompile>
     <ResourceCompile>
       <Culture>0x0409</Culture>

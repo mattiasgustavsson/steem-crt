@@ -222,6 +222,7 @@ public: //temp
   DWORD CRTBmpSize;
   HWND CRThwnd;
   struct crtemu_t* crtemu;
+  unsigned long long CRTstart;
   unsigned int* CRTpixels;
 
 #endif

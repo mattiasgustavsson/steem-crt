@@ -932,8 +932,22 @@ bool TSteemDisplay::Blit() {
     RECT dest;
     GetClientRect(StemWin,&dest);
 
-    MoveWindow( CRThwnd, 0, MENUHEIGHT+2, dest.right - dest.left, dest.bottom - dest.top - ( MENUHEIGHT+4 ), FALSE );
-	crtemu->Viewport( 0, 0, dest.right - dest.left, dest.bottom - dest.top - ( MENUHEIGHT+4 ) );    
+    if( FullScreen && runstate == RUNSTATE_RUNNING ) {
+        MoveWindow( CRThwnd, 0, 0, dest.right - dest.left, dest.bottom - dest.top, FALSE );
+    	crtemu->Viewport( 0, 0, dest.right - dest.left, dest.bottom - dest.top );    
+        SetWindowLong( CRThwnd, GWL_STYLE, GetWindowLong( CRThwnd, GWL_STYLE ) & (~ WS_CLIPSIBLINGS ) ) ;  	
+    } else {
+        MoveWindow( CRThwnd, 0, MENUHEIGHT, dest.right - dest.left, dest.bottom - dest.top - ( MENUHEIGHT ), FALSE );
+    	crtemu->Viewport( 0, 0, dest.right - dest.left, dest.bottom - dest.top - ( MENUHEIGHT ) );    
+        SetWindowLong( CRThwnd, GWL_STYLE, GetWindowLong( CRThwnd, GWL_STYLE ) | WS_CLIPSIBLINGS ) ;  	
+    }
+
+    if( FullScreen ) {
+        SetWindowLong( StemWin, GWL_EXSTYLE, GetWindowLong( StemWin, GWL_EXSTYLE ) | WS_EX_TOPMOST ) ;  	
+        SetWindowPos( StemWin, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOREDRAW | SWP_NOSIZE );
+    } else {
+        SetWindowLong( StemWin, GWL_EXSTYLE, GetWindowLong( StemWin, GWL_EXSTYLE ) & (~ WS_EX_TOPMOST ) ) ;  	
+    }
 
 	int blit_width = draw_blit_source_rect.right-draw_blit_source_rect.left;
 	int blit_height =draw_blit_source_rect.bottom-draw_blit_source_rect.top;
@@ -963,10 +977,17 @@ bool TSteemDisplay::Blit() {
 		}
 		blit_height *= 2;
 	}
-    
-	CRTEMU_U64 time = 0;
+
+    LARGE_INTEGER perff;
+    QueryPerformanceFrequency( &perff );
+
+    LARGE_INTEGER perfc;
+    QueryPerformanceCounter( &perfc );
+    CRTEMU_U64 delta = perfc.QuadPart - CRTstart; 
+  
+	CRTEMU_U64 time_us = delta / ( perff.QuadPart / 1000000 );
 	
-	crtemu_present( crtemu, time, (CRTEMU_U32*)CRTpixels, blit_width, blit_height, 0xffffffff, 0xff000000 );
+	crtemu_present( crtemu, time_us, (CRTEMU_U32*)CRTpixels, blit_width, blit_height, 0xffffffff, 0xff181818 );
     HDC dc=GetDC(CRThwnd);
 	SwapBuffers( dc );
 	ReleaseDC(CRThwnd,dc);
@@ -1639,6 +1660,11 @@ bool TSteemDisplay::CanGoToFullScreen() {
     YesWeCan=true; // ?
     break;
 #endif
+#if defined(STEEM_CRT)
+  case DISPMETHOD_CRT:
+    YesWeCan=true;
+    break;
+#endif
 #if defined(UNIX) && !defined(NO_XVIDMODE)
   {
     int evbase,errbase;
@@ -1814,6 +1840,9 @@ void TSteemDisplay::ChangeToFullScreen() {
           InvalidateRect(OptionBox.Handle,NULL,FALSE);
         if(DiskMan.IsVisible())
           InvalidateRect(DiskMan.Handle,NULL,FALSE);
+        #ifdef STEEM_CRT
+            CLICK_PLAY_BUTTON();
+        #endif
       }
       else
       {
@@ -2025,6 +2054,17 @@ HRESULT TSteemDisplay::SetDisplayMode(
     }//if
     break;
 #endif
+#if STEEM_CRT
+  case DISPMETHOD_CRT:
+    HMONITOR hmon = MonitorFromWindow( StemWin, MONITOR_DEFAULTTOPRIMARY );
+    MONITORINFO info = { sizeof( MONITORINFO ) };
+    GetMonitorInfo( hmon, &info );
+    MoveWindow( StemWin, info.rcMonitor.left, 
+        info.rcMonitor.top, info.rcMonitor.right - info.rcMonitor.left,
+        info.rcMonitor.bottom - info.rcMonitor.top, TRUE );
+    return DD_OK;
+    break;
+#endif
 #ifdef UNIX
   case DISPMETHOD_X:
   case DISPMETHOD_XSHM:
@@ -2085,7 +2125,8 @@ void TSteemDisplay::ChangeToWindowedMode(bool Emergency) {
     }
 #endif
     FullScreen=0;
-#if defined(SSE_VID_D3D)
+#if defined( STEEM_CRT )
+#elif defined(SSE_VID_D3D)
     if(D3DCreateSurfaces()!=DD_OK)
       Init();
 #else
@@ -2150,6 +2191,8 @@ void TSteemDisplay::Release() {
     if( crtemu != NULL ) {
         crtemu_destroy( crtemu );
         crtemu = NULL;
+        CloseWindow( CRThwnd );
+        CRThwnd = NULL;
     }
     if( CRTpixels != NULL ) {
         free( CRTpixels );
@@ -2754,6 +2797,7 @@ bool TSteemDisplay::InitCRT() { // SS generally Direct X is used instead
     w=640+4*SideBorderSizeWin;
     h=400+2*(BORDER_TOP+BORDER_BOTTOM);
   }
+
   DBG_LOG(Str("STARTUP: Creating bitmap w=")+w+" h="+h);
   HDC dc=GetDC(NULL);
   CRTBmp=CreateCompatibleBitmap(dc,w,h);
@@ -2805,12 +2849,12 @@ bool TSteemDisplay::InitCRT() { // SS generally Direct X is used instead
     );
   draw_init_resdependent();
 
-  WNDCLASSEX wc = { sizeof( WNDCLASSEX ), CS_DBLCLKS | CS_OWNDC ,  
+  WNDCLASSEX wc = { sizeof( WNDCLASSEX ), CS_DBLCLKS | CS_OWNDC | CS_HREDRAW | CS_VREDRAW,  
       (WNDPROC) DefWindowProc, 0, 0, 0, 0, 0, 0, 0, TEXT( "steem_crt_wc" ), 0 };
   wc.hInstance = GetModuleHandle( NULL ); wc.hbrBackground = (HBRUSH) GetStockObject( BLACK_BRUSH ); 
   RegisterClassEx( &wc );
-  CRThwnd = CreateWindowEx( WS_EX_TOOLWINDOW, wc.lpszClassName, 0, WS_CHILD | WS_VISIBLE, 0, MENUHEIGHT+2, w, h - (MENUHEIGHT+2), StemWin, (HMENU) 0, GetModuleHandle( NULL ), 0 );
-  	
+  CRThwnd = CreateWindowEx( WS_EX_TRANSPARENT, wc.lpszClassName, 0, WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE, 0, MENUHEIGHT+2, w, h - (MENUHEIGHT+2), StemWin, (HMENU) 0, GetModuleHandle( NULL ), 0 );
+
   HMODULE dll;
   HGLRC context; 
   PROC (CRTEMU_GLCALLTYPE* wglGetProcAddress) (LPCSTR);
@@ -2842,6 +2886,9 @@ bool TSteemDisplay::InitCRT() { // SS generally Direct X is used instead
   
   wglSwapIntervalEXT = (BOOL (CRTEMU_GLCALLTYPE*)(int)) (uintptr_t) wglGetProcAddress( "wglSwapIntervalEXT" );
   
+  LARGE_INTEGER perfc;
+  QueryPerformanceCounter( &perfc );
+  CRTstart = perfc.QuadPart;
   
   crtemu = crtemu_create( NULL );
   CRT_FRAME_U32* frame = (CRT_FRAME_U32*) malloc( sizeof( CRT_FRAME_U32 ) * CRT_FRAME_WIDTH * CRT_FRAME_HEIGHT );

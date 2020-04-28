@@ -651,8 +651,9 @@ crtemu_t* crtemu_create( void* memctx )
         "    /* Main color, Bleed */"
         "    vec3 col;"
         "    float x =  sin(0.1*time+curved_uv.y*13.0)*sin(0.23*time+curved_uv.y*19.0)*sin(0.3+0.11*time+curved_uv.y*23.0)*0.0012;"
-        "    float o =sin(gl_FragCoord.y*1.5)/resolution.x;"
+        "    float o =sin(gl_FragCoord.y/1.5)/resolution.x;"
         "    x+=o*0.25;"
+        "    x*=0.2f;"
         "    col.r = tsample(backbuffer,vec2(x+scuv.x+0.0009,scuv.y+0.0009),resolution.y/800.0, resolution ).x+0.02;"
         "    col.g = tsample(backbuffer,vec2(x+scuv.x+0.0000,scuv.y-0.0011),resolution.y/800.0, resolution ).y+0.02;"
         "    col.b = tsample(backbuffer,vec2(x+scuv.x-0.0015,scuv.y+0.0000),resolution.y/800.0, resolution ).z+0.02;"
@@ -1064,15 +1065,15 @@ void crtemu_present( crtemu_t* crtemu, CRTEMU_U64 time_us, CRTEMU_U32 const* pix
     int window_height = viewport[ 3 ] - viewport[ 1 ];
 
     float hscale = window_width / (float) width;
-    float vscale = window_height / (float) height;
+    float vscale = window_height / ( (float) height * 1.1f );
     float pixel_scale = hscale < vscale ? hscale : vscale;
 
     float hborder = ( window_width - pixel_scale * width ) / 2.0f;
-    float vborder = ( window_height - pixel_scale * height ) / 2.0f;
+    float vborder = ( window_height - pixel_scale * height * 1.1f ) / 2.0f;
     float x1 = hborder;
     float y1 = vborder;
     float x2 = x1 + pixel_scale * width;
-    float y2 = y1 + pixel_scale * height;
+    float y2 = y1 + pixel_scale * height * 1.1f;
 
     x1 = ( x1 / window_width ) * 2.0f - 1.0f;
     x2 = ( x2 / window_width ) * 2.0f - 1.0f;
