@@ -223,6 +223,7 @@ public: //temp
   DWORD CRTBmpSize;
   BYTE* CRTBmpMem;
   HWND CRThwnd;
+  BYTE CRTFullscreen;
   unsigned int* CRTpixels;
   int CRTwidth;
   int CRTheight;

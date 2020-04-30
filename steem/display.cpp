@@ -425,6 +425,7 @@ TSteemDisplay::TSteemDisplay() {
   CRTBmpMem = 0;
   CRTBmpLineLength = 0;
   CRThwnd = NULL;
+  CRTFullscreen = FullScreen;
   CRTpixels = NULL;
   CRTwidth = 0;
   CRTheight = 0;
@@ -949,10 +950,12 @@ bool TSteemDisplay::Blit() {
         SetWindowLong( CRThwnd, GWL_STYLE, GetWindowLong( CRThwnd, GWL_STYLE ) | WS_CLIPSIBLINGS ) ;  	
     }
 
-    if( FullScreen ) {
+    if( FullScreen && !CRTFullscreen ) {
+        CRTFullscreen = FullScreen;
         SetWindowLong( StemWin, GWL_EXSTYLE, GetWindowLong( StemWin, GWL_EXSTYLE ) | WS_EX_TOPMOST ) ;  	
-        SetWindowPos( StemWin, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOREDRAW | SWP_NOSIZE );
-    } else {
+        SetWindowPos( StemWin, HWND_TOP, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOREDRAW | SWP_NOSIZE );
+    } else if( !FullScreen && CRTFullscreen ) {
+        CRTFullscreen = FullScreen;
         SetWindowLong( StemWin, GWL_EXSTYLE, GetWindowLong( StemWin, GWL_EXSTYLE ) & (~ WS_EX_TOPMOST ) ) ;  	
     }
 
@@ -1695,6 +1698,10 @@ void TSteemDisplay::ChangeToFullScreen() {
     ) return;
   TRACE_LOG("Going fullscreen...\n");
   draw_end();
+
+#ifdef STEEM_CRT
+    CheckCurrentMonitorConfig();    
+#endif
 #ifdef WIN32
   if(runstate==RUNSTATE_RUNNING) 
   {
@@ -2056,12 +2063,9 @@ HRESULT TSteemDisplay::SetDisplayMode(
 #endif
 #if STEEM_CRT
   case DISPMETHOD_CRT:
-    HMONITOR hmon = MonitorFromWindow( StemWin, MONITOR_DEFAULTTOPRIMARY );
-    MONITORINFO info = { sizeof( MONITORINFO ) };
-    GetMonitorInfo( hmon, &info );
-    MoveWindow( StemWin, info.rcMonitor.left, 
-        info.rcMonitor.top, info.rcMonitor.right - info.rcMonitor.left,
-        info.rcMonitor.bottom - info.rcMonitor.top, TRUE );
+    MoveWindow( StemWin, rcMonitor.left, 
+        rcMonitor.top, rcMonitor.right - rcMonitor.left,
+        rcMonitor.bottom - rcMonitor.top, TRUE );
     return DD_OK;
     break;
 #endif
@@ -2204,6 +2208,7 @@ void TSteemDisplay::Release() {
     CRTBmpMem = NULL;
     CRTBmpLineLength = 0;
     CRThwnd = NULL;
+    CRTFullscreen = FullScreen;
     CRTpixels = NULL;
     CRTwidth = 0;
     CRTheight = 0;

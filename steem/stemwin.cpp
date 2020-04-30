@@ -2493,9 +2493,11 @@ HRESULT change_fullscreen_display_mode(bool resizeclippingwindow) {
 #if defined(SSE_VID_DD)
   OptionBox.UpdateFullscreen();
 #endif
+#ifndef STEEM_CRT
   HDC DC=GetDC(StemWin);
   FillRect(DC,&rc,(HBRUSH)GetStockObject(BLACK_BRUSH));
   ReleaseDC(StemWin,DC);
+#endif
 #endif//WIN32
   draw_grille_black=50; // Redraw black areas for 1 second
   return DD_OK;
