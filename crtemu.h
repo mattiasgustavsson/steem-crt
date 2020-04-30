@@ -38,7 +38,7 @@ void crtemu_config(crtemu_t* crtemu, crtemu_config_t const* config);
 void crtemu_frame( crtemu_t* crtemu, CRTEMU_U32* frame_abgr, int frame_width, int frame_height );
 
 void crtemu_present( crtemu_t* crtemu, CRTEMU_U64 time_us, CRTEMU_U32 const* pixels_xbgr, int width, int height, 
-    CRTEMU_U32 mod_xbgr, CRTEMU_U32 border_xbgr );
+    CRTEMU_U32 mod_xbgr, CRTEMU_U32 border_xbgr, int offsetY );
 
 void crtemu_coordinates_window_to_bitmap( crtemu_t* crtemu, int width, int height, int* x, int* y );
 void crtemu_coordinates_bitmap_to_window( crtemu_t* crtemu, int width, int height, int* x, int* y );
@@ -937,7 +937,7 @@ static void crtemu_internal_blur( crtemu_t* crtemu, CRTEMU_GLuint source, CRTEMU
 
 
 void crtemu_present( crtemu_t* crtemu, CRTEMU_U64 time_us, CRTEMU_U32 const* pixels_xbgr, int width, int height, 
-    CRTEMU_U32 mod_xbgr, CRTEMU_U32 border_xbgr )
+    CRTEMU_U32 mod_xbgr, CRTEMU_U32 border_xbgr, int offsetY )
     {
     int viewport[ 4 ];
     crtemu->GetIntegerv( CRTEMU_GL_VIEWPORT, viewport );
@@ -1071,7 +1071,7 @@ void crtemu_present( crtemu_t* crtemu, CRTEMU_U64 time_us, CRTEMU_U32 const* pix
     float hborder = ( window_width - pixel_scale * width ) / 2.0f;
     float vborder = ( window_height - pixel_scale * height * 1.1f ) / 2.0f;
     float x1 = hborder;
-    float y1 = vborder;
+    float y1 = vborder + offsetY;
     float x2 = x1 + pixel_scale * width;
     float y2 = y1 + pixel_scale * height * 1.1f;
 

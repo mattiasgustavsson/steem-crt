@@ -1,3 +1,7 @@
+#ifdef STEEM_CRT
+    #include "..\..\thread.h"
+#endif
+
 /*---------------------------------------------------------------------------
 PROJECT: Steem SSE
 Atari ST emulator
@@ -215,15 +219,22 @@ public: //temp
   int VideoMemorySize;
   neochrome_file *pNeoFile;
 #ifdef STEEM_CRT
-  HBITMAP CRTBmp;
-  BYTE *CRTBmpMem;
-  HDC CRTBmpDC;
   int CRTBmpLineLength;
   DWORD CRTBmpSize;
+  BYTE* CRTBmpMem;
   HWND CRThwnd;
-  struct crtemu_t* crtemu;
-  unsigned long long CRTstart;
   unsigned int* CRTpixels;
+  int CRTwidth;
+  int CRTheight;
+  int CRTviewy;
+  int CRTvieww;
+  int CRTviewh;
+  int CRTexit;
+  thread_ptr_t CRTthread;
+  thread_mutex_t CRTmutex;
+  thread_signal_t CRTsignal;
+  int CRTthreadProc();
+  static int CRTthreadWrapper( void* );
 
 #endif
 #ifdef WIN32

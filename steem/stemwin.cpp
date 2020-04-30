@@ -2114,6 +2114,26 @@ void HandleButtonMessage(UINT Id,HWND hBut) {
       }
 #endif
     }
+#ifdef STEEM_CRT    
+    thread_mutex_lock( &Disp.CRTmutex );
+
+    RECT dest;
+    GetClientRect(StemWin,&dest);
+
+    Disp.CRTviewy = ( FullScreen && runstate != RUNSTATE_RUNNING ) ? MENUHEIGHT / 2 : 0;
+    Disp.CRTvieww = dest.right - dest.left;
+    Disp.CRTviewh = dest.bottom - dest.top - ( ( FullScreen && runstate == RUNSTATE_RUNNING ) ? 0 : MENUHEIGHT );
+    if( FullScreen && runstate == RUNSTATE_RUNNING ) {
+        MoveWindow( Disp.CRThwnd, 0, 0, Disp.CRTvieww, Disp.CRTviewh, FALSE );
+        SetWindowLong( Disp.CRThwnd, GWL_STYLE, GetWindowLong( Disp.CRThwnd, GWL_STYLE ) & (~ WS_CLIPSIBLINGS ) ) ;  	
+    } else {
+        MoveWindow( Disp.CRThwnd, 0, MENUHEIGHT, Disp.CRTvieww, Disp.CRTviewh, FALSE );
+        SetWindowLong( Disp.CRThwnd, GWL_STYLE, GetWindowLong( Disp.CRThwnd, GWL_STYLE ) | WS_CLIPSIBLINGS ) ;  	
+    }
+
+    thread_mutex_unlock( &Disp.CRTmutex );
+
+#endif
     break;
   case IDC_RESET:
   {

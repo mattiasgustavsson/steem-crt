@@ -856,7 +856,10 @@ void event_vbl_interrupt() {
     event_scanline_sub();
     Glue.VCount=0;
   }
-#if defined(SSE_VID_VSYNC_WINDOW)
+#if defined(STEEM_CRT)
+  bool VSyncing=((OPTION_WIN_VSYNC)
+    && (fast_forward==0&&slow_motion==0));
+#elif defined(SSE_VID_VSYNC_WINDOW)
   bool VSyncing=((OPTION_WIN_VSYNC&&!FullScreen||FSDoVsync&&FullScreen)
     && (fast_forward==0&&slow_motion==0));
 #else

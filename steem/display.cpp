@@ -1,11 +1,3 @@
-#ifdef STEEM_CRT
-    #define CRTEMU_IMPLEMENTATION
-    #include "..\..\crtemu.h"
-
-    #define CRT_FRAME_IMPLEMENTATION
-    #include "..\..\crt_frame.h"
-#endif
-
 /*---------------------------------------------------------------------------
 PROJECT: Steem SSE
 Atari ST emulator
@@ -56,6 +48,22 @@ This contains the DirectDraw, Direct3D and X code used by Steem for output.
 #include <AVI/AviFile.h> // AVI (DD-only)
 #endif
 #include <stdarg.h>
+
+#ifdef STEEM_CRT
+    #define CRTEMU_IMPLEMENTATION
+    #include "..\..\crtemu.h"
+
+    #define CRT_FRAME_IMPLEMENTATION
+    #include "..\..\crt_frame.h"
+
+    #define FRAMETIMER_IMPLEMENTATION
+    #include "..\..\frametimer.h"
+
+    #define THREAD_IMPLEMENTATION
+    #include "..\..\thread.h"
+    #undef WINVER
+    #undef _WIN32_WINNT
+#endif
 
 BYTE FullScreen=0;
 
@@ -414,8 +422,17 @@ TSteemDisplay::TSteemDisplay() {
   GDIBmp=NULL;
   GDIBmpMem=NULL;
 #ifdef STEEM_CRT 
-  CRTBmp=NULL;
-  CRTBmpMem=NULL;
+  CRTBmpMem = 0;
+  CRTBmpLineLength = 0;
+  CRThwnd = NULL;
+  CRTpixels = NULL;
+  CRTwidth = 0;
+  CRTheight = 0;
+  CRTexit = 0;
+  CRTviewy = 0;
+  CRTvieww = 0;
+  CRTviewh = 0;
+  CRTthread = NULL;
 #endif
 #if !defined(SSE_VID_NO_FREEIMAGE)
   hFreeImage=NULL;
@@ -733,7 +750,6 @@ void TSteemDisplay::Unlock() {
 #endif
 #ifdef STEEM_CRT
   case DISPMETHOD_CRT:
-    //SetBitmapBits(CRTBmp,CRTBmpSize,CRTBmpMem);
     break;
 #endif
 #ifdef UNIX
@@ -917,28 +933,19 @@ bool TSteemDisplay::Blit() {
 #ifdef STEEM_CRT
   case DISPMETHOD_CRT:
   {
-/*
-    RECT dest;
-    GetClientRect(StemWin,&dest);
-    HDC dc=GetDC(StemWin);
-    SetStretchBltMode(dc,COLORONCOLOR);
-    success=(StretchBlt(dc,2,MENUHEIGHT+2,dest.right-4,dest.bottom-(MENUHEIGHT+4),
-      CRTBmpDC,draw_blit_source_rect.left,draw_blit_source_rect.top,
-      draw_blit_source_rect.right-draw_blit_source_rect.left,
-      draw_blit_source_rect.bottom-draw_blit_source_rect.top,SRCCOPY)!=0);
-    ReleaseDC(StemWin,dc);
-*/
-  
+    if( !CRTpixels ) break;
+    thread_mutex_lock( &CRTmutex );
     RECT dest;
     GetClientRect(StemWin,&dest);
 
+    CRTviewy = ( FullScreen && runstate != RUNSTATE_RUNNING ) ? MENUHEIGHT / 2 : 0;
+    CRTvieww = dest.right - dest.left;
+    CRTviewh = dest.bottom - dest.top - ( ( FullScreen && runstate == RUNSTATE_RUNNING ) ? 0 : MENUHEIGHT );
     if( FullScreen && runstate == RUNSTATE_RUNNING ) {
-        MoveWindow( CRThwnd, 0, 0, dest.right - dest.left, dest.bottom - dest.top, FALSE );
-    	crtemu->Viewport( 0, 0, dest.right - dest.left, dest.bottom - dest.top );    
+        MoveWindow( CRThwnd, 0, 0, CRTvieww, CRTviewh, FALSE );
         SetWindowLong( CRThwnd, GWL_STYLE, GetWindowLong( CRThwnd, GWL_STYLE ) & (~ WS_CLIPSIBLINGS ) ) ;  	
     } else {
-        MoveWindow( CRThwnd, 0, MENUHEIGHT, dest.right - dest.left, dest.bottom - dest.top - ( MENUHEIGHT ), FALSE );
-    	crtemu->Viewport( 0, 0, dest.right - dest.left, dest.bottom - dest.top - ( MENUHEIGHT ) );    
+        MoveWindow( CRThwnd, 0, MENUHEIGHT, CRTvieww, CRTviewh, FALSE );
         SetWindowLong( CRThwnd, GWL_STYLE, GetWindowLong( CRThwnd, GWL_STYLE ) | WS_CLIPSIBLINGS ) ;  	
     }
 
@@ -978,20 +985,9 @@ bool TSteemDisplay::Blit() {
 		blit_height *= 2;
 	}
 
-    LARGE_INTEGER perff;
-    QueryPerformanceFrequency( &perff );
-
-    LARGE_INTEGER perfc;
-    QueryPerformanceCounter( &perfc );
-    CRTEMU_U64 delta = perfc.QuadPart - CRTstart; 
-  
-	CRTEMU_U64 time_us = delta / ( perff.QuadPart / 1000000 );
-	
-	crtemu_present( crtemu, time_us, (CRTEMU_U32*)CRTpixels, blit_width, blit_height, 0xffffffff, 0xff181818 );
-    HDC dc=GetDC(CRThwnd);
-	SwapBuffers( dc );
-	ReleaseDC(CRThwnd,dc);
-    
+    CRTwidth = blit_width;
+    CRTheight = blit_height;
+    thread_mutex_unlock( &CRTmutex );
     break;
   }
 #endif
@@ -1166,6 +1162,10 @@ void TSteemDisplay::WaitForAsyncBlitToFinish() {
 
 
 void TSteemDisplay::VSync() {
+#ifdef STEEM_CRT
+    thread_signal_wait( &CRTsignal, 1000 );
+    return;
+#endif
 #ifdef WIN32
 #if !defined(SSE_VID_VSYNC_WINDOW)
   if(FullScreen==0) 
@@ -2188,16 +2188,30 @@ void TSteemDisplay::Release() {
   }
 #endif
 #ifdef STEEM_CRT
-    if( crtemu != NULL ) {
-        crtemu_destroy( crtemu );
-        crtemu = NULL;
+    if( CRTthread != NULL ) {
+        CRTexit = 1;
+        thread_join( CRTthread );
+        thread_destroy( CRTthread );
+
+        thread_mutex_term( &CRTmutex );
+        thread_signal_term( &CRTsignal );
+
         CloseWindow( CRThwnd );
-        CRThwnd = NULL;
     }
-    if( CRTpixels != NULL ) {
-        free( CRTpixels );
-        CRTpixels = NULL;
+    if( CRTBmpMem ) {
+        delete[] CRTBmpMem;
     }
+    CRTBmpMem = NULL;
+    CRTBmpLineLength = 0;
+    CRThwnd = NULL;
+    CRTpixels = NULL;
+    CRTwidth = 0;
+    CRTheight = 0;
+    CRTexit = 0;
+    CRTviewy = 0;
+    CRTvieww = 0;
+    CRTviewh = 0;
+    CRTthread = NULL;
 #endif
 #if defined(SSE_VID_DD)
   if(DDObj!=NULL) 
@@ -2782,79 +2796,7 @@ bool TSteemDisplay::InitGDI() { // SS generally Direct X is used instead
 
 #ifdef STEEM_CRT 
 
-bool TSteemDisplay::InitCRT() { // SS generally Direct X is used instead
-  Release(); // note this will kill D3D
-  WORD w=640,h=480;
-  if(extended_monitor) 
-  {
-    w=(WORD)GetScreenWidth();
-    h=(WORD)GetScreenHeight();
-  }
-  else if(GuiSM.cx_screen()>640+4*SideBorderSizeWin
-    // testing also vertical pixels (bugfix 3.4.1) but... CRT? (useless)
-    && GuiSM.cy_screen()>400+2*(BORDER_TOP+BORDER_BOTTOM))
-  {
-    w=640+4*SideBorderSizeWin;
-    h=400+2*(BORDER_TOP+BORDER_BOTTOM);
-  }
-
-  DBG_LOG(Str("STARTUP: Creating bitmap w=")+w+" h="+h);
-  HDC dc=GetDC(NULL);
-  CRTBmp=CreateCompatibleBitmap(dc,w,h);
-  ReleaseDC(NULL,dc);
-  if(CRTBmp==NULL)
-    return 0;
-  BITMAP BmpInf;
-  GetObject(CRTBmp,sizeof(BITMAP),&BmpInf);
-#if defined(SSE_VID_32BIT_ONLY)
-  ASSERT(((BmpInf.bmBitsPixel+7)/8)==4);
-#else
-  BytesPerPixel=(BYTE)(BmpInf.bmBitsPixel+7)/8;
-#endif
-  CRTBmpLineLength=BmpInf.bmWidthBytes;
-  CRTBmpSize=CRTBmpLineLength*BmpInf.bmHeight;
-  DBG_LOG(Str("STARTUP: BytesPerPixel=")+BytesPerPixel+" CRTBmpLineLength="+CRTBmpLineLength+" CRTBmpSize="+CRTBmpSize);
-  CRTBmpDC=CreateCompatibleDC(NULL);
-  SelectObject(CRTBmpDC,CRTBmp);
-  SelectObject(CRTBmpDC,fnt);
-  DBG_LOG("STARTUP: Creating bitmap memory");
-  try{
-    CRTBmpMem=new BYTE[CRTBmpSize+1];
-  }catch (...){
-    CRTBmpMem=NULL;
-    Release();
-    return 0;
-  }
-  if(BytesPerPixel>1) 
-  {
-    SetPixel(CRTBmpDC,0,0,RGB(255,0,0));
-    GetBitmapBits(CRTBmp,CRTBmpSize,CRTBmpMem);
-    DWORD RedBitMask=0;
-    for(int i=BytesPerPixel-1;i>=0;i--)
-    {
-      RedBitMask<<=8;
-      RedBitMask|=CRTBmpMem[i];
-    }
-    rgb555=(RedBitMask==(hib01111100 | b00000000));
-    rgb32_bluestart_bit=int((RedBitMask==0xff000000) ? 8:0);
-  }
-  SurfaceWidth=w;
-  SurfaceHeight=h;
-  DBG_LOG(Str("STARTUP: rgb555=")+rgb555+" rgb32_bluestart_bit="+rgb32_bluestart_bit+
-        " SurfaceWidth="+SurfaceWidth+" SurfaceHeight="+SurfaceHeight);
-  palette_prepare(
-#if !defined(SSE_VID_32BIT_ONLY)
-    true
-#endif
-    );
-  draw_init_resdependent();
-
-  WNDCLASSEX wc = { sizeof( WNDCLASSEX ), CS_DBLCLKS | CS_OWNDC | CS_HREDRAW | CS_VREDRAW,  
-      (WNDPROC) DefWindowProc, 0, 0, 0, 0, 0, 0, 0, TEXT( "steem_crt_wc" ), 0 };
-  wc.hInstance = GetModuleHandle( NULL ); wc.hbrBackground = (HBRUSH) GetStockObject( BLACK_BRUSH ); 
-  RegisterClassEx( &wc );
-  CRThwnd = CreateWindowEx( WS_EX_TRANSPARENT, wc.lpszClassName, 0, WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE, 0, MENUHEIGHT+2, w, h - (MENUHEIGHT+2), StemWin, (HMENU) 0, GetModuleHandle( NULL ), 0 );
-
+int TSteemDisplay::CRTthreadProc() {
   HMODULE dll;
   HGLRC context; 
   PROC (CRTEMU_GLCALLTYPE* wglGetProcAddress) (LPCSTR);
@@ -2882,23 +2824,116 @@ bool TSteemDisplay::InitCRT() { // SS generally Direct X is used instead
   	
   context = wglCreateContext( CRTdc ); 
   wglMakeCurrent( CRTdc, context );
-  ReleaseDC( CRThwnd, CRTdc );
   
   wglSwapIntervalEXT = (BOOL (CRTEMU_GLCALLTYPE*)(int)) (uintptr_t) wglGetProcAddress( "wglSwapIntervalEXT" );
   
   LARGE_INTEGER perfc;
   QueryPerformanceCounter( &perfc );
-  CRTstart = perfc.QuadPart;
+  CRTEMU_U64 CRTstart = perfc.QuadPart;
   
-  crtemu = crtemu_create( NULL );
+  LARGE_INTEGER perff;
+  QueryPerformanceFrequency( &perff );
+
+  crtemu_t* crtemu = crtemu_create( NULL );
   CRT_FRAME_U32* frame = (CRT_FRAME_U32*) malloc( sizeof( CRT_FRAME_U32 ) * CRT_FRAME_WIDTH * CRT_FRAME_HEIGHT );
   crt_frame( frame );
   crtemu_frame( crtemu, frame, CRT_FRAME_WIDTH, CRT_FRAME_HEIGHT );
   free( frame );
   
   if( wglSwapIntervalEXT ) wglSwapIntervalEXT( 1 );
-  
+  frametimer_t* frametimer = frametimer_create( NULL );
+  if( !wglSwapIntervalEXT ) {
+      frametimer_lock_rate( frametimer, 60 );
+  }
   CRTpixels = (CRTEMU_U32*) malloc( sizeof( CRTEMU_U32 ) * 1280 * 1024 );
+  CRTEMU_U32* CRTpixelsCopy = (CRTEMU_U32*) malloc( sizeof( CRTEMU_U32 ) * 1280 * 1024 );
+  int CRTwidthCopy = 0;
+  int CRTheightCopy = 0;
+  int CRTviewyCopy = 0;
+  int CRTviewwCopy = 0;
+  int CRTviewhCopy = 0;
+
+  thread_signal_raise( &CRTsignal );
+  while( !CRTexit ) {  
+      thread_mutex_lock( &CRTmutex );
+      CRTwidthCopy = CRTwidth;
+      CRTheightCopy = CRTheight;
+      CRTviewyCopy = CRTviewy;
+      CRTviewwCopy = CRTvieww;
+      CRTviewhCopy = CRTviewh;
+      memcpy( CRTpixelsCopy, CRTpixels, CRTwidth * CRTheight * 4 );
+      thread_mutex_unlock( &CRTmutex );
+  	
+      frametimer_update( frametimer );
+      if( CRTviewwCopy > 0 && CRTviewhCopy > 0 ) { 
+          QueryPerformanceCounter( &perfc );
+          CRTEMU_U64 delta = perfc.QuadPart - CRTstart; 
+          CRTEMU_U64 time_us = delta / ( perff.QuadPart / 1000000 );
+          crtemu->Viewport( 0, 0, CRTviewwCopy, CRTviewhCopy );    
+          crtemu_present( crtemu, time_us, (CRTEMU_U32*)CRTpixelsCopy, CRTwidthCopy, CRTheightCopy, 0xffffffff, 0xff181818, CRTviewy  );      
+          SwapBuffers( CRTdc );
+          thread_signal_raise( &CRTsignal );
+      }
+  }
+  frametimer_destroy( frametimer );
+  crtemu_destroy( crtemu  );
+  wglMakeCurrent( CRTdc, NULL );
+  wglDeleteContext( context );
+  ReleaseDC( CRThwnd, CRTdc );
+  FreeLibrary( dll );
+  free( CRTpixels );
+  free( CRTpixelsCopy );
+  CRTpixels = NULL;
+  return 0;
+}
+
+int TSteemDisplay::CRTthreadWrapper( void* user_data ) {
+    TSteemDisplay* display = (TSteemDisplay*) user_data;
+    return display->CRTthreadProc();
+}
+
+
+bool TSteemDisplay::InitCRT() { // SS generally Direct X is used instead
+  Release(); // note this will kill D3D
+  WORD w=640,h=480;
+  if(extended_monitor) 
+  {
+    w=(WORD)GetScreenWidth();
+    h=(WORD)GetScreenHeight();
+  }
+  else if(GuiSM.cx_screen()>640+4*SideBorderSizeWin
+    && GuiSM.cy_screen()>400+2*(BORDER_TOP+BORDER_BOTTOM))
+  {
+    w=640+4*SideBorderSizeWin;
+    h=400+2*(BORDER_TOP+BORDER_BOTTOM);
+  }
+
+  CRTBmpLineLength = 4 * w;
+  CRTBmpSize = CRTBmpLineLength * h;  
+  CRTBmpMem=new BYTE[CRTBmpSize+1];
+        
+  SurfaceWidth=w;
+  SurfaceHeight=h;
+  DBG_LOG(Str("STARTUP: rgb555=")+rgb555+" rgb32_bluestart_bit="+rgb32_bluestart_bit+
+        " SurfaceWidth="+SurfaceWidth+" SurfaceHeight="+SurfaceHeight);
+  palette_prepare(
+#if !defined(SSE_VID_32BIT_ONLY)
+    true
+#endif
+    );
+  draw_init_resdependent();
+
+  WNDCLASSEX wc = { sizeof( WNDCLASSEX ), CS_DBLCLKS | CS_OWNDC | CS_HREDRAW | CS_VREDRAW,  
+      (WNDPROC) DefWindowProc, 0, 0, 0, 0, 0, 0, 0, TEXT( "steem_crt_wc" ), 0 };
+  wc.hInstance = GetModuleHandle( NULL ); wc.hbrBackground = (HBRUSH) GetStockObject( BLACK_BRUSH ); 
+  RegisterClassEx( &wc );
+  CRThwnd = CreateWindowEx( WS_EX_TRANSPARENT, wc.lpszClassName, 0, WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE, 0, MENUHEIGHT+2, SurfaceWidth, SurfaceHeight - (MENUHEIGHT+2), StemWin, (HMENU) 0, GetModuleHandle( NULL ), 0 );
+
+  thread_mutex_init( &CRTmutex );
+  thread_signal_init( &CRTsignal );
+  CRTexit = 0;
+  CRTthread = thread_create( CRTthreadWrapper, this, THREAD_STACK_SIZE_DEFAULT );
+  thread_signal_wait( &CRTsignal, THREAD_SIGNAL_WAIT_INFINITE );
   return true;
 }
 
