@@ -1074,6 +1074,10 @@ void crtemu_present( crtemu_t* crtemu, CRTEMU_U64 time_us, CRTEMU_U32 const* pix
     float y1 = vborder + offsetY;
     float x2 = x1 + pixel_scale * width;
     float y2 = y1 + pixel_scale * height * 1.1f;
+    x1 = 0;
+    y1 = 0;
+    x2 = (float)window_width;
+    y2 = (float)window_height;
 
     x1 = ( x1 / window_width ) * 2.0f - 1.0f;
     x2 = ( x2 / window_width ) * 2.0f - 1.0f;
